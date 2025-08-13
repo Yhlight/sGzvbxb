@@ -366,10 +366,9 @@ void CSSPreprocessor::processValue() {
                 }
             }
             
-            // 不是变量组使用，回退并输出原文
-            size_t currentPos = scanner->getPosition();
-            // 简单地输出变量名本身
-            valueBuffer << varGroup << "(" << varName;
+            // 不是变量组使用，回退到原始位置并输出标识符
+            scanner->setPosition(savePos);
+            valueBuffer << scanner->scanIdentifier();
         } else {
             valueBuffer << scanner->advance();
         }
@@ -392,7 +391,9 @@ std::string CSSPreprocessor::expandStyleGroup(const std::string& name) {
     if (templateManager) {
         auto styleTemplate = templateManager->findTemplate(name, TemplateType::STYLE);
         if (styleTemplate) {
-            auto styles = std::static_pointer_cast<StyleTemplate>(styleTemplate)->getAllStyles();
+            // TODO: 需要传递正确的templateMap参数
+            std::unordered_map<std::string, std::shared_ptr<StyleTemplate>> emptyTemplateMap;
+            auto styles = std::static_pointer_cast<StyleTemplate>(styleTemplate)->getAllStyles(emptyTemplateMap);
             for (const auto& [prop, value] : styles) {
                 expanded << "    " << prop << ": " << value << ";\n";
             }
@@ -446,7 +447,8 @@ std::string CSSPreprocessor::resolveVariable(const std::string& varGroup, const 
         auto varTemplate = templateManager->findTemplate(varGroup, TemplateType::VAR);
         if (varTemplate) {
             auto varGroupTemplate = std::static_pointer_cast<VarTemplate>(varTemplate);
-            std::string value = varGroupTemplate->getVariable(varName);
+            auto valueOpt = varGroupTemplate->getVariable(varName);
+            std::string value = valueOpt.value_or("");
             
             if (!value.empty()) {
                 resolvedVarGroups[varGroup][varName] = value;

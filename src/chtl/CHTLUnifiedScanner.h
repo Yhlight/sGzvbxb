@@ -11,6 +11,10 @@
 
 namespace chtl {
 
+// 前向声明
+class TemplateManager;
+class CustomManager;
+
 // 扫描器状态
 enum class ScannerState {
     Normal,              // 普通文本
@@ -52,7 +56,7 @@ enum class TokenType {
     OriginContent,       // 原始内容
     Whitespace,          // 空白
     NewLine,             // 换行
-    EOF                  // 文件结束
+    EOF_TOKEN            // 文件结束
 };
 
 // 扫描令牌

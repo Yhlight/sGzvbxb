@@ -60,7 +60,7 @@ void CHTLUnifiedScanner::scan() {
     }
     
     // 添加EOF令牌
-    emitToken(TokenType::EOF, "");
+    emitToken(TokenType::EOF_TOKEN, "");
 }
 
 void CHTLUnifiedScanner::scanNormal() {
@@ -603,14 +603,14 @@ Token CHTLUnifiedScanner::nextToken() {
     if (hasMoreTokens()) {
         return tokens[currentTokenIndex++];
     }
-    return Token(TokenType::EOF, "", line, column, position, currentContext);
+    return Token(TokenType::EOF_TOKEN, "", line, column, position, currentContext);
 }
 
 Token CHTLUnifiedScanner::peekToken() const {
     if (hasMoreTokens()) {
         return tokens[currentTokenIndex];
     }
-    return Token(TokenType::EOF, "", line, column, position, currentContext);
+    return Token(TokenType::EOF_TOKEN, "", line, column, position, currentContext);
 }
 
 void CHTLUnifiedScanner::rewind() {
@@ -858,7 +858,7 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::OriginContent: return "OriginContent";
         case TokenType::Whitespace: return "Whitespace";
         case TokenType::NewLine: return "NewLine";
-        case TokenType::EOF: return "EOF";
+        case TokenType::EOF_TOKEN: return "EOF";
         default: return "Unknown";
     }
 }

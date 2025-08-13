@@ -76,6 +76,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/generated
+    ${ANTLR4_INCLUDE_DIR}
 )
 
 # ===== CHTL核心 - 完全独立实现 =====

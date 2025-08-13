@@ -1,15 +1,15 @@
 #pragma once
 
-#include "../CHTLUnifiedScanner.h"
+#include "CHTLUnifiedScanner.h"
 #include "../../generated/chtl/grammars/CHTLLexer.h"
-#include "../generated/CHTLParser.h"
-#include "../generated/CSSLexer.h"
-#include "../generated/CSSParser.h"
-#include "../generated/JSLexer.h"
-#include "../generated/JSParser.h"
-#include "../generated/CHTLJSLexer.h"
-#include "../generated/CHTLJSParser.h"
-#include "antlr4-runtime.h"
+#include "../../generated/chtl/grammars/CHTLParser.h"
+#include "../../generated/css/grammars/CSSLexer.h"
+#include "../../generated/css/grammars/CSSParser.h"
+#include "../../generated/javascript/grammars/JavaScriptLexer.h"
+#include "../../generated/javascript/grammars/JavaScriptParser.h"
+#include "../../generated/chtljs/grammars/CHTLJavaScriptLexer.h"
+#include "../../generated/chtljs/grammars/CHTLJavaScriptParser.h"
+#include <antlr4-runtime/antlr4-runtime.h>
 #include <memory>
 #include <vector>
 
