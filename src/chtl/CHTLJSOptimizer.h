@@ -47,7 +47,8 @@ public:
     antlrcpp::Any visitVariableDeclaration(JavaScriptParser::VariableDeclarationContext* ctx) override;
     antlrcpp::Any visitFunctionDeclaration(JavaScriptParser::FunctionDeclarationContext* ctx) override;
     antlrcpp::Any visitFormalParameterList(JavaScriptParser::FormalParameterListContext* ctx) override;
-    // TODO: 需要根据新的JavaScript语法更新这些方法
+    // 注意：以下方法取决于JavaScriptParser生成的具体Context类
+    // 可能需要根据实际的ANTLR语法文件调整
     // antlrcpp::Any visitIdentifierExpression(JavaScriptParser::IdentifierExpressionContext* ctx) override;
     // antlrcpp::Any visitBlock(JavaScriptParser::BlockContext* ctx) override;
     

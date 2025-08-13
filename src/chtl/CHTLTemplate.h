@@ -210,6 +210,11 @@ public:
     // 验证
     bool validateTemplate(const std::string& name, TemplateType type) const;
     bool checkCircularInheritance() const;
+    
+    // 获取所有样式模板（用于CSS预处理器）
+    std::unordered_map<std::string, std::shared_ptr<StyleTemplate>> getAllStyleTemplates() const {
+        return styleTemplates;
+    }
 };
 
 // 模板使用处理器

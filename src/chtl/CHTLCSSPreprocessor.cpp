@@ -391,9 +391,9 @@ std::string CSSPreprocessor::expandStyleGroup(const std::string& name) {
     if (templateManager) {
         auto styleTemplate = templateManager->findTemplate(name, TemplateType::STYLE);
         if (styleTemplate) {
-            // TODO: 需要传递正确的templateMap参数
-            std::unordered_map<std::string, std::shared_ptr<StyleTemplate>> emptyTemplateMap;
-            auto styles = std::static_pointer_cast<StyleTemplate>(styleTemplate)->getAllStyles(emptyTemplateMap);
+            // 获取当前上下文中的所有样式模板
+            auto templateMap = templateManager->getAllStyleTemplates();
+            auto styles = std::static_pointer_cast<StyleTemplate>(styleTemplate)->getAllStyles(templateMap);
             for (const auto& [prop, value] : styles) {
                 expanded << "    " << prop << ": " << value << ";\n";
             }
@@ -408,9 +408,10 @@ std::string CSSPreprocessor::expandStyleGroup(const std::string& name) {
         auto customStyle = customManager->findCustomStyle(name);
         if (customStyle) {
             auto styleGroup = std::static_pointer_cast<CustomStyleGroup>(customStyle);
-            // TODO: 需要传递正确的templateMap参数
-            std::unordered_map<std::string, std::shared_ptr<StyleTemplate>> emptyMap;
-            auto styles = styleGroup->getEffectiveStyles(emptyMap);
+            // 获取当前上下文中的所有样式模板用于继承解析
+            auto templateMap = templateManager ? templateManager->getAllStyleTemplates() 
+                                              : std::unordered_map<std::string, std::shared_ptr<StyleTemplate>>{};
+            auto styles = styleGroup->getEffectiveStyles(templateMap);
             
             for (const auto& [prop, value] : styles) {
                 if (styleGroup->requiresValue(prop) && value.empty()) {
