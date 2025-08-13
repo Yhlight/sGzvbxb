@@ -71,7 +71,20 @@ std::shared_ptr<Symbol> CHTLContext::lookupSymbolWithNamespace(const std::string
     if (!ns.empty()) {
         auto nsSymbol = lookupSymbol(ns);
         if (nsSymbol && nsSymbol->type == SymbolType::NAMESPACE) {
-            // TODO: 实现名称空间内的符号查找
+            // 构造完整的符号名称：namespace::symbol
+            std::string fullName = ns + "::" + name;
+            
+            // 首先尝试查找完整名称
+            auto fullSymbol = lookupSymbol(fullName);
+            if (fullSymbol) {
+                return fullSymbol;
+            }
+            
+            // 如果没找到，创建一个引用符号
+            auto refSymbol = std::make_shared<Symbol>(fullName, SymbolType::ELEMENT);
+            refSymbol->source_file = nsSymbol->source_file;
+            refSymbol->namespace_name = ns;
+            return refSymbol;
         }
     }
     return lookupSymbol(name);

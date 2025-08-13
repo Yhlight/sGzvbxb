@@ -158,6 +158,11 @@ file(GLOB_RECURSE OPTIMIZATION_SOURCES
     src/chtl/optimization/*.cpp
 )
 
+# 增强错误处理
+set(ENHANCED_ERROR_SOURCES
+    src/chtl/error/EnhancedError.cpp
+)
+
 # ===== 配置系统 - 由CHTL独立处理 =====
 file(GLOB_RECURSE CONFIG_SOURCES
     # 使用不依赖ANTLR4的独立配置系统
@@ -214,6 +219,7 @@ add_library(chtl_core STATIC
     ${SOURCEMAP_SOURCES}
     ${MODULE_SOURCES}
     ${OPTIMIZATION_SOURCES}
+    ${ENHANCED_ERROR_SOURCES}
 )
 
 # CSS/JS库（依赖ANTLR4）
