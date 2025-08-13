@@ -5,6 +5,7 @@
 #include <vector>
 #include <type_traits>
 #include <cstddef>
+#include <functional>
 
 namespace chtl {
 namespace utils {

@@ -3,6 +3,7 @@
 
 
 #include "CSSListener.h"
+#include "CSSVisitor.h"
 
 #include "CSSParser.h"
 
@@ -397,6 +398,14 @@ void CSSParser::StylesheetContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitStylesheet(this);
 }
 
+
+std::any CSSParser::StylesheetContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitStylesheet(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::StylesheetContext* CSSParser::stylesheet() {
   StylesheetContext *_localctx = _tracker.createInstance<StylesheetContext>(_ctx, getState());
   enterRule(_localctx, 0, CSSParser::RuleStylesheet);
@@ -470,6 +479,14 @@ void CSSParser::StatementContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitStatement(this);
+}
+
+
+std::any CSSParser::StatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::StatementContext* CSSParser::statement() {
@@ -580,6 +597,14 @@ void CSSParser::RulesetContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitRuleset(this);
 }
 
+
+std::any CSSParser::RulesetContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitRuleset(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::RulesetContext* CSSParser::ruleset() {
   RulesetContext *_localctx = _tracker.createInstance<RulesetContext>(_ctx, getState());
   enterRule(_localctx, 4, CSSParser::RuleRuleset);
@@ -652,6 +677,14 @@ void CSSParser::SelectorListContext::exitRule(tree::ParseTreeListener *listener)
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitSelectorList(this);
+}
+
+
+std::any CSSParser::SelectorListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitSelectorList(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::SelectorListContext* CSSParser::selectorList() {
@@ -732,6 +765,14 @@ void CSSParser::SelectorContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitSelector(this);
 }
 
+
+std::any CSSParser::SelectorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitSelector(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::SelectorContext* CSSParser::selector() {
   SelectorContext *_localctx = _tracker.createInstance<SelectorContext>(_ctx, getState());
   enterRule(_localctx, 8, CSSParser::RuleSelector);
@@ -797,6 +838,14 @@ void CSSParser::CombinatorContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCombinator(this);
+}
+
+
+std::any CSSParser::CombinatorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitCombinator(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::CombinatorContext* CSSParser::combinator() {
@@ -895,6 +944,14 @@ void CSSParser::SimpleSelectorContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitSimpleSelector(this);
+}
+
+
+std::any CSSParser::SimpleSelectorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitSimpleSelector(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::SimpleSelectorContext* CSSParser::simpleSelector() {
@@ -1077,6 +1134,14 @@ void CSSParser::TypeSelectorContext::exitRule(tree::ParseTreeListener *listener)
     parserListener->exitTypeSelector(this);
 }
 
+
+std::any CSSParser::TypeSelectorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitTypeSelector(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::TypeSelectorContext* CSSParser::typeSelector() {
   TypeSelectorContext *_localctx = _tracker.createInstance<TypeSelectorContext>(_ctx, getState());
   enterRule(_localctx, 14, CSSParser::RuleTypeSelector);
@@ -1124,6 +1189,14 @@ void CSSParser::UniversalSelectorContext::exitRule(tree::ParseTreeListener *list
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitUniversalSelector(this);
+}
+
+
+std::any CSSParser::UniversalSelectorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitUniversalSelector(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::UniversalSelectorContext* CSSParser::universalSelector() {
@@ -1179,6 +1252,14 @@ void CSSParser::IdSelectorContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitIdSelector(this);
 }
 
+
+std::any CSSParser::IdSelectorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitIdSelector(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::IdSelectorContext* CSSParser::idSelector() {
   IdSelectorContext *_localctx = _tracker.createInstance<IdSelectorContext>(_ctx, getState());
   enterRule(_localctx, 18, CSSParser::RuleIdSelector);
@@ -1232,6 +1313,14 @@ void CSSParser::ClassSelectorContext::exitRule(tree::ParseTreeListener *listener
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitClassSelector(this);
+}
+
+
+std::any CSSParser::ClassSelectorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitClassSelector(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::ClassSelectorContext* CSSParser::classSelector() {
@@ -1299,6 +1388,14 @@ void CSSParser::AttributeSelectorContext::exitRule(tree::ParseTreeListener *list
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAttributeSelector(this);
+}
+
+
+std::any CSSParser::AttributeSelectorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAttributeSelector(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::AttributeSelectorContext* CSSParser::attributeSelector() {
@@ -1375,6 +1472,14 @@ void CSSParser::AttributeOperatorContext::exitRule(tree::ParseTreeListener *list
     parserListener->exitAttributeOperator(this);
 }
 
+
+std::any CSSParser::AttributeOperatorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAttributeOperator(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::AttributeOperatorContext* CSSParser::attributeOperator() {
   AttributeOperatorContext *_localctx = _tracker.createInstance<AttributeOperatorContext>(_ctx, getState());
   enterRule(_localctx, 24, CSSParser::RuleAttributeOperator);
@@ -1439,6 +1544,14 @@ void CSSParser::PseudoSelectorContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitPseudoSelector(this);
+}
+
+
+std::any CSSParser::PseudoSelectorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitPseudoSelector(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::PseudoSelectorContext* CSSParser::pseudoSelector() {
@@ -1521,6 +1634,14 @@ void CSSParser::PseudoClassContext::exitRule(tree::ParseTreeListener *listener) 
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitPseudoClass(this);
+}
+
+
+std::any CSSParser::PseudoClassContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitPseudoClass(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::PseudoClassContext* CSSParser::pseudoClass() {
@@ -1651,6 +1772,14 @@ void CSSParser::PseudoClassArgumentContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitPseudoClassArgument(this);
 }
 
+
+std::any CSSParser::PseudoClassArgumentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitPseudoClassArgument(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::PseudoClassArgumentContext* CSSParser::pseudoClassArgument() {
   PseudoClassArgumentContext *_localctx = _tracker.createInstance<PseudoClassArgumentContext>(_ctx, getState());
   enterRule(_localctx, 30, CSSParser::RulePseudoClassArgument);
@@ -1735,6 +1864,14 @@ void CSSParser::PseudoElementContext::exitRule(tree::ParseTreeListener *listener
     parserListener->exitPseudoElement(this);
 }
 
+
+std::any CSSParser::PseudoElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitPseudoElement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::PseudoElementContext* CSSParser::pseudoElement() {
   PseudoElementContext *_localctx = _tracker.createInstance<PseudoElementContext>(_ctx, getState());
   enterRule(_localctx, 32, CSSParser::RulePseudoElement);
@@ -1796,6 +1933,14 @@ void CSSParser::DeclarationContext::exitRule(tree::ParseTreeListener *listener) 
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitDeclaration(this);
+}
+
+
+std::any CSSParser::DeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitDeclaration(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::DeclarationContext* CSSParser::declaration() {
@@ -1903,6 +2048,14 @@ void CSSParser::PropertyContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitProperty(this);
 }
 
+
+std::any CSSParser::PropertyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitProperty(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::PropertyContext* CSSParser::property() {
   PropertyContext *_localctx = _tracker.createInstance<PropertyContext>(_ctx, getState());
   enterRule(_localctx, 36, CSSParser::RuleProperty);
@@ -1998,6 +2151,14 @@ void CSSParser::ValueContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitValue(this);
 }
 
+
+std::any CSSParser::ValueContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitValue(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::ValueContext* CSSParser::value() {
   ValueContext *_localctx = _tracker.createInstance<ValueContext>(_ctx, getState());
   enterRule(_localctx, 38, CSSParser::RuleValue);
@@ -2073,6 +2234,14 @@ void CSSParser::OperatorContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitOperator(this);
+}
+
+
+std::any CSSParser::OperatorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitOperator(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::OperatorContext* CSSParser::operator_() {
@@ -2192,6 +2361,14 @@ void CSSParser::TermContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitTerm(this);
+}
+
+
+std::any CSSParser::TermContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitTerm(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::TermContext* CSSParser::term() {
@@ -2359,6 +2536,14 @@ void CSSParser::UnaryOperatorContext::exitRule(tree::ParseTreeListener *listener
     parserListener->exitUnaryOperator(this);
 }
 
+
+std::any CSSParser::UnaryOperatorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitUnaryOperator(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::UnaryOperatorContext* CSSParser::unaryOperator() {
   UnaryOperatorContext *_localctx = _tracker.createInstance<UnaryOperatorContext>(_ctx, getState());
   enterRule(_localctx, 44, CSSParser::RuleUnaryOperator);
@@ -2422,6 +2607,14 @@ void CSSParser::NumericContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitNumeric(this);
 }
 
+
+std::any CSSParser::NumericContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitNumeric(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::NumericContext* CSSParser::numeric() {
   NumericContext *_localctx = _tracker.createInstance<NumericContext>(_ctx, getState());
   enterRule(_localctx, 46, CSSParser::RuleNumeric);
@@ -2473,6 +2666,14 @@ void CSSParser::PercentageContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitPercentage(this);
+}
+
+
+std::any CSSParser::PercentageContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitPercentage(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::PercentageContext* CSSParser::percentage() {
@@ -2586,6 +2787,14 @@ void CSSParser::LengthContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitLength(this);
 }
 
+
+std::any CSSParser::LengthContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitLength(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::LengthContext* CSSParser::length() {
   LengthContext *_localctx = _tracker.createInstance<LengthContext>(_ctx, getState());
   enterRule(_localctx, 50, CSSParser::RuleLength);
@@ -2666,6 +2875,14 @@ void CSSParser::AngleContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitAngle(this);
 }
 
+
+std::any CSSParser::AngleContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAngle(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::AngleContext* CSSParser::angle() {
   AngleContext *_localctx = _tracker.createInstance<AngleContext>(_ctx, getState());
   enterRule(_localctx, 52, CSSParser::RuleAngle);
@@ -2736,6 +2953,14 @@ void CSSParser::TimeContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitTime(this);
+}
+
+
+std::any CSSParser::TimeContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitTime(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::TimeContext* CSSParser::time() {
@@ -2809,6 +3034,14 @@ void CSSParser::FrequencyContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitFrequency(this);
+}
+
+
+std::any CSSParser::FrequencyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitFrequency(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::FrequencyContext* CSSParser::frequency() {
@@ -2888,6 +3121,14 @@ void CSSParser::ResolutionContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitResolution(this);
 }
 
+
+std::any CSSParser::ResolutionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitResolution(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::ResolutionContext* CSSParser::resolution() {
   ResolutionContext *_localctx = _tracker.createInstance<ResolutionContext>(_ctx, getState());
   enterRule(_localctx, 58, CSSParser::RuleResolution);
@@ -2956,6 +3197,14 @@ void CSSParser::HexcolorContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitHexcolor(this);
 }
 
+
+std::any CSSParser::HexcolorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitHexcolor(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::HexcolorContext* CSSParser::hexcolor() {
   HexcolorContext *_localctx = _tracker.createInstance<HexcolorContext>(_ctx, getState());
   enterRule(_localctx, 60, CSSParser::RuleHexcolor);
@@ -3022,6 +3271,14 @@ void CSSParser::FunctionContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitFunction(this);
+}
+
+
+std::any CSSParser::FunctionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitFunction(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::FunctionContext* CSSParser::function() {
@@ -3096,6 +3353,14 @@ void CSSParser::FunctionArgumentsContext::exitRule(tree::ParseTreeListener *list
     parserListener->exitFunctionArguments(this);
 }
 
+
+std::any CSSParser::FunctionArgumentsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitFunctionArguments(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::FunctionArgumentsContext* CSSParser::functionArguments() {
   FunctionArgumentsContext *_localctx = _tracker.createInstance<FunctionArgumentsContext>(_ctx, getState());
   enterRule(_localctx, 64, CSSParser::RuleFunctionArguments);
@@ -3162,6 +3427,14 @@ void CSSParser::FunctionArgumentContext::exitRule(tree::ParseTreeListener *liste
     parserListener->exitFunctionArgument(this);
 }
 
+
+std::any CSSParser::FunctionArgumentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitFunctionArgument(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::FunctionArgumentContext* CSSParser::functionArgument() {
   FunctionArgumentContext *_localctx = _tracker.createInstance<FunctionArgumentContext>(_ctx, getState());
   enterRule(_localctx, 66, CSSParser::RuleFunctionArgument);
@@ -3213,6 +3486,14 @@ void CSSParser::CalcContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCalc(this);
+}
+
+
+std::any CSSParser::CalcContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitCalc(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::CalcContext* CSSParser::calc() {
@@ -3276,6 +3557,14 @@ void CSSParser::CalcExpressionContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCalcExpression(this);
+}
+
+
+std::any CSSParser::CalcExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitCalcExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::CalcExpressionContext* CSSParser::calcExpression() {
@@ -3357,6 +3646,14 @@ void CSSParser::CalcTermContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCalcTerm(this);
+}
+
+
+std::any CSSParser::CalcTermContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitCalcTerm(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::CalcTermContext* CSSParser::calcTerm() {
@@ -3454,6 +3751,14 @@ void CSSParser::CalcFactorContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCalcFactor(this);
+}
+
+
+std::any CSSParser::CalcFactorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitCalcFactor(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::CalcFactorContext* CSSParser::calcFactor() {
@@ -3600,6 +3905,14 @@ void CSSParser::AtRuleContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAtRule(this);
+}
+
+
+std::any CSSParser::AtRuleContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAtRule(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::AtRuleContext* CSSParser::atRule() {
@@ -3754,6 +4067,14 @@ void CSSParser::AtImportContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitAtImport(this);
 }
 
+
+std::any CSSParser::AtImportContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAtImport(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::AtImportContext* CSSParser::atImport() {
   AtImportContext *_localctx = _tracker.createInstance<AtImportContext>(_ctx, getState());
   enterRule(_localctx, 78, CSSParser::RuleAtImport);
@@ -3842,6 +4163,14 @@ void CSSParser::AtMediaContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitAtMedia(this);
 }
 
+
+std::any CSSParser::AtMediaContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAtMedia(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::AtMediaContext* CSSParser::atMedia() {
   AtMediaContext *_localctx = _tracker.createInstance<AtMediaContext>(_ctx, getState());
   enterRule(_localctx, 80, CSSParser::RuleAtMedia);
@@ -3917,6 +4246,14 @@ void CSSParser::MediaQueryListContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitMediaQueryList(this);
+}
+
+
+std::any CSSParser::MediaQueryListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitMediaQueryList(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::MediaQueryListContext* CSSParser::mediaQueryList() {
@@ -4007,6 +4344,14 @@ void CSSParser::MediaQueryContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitMediaQuery(this);
+}
+
+
+std::any CSSParser::MediaQueryContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitMediaQuery(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::MediaQueryContext* CSSParser::mediaQuery() {
@@ -4125,6 +4470,14 @@ void CSSParser::MediaTypeContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitMediaType(this);
 }
 
+
+std::any CSSParser::MediaTypeContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitMediaType(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::MediaTypeContext* CSSParser::mediaType() {
   MediaTypeContext *_localctx = _tracker.createInstance<MediaTypeContext>(_ctx, getState());
   enterRule(_localctx, 86, CSSParser::RuleMediaType);
@@ -4180,6 +4533,14 @@ void CSSParser::MediaFeatureContext::exitRule(tree::ParseTreeListener *listener)
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitMediaFeature(this);
+}
+
+
+std::any CSSParser::MediaFeatureContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitMediaFeature(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::MediaFeatureContext* CSSParser::mediaFeature() {
@@ -4262,6 +4623,14 @@ void CSSParser::AtKeyframesContext::exitRule(tree::ParseTreeListener *listener) 
     parserListener->exitAtKeyframes(this);
 }
 
+
+std::any CSSParser::AtKeyframesContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAtKeyframes(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::AtKeyframesContext* CSSParser::atKeyframes() {
   AtKeyframesContext *_localctx = _tracker.createInstance<AtKeyframesContext>(_ctx, getState());
   enterRule(_localctx, 90, CSSParser::RuleAtKeyframes);
@@ -4339,6 +4708,14 @@ void CSSParser::KeyframeBlockContext::exitRule(tree::ParseTreeListener *listener
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitKeyframeBlock(this);
+}
+
+
+std::any CSSParser::KeyframeBlockContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitKeyframeBlock(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::KeyframeBlockContext* CSSParser::keyframeBlock() {
@@ -4425,6 +4802,14 @@ void CSSParser::KeyframeSelectorContext::exitRule(tree::ParseTreeListener *liste
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitKeyframeSelector(this);
+}
+
+
+std::any CSSParser::KeyframeSelectorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitKeyframeSelector(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 
@@ -4544,6 +4929,14 @@ void CSSParser::AtFontFaceContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitAtFontFace(this);
 }
 
+
+std::any CSSParser::AtFontFaceContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAtFontFace(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::AtFontFaceContext* CSSParser::atFontFace() {
   AtFontFaceContext *_localctx = _tracker.createInstance<AtFontFaceContext>(_ctx, getState());
   enterRule(_localctx, 96, CSSParser::RuleAtFontFace);
@@ -4624,6 +5017,14 @@ void CSSParser::AtSupportsContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAtSupports(this);
+}
+
+
+std::any CSSParser::AtSupportsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAtSupports(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::AtSupportsContext* CSSParser::atSupports() {
@@ -4709,6 +5110,14 @@ void CSSParser::SupportsConditionContext::exitRule(tree::ParseTreeListener *list
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitSupportsCondition(this);
+}
+
+
+std::any CSSParser::SupportsConditionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitSupportsCondition(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::SupportsConditionContext* CSSParser::supportsCondition() {
@@ -4799,6 +5208,14 @@ void CSSParser::SupportsNegationContext::exitRule(tree::ParseTreeListener *liste
     parserListener->exitSupportsNegation(this);
 }
 
+
+std::any CSSParser::SupportsNegationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitSupportsNegation(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::SupportsNegationContext* CSSParser::supportsNegation() {
   SupportsNegationContext *_localctx = _tracker.createInstance<SupportsNegationContext>(_ctx, getState());
   enterRule(_localctx, 102, CSSParser::RuleSupportsNegation);
@@ -4864,6 +5281,14 @@ void CSSParser::SupportsConjunctionContext::exitRule(tree::ParseTreeListener *li
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitSupportsConjunction(this);
+}
+
+
+std::any CSSParser::SupportsConjunctionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitSupportsConjunction(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::SupportsConjunctionContext* CSSParser::supportsConjunction() {
@@ -4944,6 +5369,14 @@ void CSSParser::SupportsDisjunctionContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitSupportsDisjunction(this);
 }
 
+
+std::any CSSParser::SupportsDisjunctionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitSupportsDisjunction(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::SupportsDisjunctionContext* CSSParser::supportsDisjunction() {
   SupportsDisjunctionContext *_localctx = _tracker.createInstance<SupportsDisjunctionContext>(_ctx, getState());
   enterRule(_localctx, 106, CSSParser::RuleSupportsDisjunction);
@@ -5012,6 +5445,14 @@ void CSSParser::SupportsInParensContext::exitRule(tree::ParseTreeListener *liste
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitSupportsInParens(this);
+}
+
+
+std::any CSSParser::SupportsInParensContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitSupportsInParens(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::SupportsInParensContext* CSSParser::supportsInParens() {
@@ -5088,6 +5529,14 @@ void CSSParser::SupportsFeatureContext::exitRule(tree::ParseTreeListener *listen
     parserListener->exitSupportsFeature(this);
 }
 
+
+std::any CSSParser::SupportsFeatureContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitSupportsFeature(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::SupportsFeatureContext* CSSParser::supportsFeature() {
   SupportsFeatureContext *_localctx = _tracker.createInstance<SupportsFeatureContext>(_ctx, getState());
   enterRule(_localctx, 110, CSSParser::RuleSupportsFeature);
@@ -5155,6 +5604,14 @@ void CSSParser::AtPageContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAtPage(this);
+}
+
+
+std::any CSSParser::AtPageContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAtPage(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::AtPageContext* CSSParser::atPage() {
@@ -5235,6 +5692,14 @@ void CSSParser::PseudoPageContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitPseudoPage(this);
 }
 
+
+std::any CSSParser::PseudoPageContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitPseudoPage(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::PseudoPageContext* CSSParser::pseudoPage() {
   PseudoPageContext *_localctx = _tracker.createInstance<PseudoPageContext>(_ctx, getState());
   enterRule(_localctx, 114, CSSParser::RulePseudoPage);
@@ -5300,6 +5765,14 @@ void CSSParser::AtNamespaceContext::exitRule(tree::ParseTreeListener *listener) 
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAtNamespace(this);
+}
+
+
+std::any CSSParser::AtNamespaceContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAtNamespace(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::AtNamespaceContext* CSSParser::atNamespace() {
@@ -5381,6 +5854,14 @@ void CSSParser::AtCharsetContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitAtCharset(this);
 }
 
+
+std::any CSSParser::AtCharsetContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAtCharset(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::AtCharsetContext* CSSParser::atCharset() {
   AtCharsetContext *_localctx = _tracker.createInstance<AtCharsetContext>(_ctx, getState());
   enterRule(_localctx, 118, CSSParser::RuleAtCharset);
@@ -5444,6 +5925,14 @@ void CSSParser::AtViewportContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAtViewport(this);
+}
+
+
+std::any CSSParser::AtViewportContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAtViewport(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::AtViewportContext* CSSParser::atViewport() {
@@ -5526,6 +6015,14 @@ void CSSParser::AtCounterStyleContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAtCounterStyle(this);
+}
+
+
+std::any CSSParser::AtCounterStyleContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAtCounterStyle(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::AtCounterStyleContext* CSSParser::atCounterStyle() {
@@ -5616,6 +6113,14 @@ void CSSParser::AtFontFeatureValuesContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitAtFontFeatureValues(this);
 }
 
+
+std::any CSSParser::AtFontFeatureValuesContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAtFontFeatureValues(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::AtFontFeatureValuesContext* CSSParser::atFontFeatureValues() {
   AtFontFeatureValuesContext *_localctx = _tracker.createInstance<AtFontFeatureValuesContext>(_ctx, getState());
   enterRule(_localctx, 124, CSSParser::RuleAtFontFeatureValues);
@@ -5700,6 +6205,14 @@ void CSSParser::FontFamilyNameContext::exitRule(tree::ParseTreeListener *listene
     parserListener->exitFontFamilyName(this);
 }
 
+
+std::any CSSParser::FontFamilyNameContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitFontFamilyName(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::FontFamilyNameContext* CSSParser::fontFamilyName() {
   FontFamilyNameContext *_localctx = _tracker.createInstance<FontFamilyNameContext>(_ctx, getState());
   enterRule(_localctx, 126, CSSParser::RuleFontFamilyName);
@@ -5769,6 +6282,14 @@ void CSSParser::FontFeatureValueBlockContext::exitRule(tree::ParseTreeListener *
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitFontFeatureValueBlock(this);
+}
+
+
+std::any CSSParser::FontFeatureValueBlockContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitFontFeatureValueBlock(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::FontFeatureValueBlockContext* CSSParser::fontFeatureValueBlock() {
@@ -5855,6 +6376,14 @@ void CSSParser::AtPropertyContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitAtProperty(this);
 }
 
+
+std::any CSSParser::AtPropertyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitAtProperty(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::AtPropertyContext* CSSParser::atProperty() {
   AtPropertyContext *_localctx = _tracker.createInstance<AtPropertyContext>(_ctx, getState());
   enterRule(_localctx, 130, CSSParser::RuleAtProperty);
@@ -5939,6 +6468,14 @@ void CSSParser::ExpressionContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitExpression(this);
 }
 
+
+std::any CSSParser::ExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CSSParser::ExpressionContext* CSSParser::expression() {
   ExpressionContext *_localctx = _tracker.createInstance<ExpressionContext>(_ctx, getState());
   enterRule(_localctx, 132, CSSParser::RuleExpression);
@@ -6005,6 +6542,14 @@ void CSSParser::CommentContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CSSListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitComment(this);
+}
+
+
+std::any CSSParser::CommentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CSSVisitor*>(visitor))
+    return parserVisitor->visitComment(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CSSParser::CommentContext* CSSParser::comment() {

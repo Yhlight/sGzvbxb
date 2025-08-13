@@ -3,6 +3,7 @@
 
 
 #include "JavaScriptListener.h"
+#include "JavaScriptVisitor.h"
 
 #include "JavaScriptParser.h"
 
@@ -717,6 +718,14 @@ void JavaScriptParser::ProgramContext::exitRule(tree::ParseTreeListener *listene
     parserListener->exitProgram(this);
 }
 
+
+std::any JavaScriptParser::ProgramContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitProgram(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ProgramContext* JavaScriptParser::program() {
   ProgramContext *_localctx = _tracker.createInstance<ProgramContext>(_ctx, getState());
   enterRule(_localctx, 0, JavaScriptParser::RuleProgram);
@@ -785,6 +794,14 @@ void JavaScriptParser::SourceElementsContext::exitRule(tree::ParseTreeListener *
     parserListener->exitSourceElements(this);
 }
 
+
+std::any JavaScriptParser::SourceElementsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitSourceElements(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::SourceElementsContext* JavaScriptParser::sourceElements() {
   SourceElementsContext *_localctx = _tracker.createInstance<SourceElementsContext>(_ctx, getState());
   enterRule(_localctx, 2, JavaScriptParser::RuleSourceElements);
@@ -851,6 +868,14 @@ void JavaScriptParser::SourceElementContext::exitRule(tree::ParseTreeListener *l
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitSourceElement(this);
+}
+
+
+std::any JavaScriptParser::SourceElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitSourceElement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::SourceElementContext* JavaScriptParser::sourceElement() {
@@ -929,6 +954,14 @@ void JavaScriptParser::DeclarationContext::exitRule(tree::ParseTreeListener *lis
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitDeclaration(this);
+}
+
+
+std::any JavaScriptParser::DeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitDeclaration(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::DeclarationContext* JavaScriptParser::declaration() {
@@ -1020,6 +1053,14 @@ void JavaScriptParser::HoistableDeclarationContext::exitRule(tree::ParseTreeList
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitHoistableDeclaration(this);
+}
+
+
+std::any JavaScriptParser::HoistableDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitHoistableDeclaration(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::HoistableDeclarationContext* JavaScriptParser::hoistableDeclaration() {
@@ -1114,6 +1155,14 @@ void JavaScriptParser::FunctionDeclarationContext::exitRule(tree::ParseTreeListe
     parserListener->exitFunctionDeclaration(this);
 }
 
+
+std::any JavaScriptParser::FunctionDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFunctionDeclaration(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::FunctionDeclarationContext* JavaScriptParser::functionDeclaration() {
   FunctionDeclarationContext *_localctx = _tracker.createInstance<FunctionDeclarationContext>(_ctx, getState());
   enterRule(_localctx, 10, JavaScriptParser::RuleFunctionDeclaration);
@@ -1197,6 +1246,14 @@ void JavaScriptParser::GeneratorDeclarationContext::exitRule(tree::ParseTreeList
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitGeneratorDeclaration(this);
+}
+
+
+std::any JavaScriptParser::GeneratorDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitGeneratorDeclaration(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::GeneratorDeclarationContext* JavaScriptParser::generatorDeclaration() {
@@ -1286,6 +1343,14 @@ void JavaScriptParser::AsyncFunctionDeclarationContext::exitRule(tree::ParseTree
     parserListener->exitAsyncFunctionDeclaration(this);
 }
 
+
+std::any JavaScriptParser::AsyncFunctionDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAsyncFunctionDeclaration(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::AsyncFunctionDeclarationContext* JavaScriptParser::asyncFunctionDeclaration() {
   AsyncFunctionDeclarationContext *_localctx = _tracker.createInstance<AsyncFunctionDeclarationContext>(_ctx, getState());
   enterRule(_localctx, 14, JavaScriptParser::RuleAsyncFunctionDeclaration);
@@ -1371,6 +1436,14 @@ void JavaScriptParser::AsyncGeneratorDeclarationContext::exitRule(tree::ParseTre
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAsyncGeneratorDeclaration(this);
+}
+
+
+std::any JavaScriptParser::AsyncGeneratorDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAsyncGeneratorDeclaration(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::AsyncGeneratorDeclarationContext* JavaScriptParser::asyncGeneratorDeclaration() {
@@ -1462,6 +1535,14 @@ void JavaScriptParser::ClassDeclarationContext::exitRule(tree::ParseTreeListener
     parserListener->exitClassDeclaration(this);
 }
 
+
+std::any JavaScriptParser::ClassDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitClassDeclaration(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ClassDeclarationContext* JavaScriptParser::classDeclaration() {
   ClassDeclarationContext *_localctx = _tracker.createInstance<ClassDeclarationContext>(_ctx, getState());
   enterRule(_localctx, 18, JavaScriptParser::RuleClassDeclaration);
@@ -1532,6 +1613,14 @@ void JavaScriptParser::ClassExtendsContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitClassExtends(this);
 }
 
+
+std::any JavaScriptParser::ClassExtendsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitClassExtends(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ClassExtendsContext* JavaScriptParser::classExtends() {
   ClassExtendsContext *_localctx = _tracker.createInstance<ClassExtendsContext>(_ctx, getState());
   enterRule(_localctx, 20, JavaScriptParser::RuleClassExtends);
@@ -1589,6 +1678,14 @@ void JavaScriptParser::ClassBodyContext::exitRule(tree::ParseTreeListener *liste
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitClassBody(this);
+}
+
+
+std::any JavaScriptParser::ClassBodyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitClassBody(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ClassBodyContext* JavaScriptParser::classBody() {
@@ -1657,6 +1754,14 @@ void JavaScriptParser::ClassElementContext::exitRule(tree::ParseTreeListener *li
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitClassElement(this);
+}
+
+
+std::any JavaScriptParser::ClassElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitClassElement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ClassElementContext* JavaScriptParser::classElement() {
@@ -1764,6 +1869,14 @@ void JavaScriptParser::MethodDefinitionContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitMethodDefinition(this);
+}
+
+
+std::any JavaScriptParser::MethodDefinitionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitMethodDefinition(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::MethodDefinitionContext* JavaScriptParser::methodDefinition() {
@@ -1987,6 +2100,14 @@ void JavaScriptParser::FieldDefinitionContext::exitRule(tree::ParseTreeListener 
     parserListener->exitFieldDefinition(this);
 }
 
+
+std::any JavaScriptParser::FieldDefinitionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFieldDefinition(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::FieldDefinitionContext* JavaScriptParser::fieldDefinition() {
   FieldDefinitionContext *_localctx = _tracker.createInstance<FieldDefinitionContext>(_ctx, getState());
   enterRule(_localctx, 28, JavaScriptParser::RuleFieldDefinition);
@@ -2053,6 +2174,14 @@ void JavaScriptParser::LexicalDeclarationContext::exitRule(tree::ParseTreeListen
     parserListener->exitLexicalDeclaration(this);
 }
 
+
+std::any JavaScriptParser::LexicalDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLexicalDeclaration(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::LexicalDeclarationContext* JavaScriptParser::lexicalDeclaration() {
   LexicalDeclarationContext *_localctx = _tracker.createInstance<LexicalDeclarationContext>(_ctx, getState());
   enterRule(_localctx, 30, JavaScriptParser::RuleLexicalDeclaration);
@@ -2104,6 +2233,14 @@ void JavaScriptParser::LetOrConstContext::exitRule(tree::ParseTreeListener *list
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitLetOrConst(this);
+}
+
+
+std::any JavaScriptParser::LetOrConstContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLetOrConst(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::LetOrConstContext* JavaScriptParser::letOrConst() {
@@ -2171,6 +2308,14 @@ void JavaScriptParser::BindingListContext::exitRule(tree::ParseTreeListener *lis
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBindingList(this);
+}
+
+
+std::any JavaScriptParser::BindingListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingList(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::BindingListContext* JavaScriptParser::bindingList() {
@@ -2245,6 +2390,14 @@ void JavaScriptParser::LexicalBindingContext::exitRule(tree::ParseTreeListener *
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitLexicalBinding(this);
+}
+
+
+std::any JavaScriptParser::LexicalBindingContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLexicalBinding(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::LexicalBindingContext* JavaScriptParser::lexicalBinding() {
@@ -2393,6 +2546,14 @@ void JavaScriptParser::StatementContext::exitRule(tree::ParseTreeListener *liste
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitStatement(this);
+}
+
+
+std::any JavaScriptParser::StatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::StatementContext* JavaScriptParser::statement() {
@@ -2570,6 +2731,14 @@ void JavaScriptParser::BlockStatementContext::exitRule(tree::ParseTreeListener *
     parserListener->exitBlockStatement(this);
 }
 
+
+std::any JavaScriptParser::BlockStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBlockStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::BlockStatementContext* JavaScriptParser::blockStatement() {
   BlockStatementContext *_localctx = _tracker.createInstance<BlockStatementContext>(_ctx, getState());
   enterRule(_localctx, 40, JavaScriptParser::RuleBlockStatement);
@@ -2640,6 +2809,14 @@ void JavaScriptParser::StatementListContext::exitRule(tree::ParseTreeListener *l
     parserListener->exitStatementList(this);
 }
 
+
+std::any JavaScriptParser::StatementListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitStatementList(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::StatementListContext* JavaScriptParser::statementList() {
   StatementListContext *_localctx = _tracker.createInstance<StatementListContext>(_ctx, getState());
   enterRule(_localctx, 42, JavaScriptParser::RuleStatementList);
@@ -2704,6 +2881,14 @@ void JavaScriptParser::VariableStatementContext::exitRule(tree::ParseTreeListene
     parserListener->exitVariableStatement(this);
 }
 
+
+std::any JavaScriptParser::VariableStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitVariableStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::VariableStatementContext* JavaScriptParser::variableStatement() {
   VariableStatementContext *_localctx = _tracker.createInstance<VariableStatementContext>(_ctx, getState());
   enterRule(_localctx, 44, JavaScriptParser::RuleVariableStatement);
@@ -2763,6 +2948,14 @@ void JavaScriptParser::VariableDeclarationListContext::exitRule(tree::ParseTreeL
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitVariableDeclarationList(this);
+}
+
+
+std::any JavaScriptParser::VariableDeclarationListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitVariableDeclarationList(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::VariableDeclarationListContext* JavaScriptParser::variableDeclarationList() {
@@ -2837,6 +3030,14 @@ void JavaScriptParser::VariableDeclarationContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitVariableDeclaration(this);
+}
+
+
+std::any JavaScriptParser::VariableDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitVariableDeclaration(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::VariableDeclarationContext* JavaScriptParser::variableDeclaration() {
@@ -2919,6 +3120,14 @@ void JavaScriptParser::EmptyStatementContext::exitRule(tree::ParseTreeListener *
     parserListener->exitEmptyStatement(this);
 }
 
+
+std::any JavaScriptParser::EmptyStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitEmptyStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::EmptyStatementContext* JavaScriptParser::emptyStatement() {
   EmptyStatementContext *_localctx = _tracker.createInstance<EmptyStatementContext>(_ctx, getState());
   enterRule(_localctx, 50, JavaScriptParser::RuleEmptyStatement);
@@ -2970,6 +3179,14 @@ void JavaScriptParser::ExpressionStatementContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitExpressionStatement(this);
+}
+
+
+std::any JavaScriptParser::ExpressionStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitExpressionStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ExpressionStatementContext* JavaScriptParser::expressionStatement() {
@@ -3033,6 +3250,14 @@ void JavaScriptParser::IfStatementContext::exitRule(tree::ParseTreeListener *lis
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitIfStatement(this);
+}
+
+
+std::any JavaScriptParser::IfStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitIfStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::IfStatementContext* JavaScriptParser::ifStatement() {
@@ -3125,6 +3350,14 @@ void JavaScriptParser::IterationStatementContext::exitRule(tree::ParseTreeListen
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitIterationStatement(this);
+}
+
+
+std::any JavaScriptParser::IterationStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitIterationStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::IterationStatementContext* JavaScriptParser::iterationStatement() {
@@ -3222,6 +3455,14 @@ void JavaScriptParser::DoWhileStatementContext::exitRule(tree::ParseTreeListener
     parserListener->exitDoWhileStatement(this);
 }
 
+
+std::any JavaScriptParser::DoWhileStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitDoWhileStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::DoWhileStatementContext* JavaScriptParser::doWhileStatement() {
   DoWhileStatementContext *_localctx = _tracker.createInstance<DoWhileStatementContext>(_ctx, getState());
   enterRule(_localctx, 58, JavaScriptParser::RuleDoWhileStatement);
@@ -3289,6 +3530,14 @@ void JavaScriptParser::WhileStatementContext::exitRule(tree::ParseTreeListener *
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitWhileStatement(this);
+}
+
+
+std::any JavaScriptParser::WhileStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitWhileStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::WhileStatementContext* JavaScriptParser::whileStatement() {
@@ -3362,6 +3611,14 @@ void JavaScriptParser::ForStatementContext::exitRule(tree::ParseTreeListener *li
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitForStatement(this);
+}
+
+
+std::any JavaScriptParser::ForStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitForStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ForStatementContext* JavaScriptParser::forStatement() {
@@ -3464,6 +3721,14 @@ void JavaScriptParser::ForInitContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitForInit(this);
+}
+
+
+std::any JavaScriptParser::ForInitContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitForInit(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ForInitContext* JavaScriptParser::forInit() {
@@ -3585,6 +3850,14 @@ void JavaScriptParser::ForInStatementContext::exitRule(tree::ParseTreeListener *
     parserListener->exitForInStatement(this);
 }
 
+
+std::any JavaScriptParser::ForInStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitForInStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ForInStatementContext* JavaScriptParser::forInStatement() {
   ForInStatementContext *_localctx = _tracker.createInstance<ForInStatementContext>(_ctx, getState());
   enterRule(_localctx, 66, JavaScriptParser::RuleForInStatement);
@@ -3656,6 +3929,14 @@ void JavaScriptParser::ForOfStatementContext::exitRule(tree::ParseTreeListener *
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitForOfStatement(this);
+}
+
+
+std::any JavaScriptParser::ForOfStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitForOfStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ForOfStatementContext* JavaScriptParser::forOfStatement() {
@@ -3742,6 +4023,14 @@ void JavaScriptParser::ForInBindingContext::exitRule(tree::ParseTreeListener *li
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitForInBinding(this);
+}
+
+
+std::any JavaScriptParser::ForInBindingContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitForInBinding(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ForInBindingContext* JavaScriptParser::forInBinding() {
@@ -3861,6 +4150,14 @@ void JavaScriptParser::ContinueStatementContext::exitRule(tree::ParseTreeListene
     parserListener->exitContinueStatement(this);
 }
 
+
+std::any JavaScriptParser::ContinueStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitContinueStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ContinueStatementContext* JavaScriptParser::continueStatement() {
   ContinueStatementContext *_localctx = _tracker.createInstance<ContinueStatementContext>(_ctx, getState());
   enterRule(_localctx, 72, JavaScriptParser::RuleContinueStatement);
@@ -3927,6 +4224,14 @@ void JavaScriptParser::BreakStatementContext::exitRule(tree::ParseTreeListener *
     parserListener->exitBreakStatement(this);
 }
 
+
+std::any JavaScriptParser::BreakStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBreakStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::BreakStatementContext* JavaScriptParser::breakStatement() {
   BreakStatementContext *_localctx = _tracker.createInstance<BreakStatementContext>(_ctx, getState());
   enterRule(_localctx, 74, JavaScriptParser::RuleBreakStatement);
@@ -3991,6 +4296,14 @@ void JavaScriptParser::ReturnStatementContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitReturnStatement(this);
+}
+
+
+std::any JavaScriptParser::ReturnStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitReturnStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ReturnStatementContext* JavaScriptParser::returnStatement() {
@@ -4063,6 +4376,14 @@ void JavaScriptParser::WithStatementContext::exitRule(tree::ParseTreeListener *l
     parserListener->exitWithStatement(this);
 }
 
+
+std::any JavaScriptParser::WithStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitWithStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::WithStatementContext* JavaScriptParser::withStatement() {
   WithStatementContext *_localctx = _tracker.createInstance<WithStatementContext>(_ctx, getState());
   enterRule(_localctx, 78, JavaScriptParser::RuleWithStatement);
@@ -4126,6 +4447,14 @@ void JavaScriptParser::LabelledStatementContext::exitRule(tree::ParseTreeListene
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitLabelledStatement(this);
+}
+
+
+std::any JavaScriptParser::LabelledStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLabelledStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::LabelledStatementContext* JavaScriptParser::labelledStatement() {
@@ -4195,6 +4524,14 @@ void JavaScriptParser::SwitchStatementContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitSwitchStatement(this);
+}
+
+
+std::any JavaScriptParser::SwitchStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitSwitchStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::SwitchStatementContext* JavaScriptParser::switchStatement() {
@@ -4296,6 +4633,14 @@ void JavaScriptParser::CaseClauseContext::exitRule(tree::ParseTreeListener *list
     parserListener->exitCaseClause(this);
 }
 
+
+std::any JavaScriptParser::CaseClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitCaseClause(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::CaseClauseContext* JavaScriptParser::caseClause() {
   CaseClauseContext *_localctx = _tracker.createInstance<CaseClauseContext>(_ctx, getState());
   enterRule(_localctx, 84, JavaScriptParser::RuleCaseClause);
@@ -4364,6 +4709,14 @@ void JavaScriptParser::DefaultClauseContext::exitRule(tree::ParseTreeListener *l
     parserListener->exitDefaultClause(this);
 }
 
+
+std::any JavaScriptParser::DefaultClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitDefaultClause(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::DefaultClauseContext* JavaScriptParser::defaultClause() {
   DefaultClauseContext *_localctx = _tracker.createInstance<DefaultClauseContext>(_ctx, getState());
   enterRule(_localctx, 86, JavaScriptParser::RuleDefaultClause);
@@ -4430,6 +4783,14 @@ void JavaScriptParser::ThrowStatementContext::exitRule(tree::ParseTreeListener *
     parserListener->exitThrowStatement(this);
 }
 
+
+std::any JavaScriptParser::ThrowStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitThrowStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ThrowStatementContext* JavaScriptParser::throwStatement() {
   ThrowStatementContext *_localctx = _tracker.createInstance<ThrowStatementContext>(_ctx, getState());
   enterRule(_localctx, 88, JavaScriptParser::RuleThrowStatement);
@@ -4493,6 +4854,14 @@ void JavaScriptParser::TryStatementContext::exitRule(tree::ParseTreeListener *li
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitTryStatement(this);
+}
+
+
+std::any JavaScriptParser::TryStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitTryStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::TryStatementContext* JavaScriptParser::tryStatement() {
@@ -4592,6 +4961,14 @@ void JavaScriptParser::CatchClauseContext::exitRule(tree::ParseTreeListener *lis
     parserListener->exitCatchClause(this);
 }
 
+
+std::any JavaScriptParser::CatchClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitCatchClause(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::CatchClauseContext* JavaScriptParser::catchClause() {
   CatchClauseContext *_localctx = _tracker.createInstance<CatchClauseContext>(_ctx, getState());
   enterRule(_localctx, 92, JavaScriptParser::RuleCatchClause);
@@ -4662,6 +5039,14 @@ void JavaScriptParser::CatchParameterContext::exitRule(tree::ParseTreeListener *
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCatchParameter(this);
+}
+
+
+std::any JavaScriptParser::CatchParameterContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitCatchParameter(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::CatchParameterContext* JavaScriptParser::catchParameter() {
@@ -4737,6 +5122,14 @@ void JavaScriptParser::FinallyClauseContext::exitRule(tree::ParseTreeListener *l
     parserListener->exitFinallyClause(this);
 }
 
+
+std::any JavaScriptParser::FinallyClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFinallyClause(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::FinallyClauseContext* JavaScriptParser::finallyClause() {
   FinallyClauseContext *_localctx = _tracker.createInstance<FinallyClauseContext>(_ctx, getState());
   enterRule(_localctx, 96, JavaScriptParser::RuleFinallyClause);
@@ -4786,6 +5179,14 @@ void JavaScriptParser::DebuggerStatementContext::exitRule(tree::ParseTreeListene
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitDebuggerStatement(this);
+}
+
+
+std::any JavaScriptParser::DebuggerStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitDebuggerStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::DebuggerStatementContext* JavaScriptParser::debuggerStatement() {
@@ -4845,6 +5246,14 @@ void JavaScriptParser::ImportStatementContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitImportStatement(this);
+}
+
+
+std::any JavaScriptParser::ImportStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitImportStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ImportStatementContext* JavaScriptParser::importStatement() {
@@ -4935,6 +5344,14 @@ void JavaScriptParser::ImportClauseContext::exitRule(tree::ParseTreeListener *li
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitImportClause(this);
+}
+
+
+std::any JavaScriptParser::ImportClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitImportClause(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ImportClauseContext* JavaScriptParser::importClause() {
@@ -5036,6 +5453,14 @@ void JavaScriptParser::ImportedDefaultBindingContext::exitRule(tree::ParseTreeLi
     parserListener->exitImportedDefaultBinding(this);
 }
 
+
+std::any JavaScriptParser::ImportedDefaultBindingContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitImportedDefaultBinding(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ImportedDefaultBindingContext* JavaScriptParser::importedDefaultBinding() {
   ImportedDefaultBindingContext *_localctx = _tracker.createInstance<ImportedDefaultBindingContext>(_ctx, getState());
   enterRule(_localctx, 104, JavaScriptParser::RuleImportedDefaultBinding);
@@ -5087,6 +5512,14 @@ void JavaScriptParser::NamespaceImportContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitNamespaceImport(this);
+}
+
+
+std::any JavaScriptParser::NamespaceImportContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitNamespaceImport(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::NamespaceImportContext* JavaScriptParser::namespaceImport() {
@@ -5144,6 +5577,14 @@ void JavaScriptParser::NamedImportsContext::exitRule(tree::ParseTreeListener *li
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitNamedImports(this);
+}
+
+
+std::any JavaScriptParser::NamedImportsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitNamedImports(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::NamedImportsContext* JavaScriptParser::namedImports() {
@@ -5235,6 +5676,14 @@ void JavaScriptParser::ImportsListContext::exitRule(tree::ParseTreeListener *lis
     parserListener->exitImportsList(this);
 }
 
+
+std::any JavaScriptParser::ImportsListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitImportsList(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ImportsListContext* JavaScriptParser::importsList() {
   ImportsListContext *_localctx = _tracker.createInstance<ImportsListContext>(_ctx, getState());
   enterRule(_localctx, 110, JavaScriptParser::RuleImportsList);
@@ -5305,6 +5754,14 @@ void JavaScriptParser::ImportSpecifierContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitImportSpecifier(this);
+}
+
+
+std::any JavaScriptParser::ImportSpecifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitImportSpecifier(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ImportSpecifierContext* JavaScriptParser::importSpecifier() {
@@ -5379,6 +5836,14 @@ void JavaScriptParser::ModuleSpecifierContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitModuleSpecifier(this);
+}
+
+
+std::any JavaScriptParser::ModuleSpecifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitModuleSpecifier(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ModuleSpecifierContext* JavaScriptParser::moduleSpecifier() {
@@ -5456,6 +5921,14 @@ void JavaScriptParser::ExportStatementContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitExportStatement(this);
+}
+
+
+std::any JavaScriptParser::ExportStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitExportStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ExportStatementContext* JavaScriptParser::exportStatement() {
@@ -5597,6 +6070,14 @@ void JavaScriptParser::ExportClauseContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitExportClause(this);
 }
 
+
+std::any JavaScriptParser::ExportClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitExportClause(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ExportClauseContext* JavaScriptParser::exportClause() {
   ExportClauseContext *_localctx = _tracker.createInstance<ExportClauseContext>(_ctx, getState());
   enterRule(_localctx, 118, JavaScriptParser::RuleExportClause);
@@ -5704,6 +6185,14 @@ void JavaScriptParser::ExportsListContext::exitRule(tree::ParseTreeListener *lis
     parserListener->exitExportsList(this);
 }
 
+
+std::any JavaScriptParser::ExportsListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitExportsList(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ExportsListContext* JavaScriptParser::exportsList() {
   ExportsListContext *_localctx = _tracker.createInstance<ExportsListContext>(_ctx, getState());
   enterRule(_localctx, 120, JavaScriptParser::RuleExportsList);
@@ -5774,6 +6263,14 @@ void JavaScriptParser::ExportSpecifierContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitExportSpecifier(this);
+}
+
+
+std::any JavaScriptParser::ExportSpecifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitExportSpecifier(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ExportSpecifierContext* JavaScriptParser::exportSpecifier() {
@@ -5852,6 +6349,14 @@ void JavaScriptParser::ExpressionContext::exitRule(tree::ParseTreeListener *list
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitExpression(this);
+}
+
+
+std::any JavaScriptParser::ExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ExpressionContext* JavaScriptParser::expression() {
@@ -5942,6 +6447,14 @@ void JavaScriptParser::AssignmentExpressionContext::exitRule(tree::ParseTreeList
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAssignmentExpression(this);
+}
+
+
+std::any JavaScriptParser::AssignmentExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAssignmentExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::AssignmentExpressionContext* JavaScriptParser::assignmentExpression() {
@@ -6035,6 +6548,14 @@ void JavaScriptParser::AssignmentOperatorContext::exitRule(tree::ParseTreeListen
     parserListener->exitAssignmentOperator(this);
 }
 
+
+std::any JavaScriptParser::AssignmentOperatorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAssignmentOperator(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::AssignmentOperatorContext* JavaScriptParser::assignmentOperator() {
   AssignmentOperatorContext *_localctx = _tracker.createInstance<AssignmentOperatorContext>(_ctx, getState());
   enterRule(_localctx, 128, JavaScriptParser::RuleAssignmentOperator);
@@ -6103,6 +6624,14 @@ void JavaScriptParser::ConditionalExpressionContext::exitRule(tree::ParseTreeLis
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitConditionalExpression(this);
+}
+
+
+std::any JavaScriptParser::ConditionalExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitConditionalExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ConditionalExpressionContext* JavaScriptParser::conditionalExpression() {
@@ -6177,6 +6706,14 @@ void JavaScriptParser::CoalesceExpressionContext::exitRule(tree::ParseTreeListen
     parserListener->exitCoalesceExpression(this);
 }
 
+
+std::any JavaScriptParser::CoalesceExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitCoalesceExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::CoalesceExpressionContext* JavaScriptParser::coalesceExpression() {
   CoalesceExpressionContext *_localctx = _tracker.createInstance<CoalesceExpressionContext>(_ctx, getState());
   enterRule(_localctx, 132, JavaScriptParser::RuleCoalesceExpression);
@@ -6243,6 +6780,14 @@ void JavaScriptParser::LogicalORExpressionContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitLogicalORExpression(this);
+}
+
+
+std::any JavaScriptParser::LogicalORExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLogicalORExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::LogicalORExpressionContext* JavaScriptParser::logicalORExpression() {
@@ -6315,6 +6860,14 @@ void JavaScriptParser::LogicalANDExpressionContext::exitRule(tree::ParseTreeList
     parserListener->exitLogicalANDExpression(this);
 }
 
+
+std::any JavaScriptParser::LogicalANDExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLogicalANDExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::LogicalANDExpressionContext* JavaScriptParser::logicalANDExpression() {
   LogicalANDExpressionContext *_localctx = _tracker.createInstance<LogicalANDExpressionContext>(_ctx, getState());
   enterRule(_localctx, 136, JavaScriptParser::RuleLogicalANDExpression);
@@ -6383,6 +6936,14 @@ void JavaScriptParser::BitwiseORExpressionContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBitwiseORExpression(this);
+}
+
+
+std::any JavaScriptParser::BitwiseORExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBitwiseORExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::BitwiseORExpressionContext* JavaScriptParser::bitwiseORExpression() {
@@ -6455,6 +7016,14 @@ void JavaScriptParser::BitwiseXORExpressionContext::exitRule(tree::ParseTreeList
     parserListener->exitBitwiseXORExpression(this);
 }
 
+
+std::any JavaScriptParser::BitwiseXORExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBitwiseXORExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::BitwiseXORExpressionContext* JavaScriptParser::bitwiseXORExpression() {
   BitwiseXORExpressionContext *_localctx = _tracker.createInstance<BitwiseXORExpressionContext>(_ctx, getState());
   enterRule(_localctx, 140, JavaScriptParser::RuleBitwiseXORExpression);
@@ -6525,6 +7094,14 @@ void JavaScriptParser::BitwiseANDExpressionContext::exitRule(tree::ParseTreeList
     parserListener->exitBitwiseANDExpression(this);
 }
 
+
+std::any JavaScriptParser::BitwiseANDExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBitwiseANDExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::BitwiseANDExpressionContext* JavaScriptParser::bitwiseANDExpression() {
   BitwiseANDExpressionContext *_localctx = _tracker.createInstance<BitwiseANDExpressionContext>(_ctx, getState());
   enterRule(_localctx, 142, JavaScriptParser::RuleBitwiseANDExpression);
@@ -6593,6 +7170,14 @@ void JavaScriptParser::EqualityExpressionContext::exitRule(tree::ParseTreeListen
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitEqualityExpression(this);
+}
+
+
+std::any JavaScriptParser::EqualityExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitEqualityExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::EqualityExpressionContext* JavaScriptParser::equalityExpression() {
@@ -6672,6 +7257,14 @@ void JavaScriptParser::RelationalExpressionContext::exitRule(tree::ParseTreeList
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitRelationalExpression(this);
+}
+
+
+std::any JavaScriptParser::RelationalExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitRelationalExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::RelationalExpressionContext* JavaScriptParser::relationalExpression() {
@@ -6755,6 +7348,14 @@ void JavaScriptParser::ShiftExpressionContext::exitRule(tree::ParseTreeListener 
     parserListener->exitShiftExpression(this);
 }
 
+
+std::any JavaScriptParser::ShiftExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitShiftExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ShiftExpressionContext* JavaScriptParser::shiftExpression() {
   ShiftExpressionContext *_localctx = _tracker.createInstance<ShiftExpressionContext>(_ctx, getState());
   enterRule(_localctx, 148, JavaScriptParser::RuleShiftExpression);
@@ -6832,6 +7433,14 @@ void JavaScriptParser::AdditiveExpressionContext::exitRule(tree::ParseTreeListen
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAdditiveExpression(this);
+}
+
+
+std::any JavaScriptParser::AdditiveExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAdditiveExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::AdditiveExpressionContext* JavaScriptParser::additiveExpression() {
@@ -6913,6 +7522,14 @@ void JavaScriptParser::MultiplicativeExpressionContext::exitRule(tree::ParseTree
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitMultiplicativeExpression(this);
+}
+
+
+std::any JavaScriptParser::MultiplicativeExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitMultiplicativeExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::MultiplicativeExpressionContext* JavaScriptParser::multiplicativeExpression() {
@@ -6997,6 +7614,14 @@ void JavaScriptParser::ExponentiationExpressionContext::exitRule(tree::ParseTree
     parserListener->exitExponentiationExpression(this);
 }
 
+
+std::any JavaScriptParser::ExponentiationExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitExponentiationExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ExponentiationExpressionContext* JavaScriptParser::exponentiationExpression() {
   ExponentiationExpressionContext *_localctx = _tracker.createInstance<ExponentiationExpressionContext>(_ctx, getState());
   enterRule(_localctx, 154, JavaScriptParser::RuleExponentiationExpression);
@@ -7063,6 +7688,14 @@ void JavaScriptParser::UnaryExpressionContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitUnaryExpression(this);
+}
+
+
+std::any JavaScriptParser::UnaryExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitUnaryExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::UnaryExpressionContext* JavaScriptParser::unaryExpression() {
@@ -7204,6 +7837,14 @@ void JavaScriptParser::UpdateExpressionContext::exitRule(tree::ParseTreeListener
     parserListener->exitUpdateExpression(this);
 }
 
+
+std::any JavaScriptParser::UpdateExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitUpdateExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::UpdateExpressionContext* JavaScriptParser::updateExpression() {
   UpdateExpressionContext *_localctx = _tracker.createInstance<UpdateExpressionContext>(_ctx, getState());
   enterRule(_localctx, 158, JavaScriptParser::RuleUpdateExpression);
@@ -7307,6 +7948,14 @@ void JavaScriptParser::LeftHandSideExpressionContext::exitRule(tree::ParseTreeLi
     parserListener->exitLeftHandSideExpression(this);
 }
 
+
+std::any JavaScriptParser::LeftHandSideExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLeftHandSideExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::LeftHandSideExpressionContext* JavaScriptParser::leftHandSideExpression() {
   LeftHandSideExpressionContext *_localctx = _tracker.createInstance<LeftHandSideExpressionContext>(_ctx, getState());
   enterRule(_localctx, 160, JavaScriptParser::RuleLeftHandSideExpression);
@@ -7379,6 +8028,14 @@ void JavaScriptParser::NewExpressionContext::exitRule(tree::ParseTreeListener *l
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitNewExpression(this);
+}
+
+
+std::any JavaScriptParser::NewExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitNewExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::NewExpressionContext* JavaScriptParser::newExpression() {
@@ -7479,6 +8136,14 @@ void JavaScriptParser::CallExpressionContext::exitRule(tree::ParseTreeListener *
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCallExpression(this);
+}
+
+
+std::any JavaScriptParser::CallExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitCallExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 
@@ -7669,6 +8334,14 @@ void JavaScriptParser::SuperCallContext::exitRule(tree::ParseTreeListener *liste
     parserListener->exitSuperCall(this);
 }
 
+
+std::any JavaScriptParser::SuperCallContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitSuperCall(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::SuperCallContext* JavaScriptParser::superCall() {
   SuperCallContext *_localctx = _tracker.createInstance<SuperCallContext>(_ctx, getState());
   enterRule(_localctx, 166, JavaScriptParser::RuleSuperCall);
@@ -7722,6 +8395,14 @@ void JavaScriptParser::ImportCallContext::exitRule(tree::ParseTreeListener *list
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitImportCall(this);
+}
+
+
+std::any JavaScriptParser::ImportCallContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitImportCall(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ImportCallContext* JavaScriptParser::importCall() {
@@ -7781,6 +8462,14 @@ void JavaScriptParser::ArgumentsContext::exitRule(tree::ParseTreeListener *liste
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitArguments(this);
+}
+
+
+std::any JavaScriptParser::ArgumentsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArguments(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ArgumentsContext* JavaScriptParser::arguments() {
@@ -7853,6 +8542,14 @@ void JavaScriptParser::ArgumentListContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitArgumentList(this);
 }
 
+
+std::any JavaScriptParser::ArgumentListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArgumentList(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ArgumentListContext* JavaScriptParser::argumentList() {
   ArgumentListContext *_localctx = _tracker.createInstance<ArgumentListContext>(_ctx, getState());
   enterRule(_localctx, 172, JavaScriptParser::RuleArgumentList);
@@ -7917,6 +8614,14 @@ void JavaScriptParser::ArgumentContext::exitRule(tree::ParseTreeListener *listen
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitArgument(this);
+}
+
+
+std::any JavaScriptParser::ArgumentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArgument(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ArgumentContext* JavaScriptParser::argument() {
@@ -8044,6 +8749,14 @@ void JavaScriptParser::MemberExpressionContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitMemberExpression(this);
+}
+
+
+std::any JavaScriptParser::MemberExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitMemberExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 
@@ -8243,6 +8956,14 @@ void JavaScriptParser::MetaPropertyContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitMetaProperty(this);
 }
 
+
+std::any JavaScriptParser::MetaPropertyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitMetaProperty(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::MetaPropertyContext* JavaScriptParser::metaProperty() {
   MetaPropertyContext *_localctx = _tracker.createInstance<MetaPropertyContext>(_ctx, getState());
   enterRule(_localctx, 178, JavaScriptParser::RuleMetaProperty);
@@ -8363,6 +9084,14 @@ void JavaScriptParser::PrimaryExpressionContext::exitRule(tree::ParseTreeListene
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitPrimaryExpression(this);
+}
+
+
+std::any JavaScriptParser::PrimaryExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitPrimaryExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::PrimaryExpressionContext* JavaScriptParser::primaryExpression() {
@@ -8512,6 +9241,14 @@ void JavaScriptParser::ParenthesizedExpressionContext::exitRule(tree::ParseTreeL
     parserListener->exitParenthesizedExpression(this);
 }
 
+
+std::any JavaScriptParser::ParenthesizedExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitParenthesizedExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ParenthesizedExpressionContext* JavaScriptParser::parenthesizedExpression() {
   ParenthesizedExpressionContext *_localctx = _tracker.createInstance<ParenthesizedExpressionContext>(_ctx, getState());
   enterRule(_localctx, 182, JavaScriptParser::RuleParenthesizedExpression);
@@ -8579,6 +9316,14 @@ void JavaScriptParser::LiteralContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitLiteral(this);
+}
+
+
+std::any JavaScriptParser::LiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLiteral(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::LiteralContext* JavaScriptParser::literal() {
@@ -8665,6 +9410,14 @@ void JavaScriptParser::NullLiteralContext::exitRule(tree::ParseTreeListener *lis
     parserListener->exitNullLiteral(this);
 }
 
+
+std::any JavaScriptParser::NullLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitNullLiteral(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::NullLiteralContext* JavaScriptParser::nullLiteral() {
   NullLiteralContext *_localctx = _tracker.createInstance<NullLiteralContext>(_ctx, getState());
   enterRule(_localctx, 186, JavaScriptParser::RuleNullLiteral);
@@ -8712,6 +9465,14 @@ void JavaScriptParser::BooleanLiteralContext::exitRule(tree::ParseTreeListener *
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBooleanLiteral(this);
+}
+
+
+std::any JavaScriptParser::BooleanLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBooleanLiteral(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::BooleanLiteralContext* JavaScriptParser::booleanLiteral() {
@@ -8789,6 +9550,14 @@ void JavaScriptParser::NumericLiteralContext::exitRule(tree::ParseTreeListener *
     parserListener->exitNumericLiteral(this);
 }
 
+
+std::any JavaScriptParser::NumericLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitNumericLiteral(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::NumericLiteralContext* JavaScriptParser::numericLiteral() {
   NumericLiteralContext *_localctx = _tracker.createInstance<NumericLiteralContext>(_ctx, getState());
   enterRule(_localctx, 190, JavaScriptParser::RuleNumericLiteral);
@@ -8851,6 +9620,14 @@ void JavaScriptParser::StringLiteralContext::exitRule(tree::ParseTreeListener *l
     parserListener->exitStringLiteral(this);
 }
 
+
+std::any JavaScriptParser::StringLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitStringLiteral(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::StringLiteralContext* JavaScriptParser::stringLiteral() {
   StringLiteralContext *_localctx = _tracker.createInstance<StringLiteralContext>(_ctx, getState());
   enterRule(_localctx, 192, JavaScriptParser::RuleStringLiteral);
@@ -8902,6 +9679,14 @@ void JavaScriptParser::ArrayLiteralContext::exitRule(tree::ParseTreeListener *li
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitArrayLiteral(this);
+}
+
+
+std::any JavaScriptParser::ArrayLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArrayLiteral(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ArrayLiteralContext* JavaScriptParser::arrayLiteral() {
@@ -8976,6 +9761,14 @@ void JavaScriptParser::ElementListContext::exitRule(tree::ParseTreeListener *lis
     parserListener->exitElementList(this);
 }
 
+
+std::any JavaScriptParser::ElementListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitElementList(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ElementListContext* JavaScriptParser::elementList() {
   ElementListContext *_localctx = _tracker.createInstance<ElementListContext>(_ctx, getState());
   enterRule(_localctx, 196, JavaScriptParser::RuleElementList);
@@ -9040,6 +9833,14 @@ void JavaScriptParser::ArrayElementContext::exitRule(tree::ParseTreeListener *li
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitArrayElement(this);
+}
+
+
+std::any JavaScriptParser::ArrayElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArrayElement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ArrayElementContext* JavaScriptParser::arrayElement() {
@@ -9152,6 +9953,14 @@ void JavaScriptParser::ObjectLiteralContext::exitRule(tree::ParseTreeListener *l
     parserListener->exitObjectLiteral(this);
 }
 
+
+std::any JavaScriptParser::ObjectLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitObjectLiteral(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ObjectLiteralContext* JavaScriptParser::objectLiteral() {
   ObjectLiteralContext *_localctx = _tracker.createInstance<ObjectLiteralContext>(_ctx, getState());
   enterRule(_localctx, 200, JavaScriptParser::RuleObjectLiteral);
@@ -9245,6 +10054,14 @@ void JavaScriptParser::PropertyDefinitionListContext::exitRule(tree::ParseTreeLi
     parserListener->exitPropertyDefinitionList(this);
 }
 
+
+std::any JavaScriptParser::PropertyDefinitionListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitPropertyDefinitionList(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::PropertyDefinitionListContext* JavaScriptParser::propertyDefinitionList() {
   PropertyDefinitionListContext *_localctx = _tracker.createInstance<PropertyDefinitionListContext>(_ctx, getState());
   enterRule(_localctx, 202, JavaScriptParser::RulePropertyDefinitionList);
@@ -9323,6 +10140,14 @@ void JavaScriptParser::PropertyDefinitionContext::exitRule(tree::ParseTreeListen
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitPropertyDefinition(this);
+}
+
+
+std::any JavaScriptParser::PropertyDefinitionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitPropertyDefinition(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::PropertyDefinitionContext* JavaScriptParser::propertyDefinition() {
@@ -9425,6 +10250,14 @@ void JavaScriptParser::PropertyNameContext::exitRule(tree::ParseTreeListener *li
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitPropertyName(this);
+}
+
+
+std::any JavaScriptParser::PropertyNameContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitPropertyName(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::PropertyNameContext* JavaScriptParser::propertyName() {
@@ -9573,6 +10406,14 @@ void JavaScriptParser::FunctionExpressionContext::exitRule(tree::ParseTreeListen
     parserListener->exitFunctionExpression(this);
 }
 
+
+std::any JavaScriptParser::FunctionExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFunctionExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::FunctionExpressionContext* JavaScriptParser::functionExpression() {
   FunctionExpressionContext *_localctx = _tracker.createInstance<FunctionExpressionContext>(_ctx, getState());
   enterRule(_localctx, 208, JavaScriptParser::RuleFunctionExpression);
@@ -9664,6 +10505,14 @@ void JavaScriptParser::GeneratorExpressionContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitGeneratorExpression(this);
+}
+
+
+std::any JavaScriptParser::GeneratorExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitGeneratorExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::GeneratorExpressionContext* JavaScriptParser::generatorExpression() {
@@ -9761,6 +10610,14 @@ void JavaScriptParser::AsyncFunctionExpressionContext::exitRule(tree::ParseTreeL
     parserListener->exitAsyncFunctionExpression(this);
 }
 
+
+std::any JavaScriptParser::AsyncFunctionExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAsyncFunctionExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::AsyncFunctionExpressionContext* JavaScriptParser::asyncFunctionExpression() {
   AsyncFunctionExpressionContext *_localctx = _tracker.createInstance<AsyncFunctionExpressionContext>(_ctx, getState());
   enterRule(_localctx, 212, JavaScriptParser::RuleAsyncFunctionExpression);
@@ -9854,6 +10711,14 @@ void JavaScriptParser::AsyncGeneratorExpressionContext::exitRule(tree::ParseTree
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAsyncGeneratorExpression(this);
+}
+
+
+std::any JavaScriptParser::AsyncGeneratorExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAsyncGeneratorExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::AsyncGeneratorExpressionContext* JavaScriptParser::asyncGeneratorExpression() {
@@ -9953,6 +10818,14 @@ void JavaScriptParser::ClassExpressionContext::exitRule(tree::ParseTreeListener 
     parserListener->exitClassExpression(this);
 }
 
+
+std::any JavaScriptParser::ClassExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitClassExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ClassExpressionContext* JavaScriptParser::classExpression() {
   ClassExpressionContext *_localctx = _tracker.createInstance<ClassExpressionContext>(_ctx, getState());
   enterRule(_localctx, 216, JavaScriptParser::RuleClassExpression);
@@ -10035,6 +10908,14 @@ void JavaScriptParser::ArrowFunctionContext::exitRule(tree::ParseTreeListener *l
     parserListener->exitArrowFunction(this);
 }
 
+
+std::any JavaScriptParser::ArrowFunctionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArrowFunction(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ArrowFunctionContext* JavaScriptParser::arrowFunction() {
   ArrowFunctionContext *_localctx = _tracker.createInstance<ArrowFunctionContext>(_ctx, getState());
   enterRule(_localctx, 218, JavaScriptParser::RuleArrowFunction);
@@ -10094,6 +10975,14 @@ void JavaScriptParser::AsyncArrowFunctionContext::exitRule(tree::ParseTreeListen
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAsyncArrowFunction(this);
+}
+
+
+std::any JavaScriptParser::AsyncArrowFunctionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAsyncArrowFunction(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::AsyncArrowFunctionContext* JavaScriptParser::asyncArrowFunction() {
@@ -10157,6 +11046,14 @@ void JavaScriptParser::ArrowParametersContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitArrowParameters(this);
+}
+
+
+std::any JavaScriptParser::ArrowParametersContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArrowParameters(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ArrowParametersContext* JavaScriptParser::arrowParameters() {
@@ -10249,6 +11146,14 @@ void JavaScriptParser::ArrowBodyContext::exitRule(tree::ParseTreeListener *liste
     parserListener->exitArrowBody(this);
 }
 
+
+std::any JavaScriptParser::ArrowBodyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArrowBody(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ArrowBodyContext* JavaScriptParser::arrowBody() {
   ArrowBodyContext *_localctx = _tracker.createInstance<ArrowBodyContext>(_ctx, getState());
   enterRule(_localctx, 224, JavaScriptParser::RuleArrowBody);
@@ -10321,6 +11226,14 @@ void JavaScriptParser::YieldExpressionContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitYieldExpression(this);
+}
+
+
+std::any JavaScriptParser::YieldExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitYieldExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::YieldExpressionContext* JavaScriptParser::yieldExpression() {
@@ -10406,6 +11319,14 @@ void JavaScriptParser::TemplateLiteralContext::exitRule(tree::ParseTreeListener 
     parserListener->exitTemplateLiteral(this);
 }
 
+
+std::any JavaScriptParser::TemplateLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitTemplateLiteral(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::TemplateLiteralContext* JavaScriptParser::templateLiteral() {
   TemplateLiteralContext *_localctx = _tracker.createInstance<TemplateLiteralContext>(_ctx, getState());
   enterRule(_localctx, 228, JavaScriptParser::RuleTemplateLiteral);
@@ -10474,6 +11395,14 @@ void JavaScriptParser::TemplateSpansContext::exitRule(tree::ParseTreeListener *l
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitTemplateSpans(this);
+}
+
+
+std::any JavaScriptParser::TemplateSpansContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitTemplateSpans(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::TemplateSpansContext* JavaScriptParser::templateSpans() {
@@ -10558,6 +11487,14 @@ void JavaScriptParser::TemplateSpanContext::exitRule(tree::ParseTreeListener *li
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitTemplateSpan(this);
+}
+
+
+std::any JavaScriptParser::TemplateSpanContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitTemplateSpan(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::TemplateSpanContext* JavaScriptParser::templateSpan() {
@@ -10649,6 +11586,14 @@ void JavaScriptParser::TemplateMiddleContext::exitRule(tree::ParseTreeListener *
     parserListener->exitTemplateMiddle(this);
 }
 
+
+std::any JavaScriptParser::TemplateMiddleContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitTemplateMiddle(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::TemplateMiddleContext* JavaScriptParser::templateMiddle() {
   TemplateMiddleContext *_localctx = _tracker.createInstance<TemplateMiddleContext>(_ctx, getState());
   enterRule(_localctx, 234, JavaScriptParser::RuleTemplateMiddle);
@@ -10702,6 +11647,14 @@ void JavaScriptParser::RegularExpressionLiteralContext::exitRule(tree::ParseTree
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitRegularExpressionLiteral(this);
+}
+
+
+std::any JavaScriptParser::RegularExpressionLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitRegularExpressionLiteral(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::RegularExpressionLiteralContext* JavaScriptParser::regularExpressionLiteral() {
@@ -10763,6 +11716,14 @@ void JavaScriptParser::FormalParameterListContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitFormalParameterList(this);
+}
+
+
+std::any JavaScriptParser::FormalParameterListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFormalParameterList(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::FormalParameterListContext* JavaScriptParser::formalParameterList() {
@@ -10865,6 +11826,14 @@ void JavaScriptParser::FormalParameterContext::exitRule(tree::ParseTreeListener 
     parserListener->exitFormalParameter(this);
 }
 
+
+std::any JavaScriptParser::FormalParameterContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFormalParameter(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::FormalParameterContext* JavaScriptParser::formalParameter() {
   FormalParameterContext *_localctx = _tracker.createInstance<FormalParameterContext>(_ctx, getState());
   enterRule(_localctx, 240, JavaScriptParser::RuleFormalParameter);
@@ -10920,6 +11889,14 @@ void JavaScriptParser::RestParameterContext::exitRule(tree::ParseTreeListener *l
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitRestParameter(this);
+}
+
+
+std::any JavaScriptParser::RestParameterContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitRestParameter(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::RestParameterContext* JavaScriptParser::restParameter() {
@@ -11002,6 +11979,14 @@ void JavaScriptParser::BindingElementContext::exitRule(tree::ParseTreeListener *
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBindingElement(this);
+}
+
+
+std::any JavaScriptParser::BindingElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingElement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::BindingElementContext* JavaScriptParser::bindingElement() {
@@ -11098,6 +12083,14 @@ void JavaScriptParser::BindingPatternContext::exitRule(tree::ParseTreeListener *
     parserListener->exitBindingPattern(this);
 }
 
+
+std::any JavaScriptParser::BindingPatternContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingPattern(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::BindingPatternContext* JavaScriptParser::bindingPattern() {
   BindingPatternContext *_localctx = _tracker.createInstance<BindingPatternContext>(_ctx, getState());
   enterRule(_localctx, 246, JavaScriptParser::RuleBindingPattern);
@@ -11166,6 +12159,14 @@ void JavaScriptParser::ObjectBindingPatternContext::exitRule(tree::ParseTreeList
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitObjectBindingPattern(this);
+}
+
+
+std::any JavaScriptParser::ObjectBindingPatternContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitObjectBindingPattern(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::ObjectBindingPatternContext* JavaScriptParser::objectBindingPattern() {
@@ -11261,6 +12262,14 @@ void JavaScriptParser::BindingPropertyListContext::exitRule(tree::ParseTreeListe
     parserListener->exitBindingPropertyList(this);
 }
 
+
+std::any JavaScriptParser::BindingPropertyListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingPropertyList(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::BindingPropertyListContext* JavaScriptParser::bindingPropertyList() {
   BindingPropertyListContext *_localctx = _tracker.createInstance<BindingPropertyListContext>(_ctx, getState());
   enterRule(_localctx, 250, JavaScriptParser::RuleBindingPropertyList);
@@ -11335,6 +12344,14 @@ void JavaScriptParser::BindingPropertyContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBindingProperty(this);
+}
+
+
+std::any JavaScriptParser::BindingPropertyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingProperty(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::BindingPropertyContext* JavaScriptParser::bindingProperty() {
@@ -11420,6 +12437,14 @@ void JavaScriptParser::ArrayBindingPatternContext::exitRule(tree::ParseTreeListe
     parserListener->exitArrayBindingPattern(this);
 }
 
+
+std::any JavaScriptParser::ArrayBindingPatternContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArrayBindingPattern(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ArrayBindingPatternContext* JavaScriptParser::arrayBindingPattern() {
   ArrayBindingPatternContext *_localctx = _tracker.createInstance<ArrayBindingPatternContext>(_ctx, getState());
   enterRule(_localctx, 254, JavaScriptParser::RuleArrayBindingPattern);
@@ -11496,6 +12521,14 @@ void JavaScriptParser::BindingElementListContext::exitRule(tree::ParseTreeListen
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBindingElementList(this);
+}
+
+
+std::any JavaScriptParser::BindingElementListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingElementList(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::BindingElementListContext* JavaScriptParser::bindingElementList() {
@@ -11595,6 +12628,14 @@ void JavaScriptParser::BindingElisionContext::exitRule(tree::ParseTreeListener *
     parserListener->exitBindingElision(this);
 }
 
+
+std::any JavaScriptParser::BindingElisionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingElision(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::BindingElisionContext* JavaScriptParser::bindingElision() {
   BindingElisionContext *_localctx = _tracker.createInstance<BindingElisionContext>(_ctx, getState());
   enterRule(_localctx, 258, JavaScriptParser::RuleBindingElision);
@@ -11646,6 +12687,14 @@ void JavaScriptParser::FunctionBodyContext::exitRule(tree::ParseTreeListener *li
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitFunctionBody(this);
+}
+
+
+std::any JavaScriptParser::FunctionBodyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFunctionBody(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::FunctionBodyContext* JavaScriptParser::functionBody() {
@@ -11710,6 +12759,14 @@ void JavaScriptParser::InitializerContext::exitRule(tree::ParseTreeListener *lis
     parserListener->exitInitializer(this);
 }
 
+
+std::any JavaScriptParser::InitializerContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitInitializer(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::InitializerContext* JavaScriptParser::initializer() {
   InitializerContext *_localctx = _tracker.createInstance<InitializerContext>(_ctx, getState());
   enterRule(_localctx, 262, JavaScriptParser::RuleInitializer);
@@ -11763,6 +12820,14 @@ void JavaScriptParser::BindingIdentifierContext::exitRule(tree::ParseTreeListene
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBindingIdentifier(this);
+}
+
+
+std::any JavaScriptParser::BindingIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingIdentifier(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::BindingIdentifierContext* JavaScriptParser::bindingIdentifier() {
@@ -11842,6 +12907,14 @@ void JavaScriptParser::IdentifierContext::exitRule(tree::ParseTreeListener *list
     parserListener->exitIdentifier(this);
 }
 
+
+std::any JavaScriptParser::IdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitIdentifier(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::IdentifierContext* JavaScriptParser::identifier() {
   IdentifierContext *_localctx = _tracker.createInstance<IdentifierContext>(_ctx, getState());
   enterRule(_localctx, 266, JavaScriptParser::RuleIdentifier);
@@ -11907,6 +12980,14 @@ void JavaScriptParser::IdentifierNameContext::exitRule(tree::ParseTreeListener *
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitIdentifierName(this);
+}
+
+
+std::any JavaScriptParser::IdentifierNameContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitIdentifierName(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::IdentifierNameContext* JavaScriptParser::identifierName() {
@@ -12037,6 +13118,14 @@ void JavaScriptParser::ReservedWordContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitReservedWord(this);
 }
 
+
+std::any JavaScriptParser::ReservedWordContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitReservedWord(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::ReservedWordContext* JavaScriptParser::reservedWord() {
   ReservedWordContext *_localctx = _tracker.createInstance<ReservedWordContext>(_ctx, getState());
   enterRule(_localctx, 270, JavaScriptParser::RuleReservedWord);
@@ -12160,6 +13249,14 @@ void JavaScriptParser::KeywordContext::exitRule(tree::ParseTreeListener *listene
     parserListener->exitKeyword(this);
 }
 
+
+std::any JavaScriptParser::KeywordContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitKeyword(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 JavaScriptParser::KeywordContext* JavaScriptParser::keyword() {
   KeywordContext *_localctx = _tracker.createInstance<KeywordContext>(_ctx, getState());
   enterRule(_localctx, 272, JavaScriptParser::RuleKeyword);
@@ -12217,6 +13314,14 @@ void JavaScriptParser::FutureReservedWordContext::exitRule(tree::ParseTreeListen
   auto parserListener = dynamic_cast<JavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitFutureReservedWord(this);
+}
+
+
+std::any JavaScriptParser::FutureReservedWordContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<JavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFutureReservedWord(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 JavaScriptParser::FutureReservedWordContext* JavaScriptParser::futureReservedWord() {

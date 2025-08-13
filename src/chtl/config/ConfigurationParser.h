@@ -6,9 +6,9 @@
 #include <unordered_map>
 #include <vector>
 #include <antlr4-runtime/antlr4-runtime.h>
-#include "generated/CHConfigLexer.h"
-#include "generated/CHConfigParser.h"
-#include "generated/CHConfigBaseVisitor.h"
+#include "../../generated/config/grammars/CHConfigLexer.h"
+#include "../../generated/config/grammars/CHConfigParser.h"
+#include "../../generated/config/grammars/CHConfigBaseVisitor.h"
 #include "ConfigurationSystem.h"
 
 namespace chtl {

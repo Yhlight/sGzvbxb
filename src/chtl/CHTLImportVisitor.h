@@ -1,6 +1,6 @@
 #pragma once
 
-#include "generated/CHTLParserBaseVisitor.h"
+#include "../../generated/chtl/grammars/CHTLBaseVisitor.h"
 #include "CHTLContext.h"
 #include "CHTLTemplate.h"
 #include "CHTLCustom.h"

@@ -3,6 +3,7 @@
 
 
 #include "CHTLListener.h"
+#include "CHTLVisitor.h"
 
 #include "CHTLParser.h"
 
@@ -435,6 +436,14 @@ void CHTLParser::ProgramContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitProgram(this);
 }
 
+
+std::any CHTLParser::ProgramContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitProgram(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::ProgramContext* CHTLParser::program() {
   ProgramContext *_localctx = _tracker.createInstance<ProgramContext>(_ctx, getState());
   enterRule(_localctx, 0, CHTLParser::RuleProgram);
@@ -534,6 +543,14 @@ void CHTLParser::TopLevelStatementContext::exitRule(tree::ParseTreeListener *lis
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitTopLevelStatement(this);
+}
+
+
+std::any CHTLParser::TopLevelStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitTopLevelStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::TopLevelStatementContext* CHTLParser::topLevelStatement() {
@@ -666,6 +683,14 @@ void CHTLParser::ConfigurationBlockContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitConfigurationBlock(this);
 }
 
+
+std::any CHTLParser::ConfigurationBlockContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitConfigurationBlock(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::ConfigurationBlockContext* CHTLParser::configurationBlock() {
   ConfigurationBlockContext *_localctx = _tracker.createInstance<ConfigurationBlockContext>(_ctx, getState());
   enterRule(_localctx, 4, CHTLParser::RuleConfigurationBlock);
@@ -746,6 +771,14 @@ void CHTLParser::ConfigurationItemContext::exitRule(tree::ParseTreeListener *lis
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitConfigurationItem(this);
+}
+
+
+std::any CHTLParser::ConfigurationItemContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitConfigurationItem(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::ConfigurationItemContext* CHTLParser::configurationItem() {
@@ -839,6 +872,14 @@ void CHTLParser::ConfigKeyContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitConfigKey(this);
 }
 
+
+std::any CHTLParser::ConfigKeyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitConfigKey(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::ConfigKeyContext* CHTLParser::configKey() {
   ConfigKeyContext *_localctx = _tracker.createInstance<ConfigKeyContext>(_ctx, getState());
   enterRule(_localctx, 8, CHTLParser::RuleConfigKey);
@@ -902,6 +943,14 @@ void CHTLParser::ConfigValueContext::exitRule(tree::ParseTreeListener *listener)
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitConfigValue(this);
+}
+
+
+std::any CHTLParser::ConfigValueContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitConfigValue(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::ConfigValueContext* CHTLParser::configValue() {
@@ -992,6 +1041,14 @@ void CHTLParser::ConfigValueArrayContext::exitRule(tree::ParseTreeListener *list
     parserListener->exitConfigValueArray(this);
 }
 
+
+std::any CHTLParser::ConfigValueArrayContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitConfigValueArray(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::ConfigValueArrayContext* CHTLParser::configValueArray() {
   ConfigValueArrayContext *_localctx = _tracker.createInstance<ConfigValueArrayContext>(_ctx, getState());
   enterRule(_localctx, 12, CHTLParser::RuleConfigValueArray);
@@ -1064,6 +1121,14 @@ void CHTLParser::ConfigArrayItemContext::exitRule(tree::ParseTreeListener *liste
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitConfigArrayItem(this);
+}
+
+
+std::any CHTLParser::ConfigArrayItemContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitConfigArrayItem(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::ConfigArrayItemContext* CHTLParser::configArrayItem() {
@@ -1146,6 +1211,14 @@ void CHTLParser::NameConfigItemContext::exitRule(tree::ParseTreeListener *listen
     parserListener->exitNameConfigItem(this);
 }
 
+
+std::any CHTLParser::NameConfigItemContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitNameConfigItem(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::NameConfigItemContext* CHTLParser::nameConfigItem() {
   NameConfigItemContext *_localctx = _tracker.createInstance<NameConfigItemContext>(_ctx, getState());
   enterRule(_localctx, 16, CHTLParser::RuleNameConfigItem);
@@ -1225,6 +1298,14 @@ void CHTLParser::NamespaceDeclarationContext::exitRule(tree::ParseTreeListener *
     parserListener->exitNamespaceDeclaration(this);
 }
 
+
+std::any CHTLParser::NamespaceDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitNamespaceDeclaration(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::NamespaceDeclarationContext* CHTLParser::namespaceDeclaration() {
   NamespaceDeclarationContext *_localctx = _tracker.createInstance<NamespaceDeclarationContext>(_ctx, getState());
   enterRule(_localctx, 18, CHTLParser::RuleNamespaceDeclaration);
@@ -1291,6 +1372,14 @@ void CHTLParser::NamespaceBodyContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitNamespaceBody(this);
+}
+
+
+std::any CHTLParser::NamespaceBodyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitNamespaceBody(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::NamespaceBodyContext* CHTLParser::namespaceBody() {
@@ -1370,6 +1459,14 @@ void CHTLParser::NamespaceContentContext::exitRule(tree::ParseTreeListener *list
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitNamespaceContent(this);
+}
+
+
+std::any CHTLParser::NamespaceContentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitNamespaceContent(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::NamespaceContentContext* CHTLParser::namespaceContent() {
@@ -1464,6 +1561,14 @@ void CHTLParser::ImportStatementContext::exitRule(tree::ParseTreeListener *liste
     parserListener->exitImportStatement(this);
 }
 
+
+std::any CHTLParser::ImportStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitImportStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::ImportStatementContext* CHTLParser::importStatement() {
   ImportStatementContext *_localctx = _tracker.createInstance<ImportStatementContext>(_ctx, getState());
   enterRule(_localctx, 24, CHTLParser::RuleImportStatement);
@@ -1548,6 +1653,14 @@ void CHTLParser::ImportTypeContext::exitRule(tree::ParseTreeListener *listener) 
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitImportType(this);
+}
+
+
+std::any CHTLParser::ImportTypeContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitImportType(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::ImportTypeContext* CHTLParser::importType() {
@@ -1660,6 +1773,14 @@ void CHTLParser::ImportPathContext::exitRule(tree::ParseTreeListener *listener) 
     parserListener->exitImportPath(this);
 }
 
+
+std::any CHTLParser::ImportPathContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitImportPath(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::ImportPathContext* CHTLParser::importPath() {
   ImportPathContext *_localctx = _tracker.createInstance<ImportPathContext>(_ctx, getState());
   enterRule(_localctx, 28, CHTLParser::RuleImportPath);
@@ -1732,6 +1853,14 @@ void CHTLParser::DottedPathContext::exitRule(tree::ParseTreeListener *listener) 
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitDottedPath(this);
+}
+
+
+std::any CHTLParser::DottedPathContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitDottedPath(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::DottedPathContext* CHTLParser::dottedPath() {
@@ -1808,6 +1937,14 @@ void CHTLParser::TemplateDeclarationContext::exitRule(tree::ParseTreeListener *l
     parserListener->exitTemplateDeclaration(this);
 }
 
+
+std::any CHTLParser::TemplateDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitTemplateDeclaration(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::TemplateDeclarationContext* CHTLParser::templateDeclaration() {
   TemplateDeclarationContext *_localctx = _tracker.createInstance<TemplateDeclarationContext>(_ctx, getState());
   enterRule(_localctx, 32, CHTLParser::RuleTemplateDeclaration);
@@ -1861,6 +1998,14 @@ void CHTLParser::TemplateTypeContext::exitRule(tree::ParseTreeListener *listener
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitTemplateType(this);
+}
+
+
+std::any CHTLParser::TemplateTypeContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitTemplateType(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::TemplateTypeContext* CHTLParser::templateType() {
@@ -1927,6 +2072,14 @@ void CHTLParser::TemplateBodyContext::exitRule(tree::ParseTreeListener *listener
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitTemplateBody(this);
+}
+
+
+std::any CHTLParser::TemplateBodyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitTemplateBody(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::TemplateBodyContext* CHTLParser::templateBody() {
@@ -2006,6 +2159,14 @@ void CHTLParser::TemplateContentContext::exitRule(tree::ParseTreeListener *liste
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitTemplateContent(this);
+}
+
+
+std::any CHTLParser::TemplateContentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitTemplateContent(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::TemplateContentContext* CHTLParser::templateContent() {
@@ -2094,6 +2255,14 @@ void CHTLParser::TemplateInheritanceContext::exitRule(tree::ParseTreeListener *l
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitTemplateInheritance(this);
+}
+
+
+std::any CHTLParser::TemplateInheritanceContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitTemplateInheritance(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::TemplateInheritanceContext* CHTLParser::templateInheritance() {
@@ -2186,6 +2355,14 @@ void CHTLParser::CustomDeclarationContext::exitRule(tree::ParseTreeListener *lis
     parserListener->exitCustomDeclaration(this);
 }
 
+
+std::any CHTLParser::CustomDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitCustomDeclaration(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::CustomDeclarationContext* CHTLParser::customDeclaration() {
   CustomDeclarationContext *_localctx = _tracker.createInstance<CustomDeclarationContext>(_ctx, getState());
   enterRule(_localctx, 42, CHTLParser::RuleCustomDeclaration);
@@ -2239,6 +2416,14 @@ void CHTLParser::CustomTypeContext::exitRule(tree::ParseTreeListener *listener) 
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCustomType(this);
+}
+
+
+std::any CHTLParser::CustomTypeContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitCustomType(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::CustomTypeContext* CHTLParser::customType() {
@@ -2305,6 +2490,14 @@ void CHTLParser::CustomBodyContext::exitRule(tree::ParseTreeListener *listener) 
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCustomBody(this);
+}
+
+
+std::any CHTLParser::CustomBodyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitCustomBody(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::CustomBodyContext* CHTLParser::customBody() {
@@ -2392,6 +2585,14 @@ void CHTLParser::CustomContentContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCustomContent(this);
+}
+
+
+std::any CHTLParser::CustomContentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitCustomContent(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::CustomContentContext* CHTLParser::customContent() {
@@ -2502,6 +2703,14 @@ void CHTLParser::CustomInheritanceContext::exitRule(tree::ParseTreeListener *lis
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCustomInheritance(this);
+}
+
+
+std::any CHTLParser::CustomInheritanceContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitCustomInheritance(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::CustomInheritanceContext* CHTLParser::customInheritance() {
@@ -2615,6 +2824,14 @@ void CHTLParser::CustomSpecializationContext::exitRule(tree::ParseTreeListener *
     parserListener->exitCustomSpecialization(this);
 }
 
+
+std::any CHTLParser::CustomSpecializationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitCustomSpecialization(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::CustomSpecializationContext* CHTLParser::customSpecialization() {
   CustomSpecializationContext *_localctx = _tracker.createInstance<CustomSpecializationContext>(_ctx, getState());
   enterRule(_localctx, 52, CHTLParser::RuleCustomSpecialization);
@@ -2689,6 +2906,14 @@ void CHTLParser::SpecializationContentContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitSpecializationContent(this);
+}
+
+
+std::any CHTLParser::SpecializationContentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitSpecializationContent(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::SpecializationContentContext* CHTLParser::specializationContent() {
@@ -2772,6 +2997,14 @@ void CHTLParser::DeleteStatementContext::exitRule(tree::ParseTreeListener *liste
     parserListener->exitDeleteStatement(this);
 }
 
+
+std::any CHTLParser::DeleteStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitDeleteStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::DeleteStatementContext* CHTLParser::deleteStatement() {
   DeleteStatementContext *_localctx = _tracker.createInstance<DeleteStatementContext>(_ctx, getState());
   enterRule(_localctx, 56, CHTLParser::RuleDeleteStatement);
@@ -2852,6 +3085,14 @@ void CHTLParser::DeleteTargetContext::exitRule(tree::ParseTreeListener *listener
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitDeleteTarget(this);
+}
+
+
+std::any CHTLParser::DeleteTargetContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitDeleteTarget(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::DeleteTargetContext* CHTLParser::deleteTarget() {
@@ -2960,6 +3201,14 @@ void CHTLParser::InsertStatementContext::exitRule(tree::ParseTreeListener *liste
     parserListener->exitInsertStatement(this);
 }
 
+
+std::any CHTLParser::InsertStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitInsertStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::InsertStatementContext* CHTLParser::insertStatement() {
   InsertStatementContext *_localctx = _tracker.createInstance<InsertStatementContext>(_ctx, getState());
   enterRule(_localctx, 60, CHTLParser::RuleInsertStatement);
@@ -3027,6 +3276,14 @@ void CHTLParser::InsertPositionContext::exitRule(tree::ParseTreeListener *listen
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitInsertPosition(this);
+}
+
+
+std::any CHTLParser::InsertPositionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitInsertPosition(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::InsertPositionContext* CHTLParser::insertPosition() {
@@ -3128,6 +3385,14 @@ void CHTLParser::ElementSelectorContext::exitRule(tree::ParseTreeListener *liste
     parserListener->exitElementSelector(this);
 }
 
+
+std::any CHTLParser::ElementSelectorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitElementSelector(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::ElementSelectorContext* CHTLParser::elementSelector() {
   ElementSelectorContext *_localctx = _tracker.createInstance<ElementSelectorContext>(_ctx, getState());
   enterRule(_localctx, 64, CHTLParser::RuleElementSelector);
@@ -3196,6 +3461,14 @@ void CHTLParser::InsertContentContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitInsertContent(this);
+}
+
+
+std::any CHTLParser::InsertContentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitInsertContent(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::InsertContentContext* CHTLParser::insertContent() {
@@ -3284,6 +3557,14 @@ void CHTLParser::OriginBlockContext::exitRule(tree::ParseTreeListener *listener)
     parserListener->exitOriginBlock(this);
 }
 
+
+std::any CHTLParser::OriginBlockContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitOriginBlock(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::OriginBlockContext* CHTLParser::originBlock() {
   OriginBlockContext *_localctx = _tracker.createInstance<OriginBlockContext>(_ctx, getState());
   enterRule(_localctx, 68, CHTLParser::RuleOriginBlock);
@@ -3350,6 +3631,14 @@ void CHTLParser::OriginTypeContext::exitRule(tree::ParseTreeListener *listener) 
     parserListener->exitOriginType(this);
 }
 
+
+std::any CHTLParser::OriginTypeContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitOriginType(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::OriginTypeContext* CHTLParser::originType() {
   OriginTypeContext *_localctx = _tracker.createInstance<OriginTypeContext>(_ctx, getState());
   enterRule(_localctx, 70, CHTLParser::RuleOriginType);
@@ -3406,6 +3695,14 @@ void CHTLParser::OriginContentContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitOriginContent(this);
+}
+
+
+std::any CHTLParser::OriginContentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitOriginContent(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::OriginContentContext* CHTLParser::originContent() {
@@ -3490,6 +3787,14 @@ void CHTLParser::HtmlElementContext::exitRule(tree::ParseTreeListener *listener)
     parserListener->exitHtmlElement(this);
 }
 
+
+std::any CHTLParser::HtmlElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitHtmlElement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::HtmlElementContext* CHTLParser::htmlElement() {
   HtmlElementContext *_localctx = _tracker.createInstance<HtmlElementContext>(_ctx, getState());
   enterRule(_localctx, 74, CHTLParser::RuleHtmlElement);
@@ -3571,6 +3876,14 @@ void CHTLParser::GlobalStyleElementContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitGlobalStyleElement(this);
 }
 
+
+std::any CHTLParser::GlobalStyleElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitGlobalStyleElement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::GlobalStyleElementContext* CHTLParser::globalStyleElement() {
   GlobalStyleElementContext *_localctx = _tracker.createInstance<GlobalStyleElementContext>(_ctx, getState());
   enterRule(_localctx, 76, CHTLParser::RuleGlobalStyleElement);
@@ -3624,6 +3937,14 @@ void CHTLParser::GlobalStyleContentContext::exitRule(tree::ParseTreeListener *li
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitGlobalStyleContent(this);
+}
+
+
+std::any CHTLParser::GlobalStyleContentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitGlobalStyleContent(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::GlobalStyleContentContext* CHTLParser::globalStyleContent() {
@@ -3696,6 +4017,14 @@ void CHTLParser::ElementNameContext::exitRule(tree::ParseTreeListener *listener)
     parserListener->exitElementName(this);
 }
 
+
+std::any CHTLParser::ElementNameContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitElementName(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::ElementNameContext* CHTLParser::elementName() {
   ElementNameContext *_localctx = _tracker.createInstance<ElementNameContext>(_ctx, getState());
   enterRule(_localctx, 80, CHTLParser::RuleElementName);
@@ -3758,6 +4087,14 @@ void CHTLParser::ElementIndexAccessContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitElementIndexAccess(this);
 }
 
+
+std::any CHTLParser::ElementIndexAccessContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitElementIndexAccess(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::ElementIndexAccessContext* CHTLParser::elementIndexAccess() {
   ElementIndexAccessContext *_localctx = _tracker.createInstance<ElementIndexAccessContext>(_ctx, getState());
   enterRule(_localctx, 82, CHTLParser::RuleElementIndexAccess);
@@ -3817,6 +4154,14 @@ void CHTLParser::ElementBodyContext::exitRule(tree::ParseTreeListener *listener)
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitElementBody(this);
+}
+
+
+std::any CHTLParser::ElementBodyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitElementBody(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::ElementBodyContext* CHTLParser::elementBody() {
@@ -3912,6 +4257,14 @@ void CHTLParser::ElementContentContext::exitRule(tree::ParseTreeListener *listen
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitElementContent(this);
+}
+
+
+std::any CHTLParser::ElementContentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitElementContent(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::ElementContentContext* CHTLParser::elementContent() {
@@ -4030,6 +4383,14 @@ void CHTLParser::AttributeContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitAttribute(this);
 }
 
+
+std::any CHTLParser::AttributeContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitAttribute(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::AttributeContext* CHTLParser::attribute() {
   AttributeContext *_localctx = _tracker.createInstance<AttributeContext>(_ctx, getState());
   enterRule(_localctx, 88, CHTLParser::RuleAttribute);
@@ -4112,6 +4473,14 @@ void CHTLParser::AttributeNameContext::exitRule(tree::ParseTreeListener *listene
     parserListener->exitAttributeName(this);
 }
 
+
+std::any CHTLParser::AttributeNameContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitAttributeName(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::AttributeNameContext* CHTLParser::attributeName() {
   AttributeNameContext *_localctx = _tracker.createInstance<AttributeNameContext>(_ctx, getState());
   enterRule(_localctx, 90, CHTLParser::RuleAttributeName);
@@ -4171,6 +4540,14 @@ void CHTLParser::AttributeValueContext::exitRule(tree::ParseTreeListener *listen
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAttributeValue(this);
+}
+
+
+std::any CHTLParser::AttributeValueContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitAttributeValue(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::AttributeValueContext* CHTLParser::attributeValue() {
@@ -4254,6 +4631,14 @@ void CHTLParser::TextContentContext::exitRule(tree::ParseTreeListener *listener)
     parserListener->exitTextContent(this);
 }
 
+
+std::any CHTLParser::TextContentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitTextContent(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::TextContentContext* CHTLParser::textContent() {
   TextContentContext *_localctx = _tracker.createInstance<TextContentContext>(_ctx, getState());
   enterRule(_localctx, 94, CHTLParser::RuleTextContent);
@@ -4319,6 +4704,14 @@ void CHTLParser::StyleBlockContext::exitRule(tree::ParseTreeListener *listener) 
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitStyleBlock(this);
+}
+
+
+std::any CHTLParser::StyleBlockContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitStyleBlock(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::StyleBlockContext* CHTLParser::styleBlock() {
@@ -4404,6 +4797,14 @@ void CHTLParser::StyleContentContext::exitRule(tree::ParseTreeListener *listener
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitStyleContent(this);
+}
+
+
+std::any CHTLParser::StyleContentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitStyleContent(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::StyleContentContext* CHTLParser::styleContent() {
@@ -4507,6 +4908,14 @@ void CHTLParser::StylePropertyContext::exitRule(tree::ParseTreeListener *listene
     parserListener->exitStyleProperty(this);
 }
 
+
+std::any CHTLParser::StylePropertyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitStyleProperty(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::StylePropertyContext* CHTLParser::styleProperty() {
   StylePropertyContext *_localctx = _tracker.createInstance<StylePropertyContext>(_ctx, getState());
   enterRule(_localctx, 100, CHTLParser::RuleStyleProperty);
@@ -4598,6 +5007,14 @@ void CHTLParser::PropertyNameContext::exitRule(tree::ParseTreeListener *listener
     parserListener->exitPropertyName(this);
 }
 
+
+std::any CHTLParser::PropertyNameContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitPropertyName(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::PropertyNameContext* CHTLParser::propertyName() {
   PropertyNameContext *_localctx = _tracker.createInstance<PropertyNameContext>(_ctx, getState());
   enterRule(_localctx, 102, CHTLParser::RulePropertyName);
@@ -4674,6 +5091,14 @@ void CHTLParser::PropertyValueContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitPropertyValue(this);
+}
+
+
+std::any CHTLParser::PropertyValueContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitPropertyValue(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::PropertyValueContext* CHTLParser::propertyValue() {
@@ -4766,6 +5191,14 @@ void CHTLParser::CssSelectorContext::exitRule(tree::ParseTreeListener *listener)
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCssSelector(this);
+}
+
+
+std::any CHTLParser::CssSelectorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitCssSelector(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::CssSelectorContext* CHTLParser::cssSelector() {
@@ -4867,6 +5300,14 @@ void CHTLParser::PseudoClassContext::exitRule(tree::ParseTreeListener *listener)
     parserListener->exitPseudoClass(this);
 }
 
+
+std::any CHTLParser::PseudoClassContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitPseudoClass(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::PseudoClassContext* CHTLParser::pseudoClass() {
   PseudoClassContext *_localctx = _tracker.createInstance<PseudoClassContext>(_ctx, getState());
   enterRule(_localctx, 108, CHTLParser::RulePseudoClass);
@@ -4920,6 +5361,14 @@ void CHTLParser::PseudoElementContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitPseudoElement(this);
+}
+
+
+std::any CHTLParser::PseudoElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitPseudoElement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::PseudoElementContext* CHTLParser::pseudoElement() {
@@ -4979,6 +5428,14 @@ void CHTLParser::CssFunctionContext::exitRule(tree::ParseTreeListener *listener)
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCssFunction(this);
+}
+
+
+std::any CHTLParser::CssFunctionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitCssFunction(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::CssFunctionContext* CHTLParser::cssFunction() {
@@ -5052,6 +5509,14 @@ void CHTLParser::CssArgumentsContext::exitRule(tree::ParseTreeListener *listener
     parserListener->exitCssArguments(this);
 }
 
+
+std::any CHTLParser::CssArgumentsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitCssArguments(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::CssArgumentsContext* CHTLParser::cssArguments() {
   CssArgumentsContext *_localctx = _tracker.createInstance<CssArgumentsContext>(_ctx, getState());
   enterRule(_localctx, 114, CHTLParser::RuleCssArguments);
@@ -5118,6 +5583,14 @@ void CHTLParser::CssArgumentContext::exitRule(tree::ParseTreeListener *listener)
     parserListener->exitCssArgument(this);
 }
 
+
+std::any CHTLParser::CssArgumentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitCssArgument(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::CssArgumentContext* CHTLParser::cssArgument() {
   CssArgumentContext *_localctx = _tracker.createInstance<CssArgumentContext>(_ctx, getState());
   enterRule(_localctx, 116, CHTLParser::RuleCssArgument);
@@ -5169,6 +5642,14 @@ void CHTLParser::ScriptBlockContext::exitRule(tree::ParseTreeListener *listener)
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitScriptBlock(this);
+}
+
+
+std::any CHTLParser::ScriptBlockContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitScriptBlock(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::ScriptBlockContext* CHTLParser::scriptBlock() {
@@ -5224,6 +5705,14 @@ void CHTLParser::ScriptContentContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitScriptContent(this);
+}
+
+
+std::any CHTLParser::ScriptContentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitScriptContent(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::ScriptContentContext* CHTLParser::scriptContent() {
@@ -5381,6 +5870,14 @@ void CHTLParser::ElementUsageContext::exitRule(tree::ParseTreeListener *listener
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitElementUsage(this);
+}
+
+
+std::any CHTLParser::ElementUsageContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitElementUsage(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::ElementUsageContext* CHTLParser::elementUsage() {
@@ -5577,6 +6074,14 @@ void CHTLParser::ElementSpecializationContext::exitRule(tree::ParseTreeListener 
     parserListener->exitElementSpecialization(this);
 }
 
+
+std::any CHTLParser::ElementSpecializationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitElementSpecialization(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::ElementSpecializationContext* CHTLParser::elementSpecialization() {
   ElementSpecializationContext *_localctx = _tracker.createInstance<ElementSpecializationContext>(_ctx, getState());
   enterRule(_localctx, 124, CHTLParser::RuleElementSpecialization);
@@ -5654,6 +6159,14 @@ void CHTLParser::ElementSpecializationContentContext::exitRule(tree::ParseTreeLi
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitElementSpecializationContent(this);
+}
+
+
+std::any CHTLParser::ElementSpecializationContentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitElementSpecializationContent(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::ElementSpecializationContentContext* CHTLParser::elementSpecializationContent() {
@@ -5750,6 +6263,14 @@ void CHTLParser::StyleUsageContext::exitRule(tree::ParseTreeListener *listener) 
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitStyleUsage(this);
+}
+
+
+std::any CHTLParser::StyleUsageContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitStyleUsage(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::StyleUsageContext* CHTLParser::styleUsage() {
@@ -5851,6 +6372,14 @@ void CHTLParser::StyleSpecializationContext::exitRule(tree::ParseTreeListener *l
     parserListener->exitStyleSpecialization(this);
 }
 
+
+std::any CHTLParser::StyleSpecializationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitStyleSpecialization(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::StyleSpecializationContext* CHTLParser::styleSpecialization() {
   StyleSpecializationContext *_localctx = _tracker.createInstance<StyleSpecializationContext>(_ctx, getState());
   enterRule(_localctx, 130, CHTLParser::RuleStyleSpecialization);
@@ -5921,6 +6450,14 @@ void CHTLParser::VariableDefinitionContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitVariableDefinition(this);
 }
 
+
+std::any CHTLParser::VariableDefinitionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitVariableDefinition(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::VariableDefinitionContext* CHTLParser::variableDefinition() {
   VariableDefinitionContext *_localctx = _tracker.createInstance<VariableDefinitionContext>(_ctx, getState());
   enterRule(_localctx, 132, CHTLParser::RuleVariableDefinition);
@@ -5982,6 +6519,14 @@ void CHTLParser::VariableUsageContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitVariableUsage(this);
+}
+
+
+std::any CHTLParser::VariableUsageContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitVariableUsage(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::VariableUsageContext* CHTLParser::variableUsage() {
@@ -6054,6 +6599,14 @@ void CHTLParser::VariableArgumentsContext::exitRule(tree::ParseTreeListener *lis
     parserListener->exitVariableArguments(this);
 }
 
+
+std::any CHTLParser::VariableArgumentsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitVariableArguments(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::VariableArgumentsContext* CHTLParser::variableArguments() {
   VariableArgumentsContext *_localctx = _tracker.createInstance<VariableArgumentsContext>(_ctx, getState());
   enterRule(_localctx, 136, CHTLParser::RuleVariableArguments);
@@ -6122,6 +6675,14 @@ void CHTLParser::VariableArgumentContext::exitRule(tree::ParseTreeListener *list
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitVariableArgument(this);
+}
+
+
+std::any CHTLParser::VariableArgumentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitVariableArgument(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::VariableArgumentContext* CHTLParser::variableArgument() {
@@ -6202,6 +6763,14 @@ void CHTLParser::VariableAssignmentContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitVariableAssignment(this);
 }
 
+
+std::any CHTLParser::VariableAssignmentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitVariableAssignment(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLParser::VariableAssignmentContext* CHTLParser::variableAssignment() {
   VariableAssignmentContext *_localctx = _tracker.createInstance<VariableAssignmentContext>(_ctx, getState());
   enterRule(_localctx, 140, CHTLParser::RuleVariableAssignment);
@@ -6263,6 +6832,14 @@ void CHTLParser::NamespacePathContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitNamespacePath(this);
+}
+
+
+std::any CHTLParser::NamespacePathContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitNamespacePath(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::NamespacePathContext* CHTLParser::namespacePath() {
@@ -6333,6 +6910,14 @@ void CHTLParser::ExceptConstraintContext::exitRule(tree::ParseTreeListener *list
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitExceptConstraint(this);
+}
+
+
+std::any CHTLParser::ExceptConstraintContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitExceptConstraint(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::ExceptConstraintContext* CHTLParser::exceptConstraint() {
@@ -6411,6 +6996,14 @@ void CHTLParser::ExceptTargetContext::exitRule(tree::ParseTreeListener *listener
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitExceptTarget(this);
+}
+
+
+std::any CHTLParser::ExceptTargetContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitExceptTarget(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::ExceptTargetContext* CHTLParser::exceptTarget() {
@@ -6540,6 +7133,14 @@ void CHTLParser::CommentContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<CHTLListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitComment(this);
+}
+
+
+std::any CHTLParser::CommentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLVisitor*>(visitor))
+    return parserVisitor->visitComment(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLParser::CommentContext* CHTLParser::comment() {

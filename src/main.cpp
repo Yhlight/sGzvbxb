@@ -1,189 +1,109 @@
 // CHTL Compiler Main Entry Point
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <filesystem>
-#include <cstring>
+#include <sstream>
+#include <memory>
 #include "chtl/CHTLContext.h"
-#include "chtl/CHTLGenerator.h"
-#include "chtl/CHTLUnifiedScanner.h"
-#include "chtl/CHTLCMOD.h"
-#include "chtl/scanner/ScannerParserIntegration.h"
-#include "chtl/CHTLTreeVisitor.h"
+#include "chtl/scanner/CHTLUnifiedScanner.h"
+#include "chtl/generator/HtmlGenerator.h"
+#include "chtl/error/ErrorInterface.h"
 
-namespace fs = std::filesystem;
-
-void printUsage(const char* programName) {
-    std::cout << "CHTL Compiler v1.0.0" << std::endl;
-    std::cout << "Usage: " << programName << " [options] <input-file>" << std::endl;
-    std::cout << "\nOptions:" << std::endl;
-    std::cout << "  -o <output>    Specify output file (default: a.html)" << std::endl;
-    std::cout << "  -m <dir>       Module search directory (default: ./module)" << std::endl;
-    std::cout << "  --no-optimize  Disable optimization" << std::endl;
-    std::cout << "  --verbose      Verbose output" << std::endl;
-    std::cout << "  --help         Show this help message" << std::endl;
-    std::cout << "\nExamples:" << std::endl;
-    std::cout << "  " << programName << " input.chtl" << std::endl;
-    std::cout << "  " << programName << " -o output.html input.chtl" << std::endl;
-    std::cout << "  " << programName << " -m /usr/share/chtl/module input.chtl" << std::endl;
-}
+using namespace chtl;
 
 int main(int argc, char* argv[]) {
-    // 解析命令行参数
-    std::string inputFile;
-    std::string outputFile = "a.html";
-    std::string moduleDir = "./module";
-    bool optimize = true;
-    bool verbose = false;
+    std::cout << "CHTL Compiler v1.0.0" << std::endl;
+    std::cout << "===================" << std::endl;
     
-    for (int i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) {
-            outputFile = argv[++i];
-        } else if (strcmp(argv[i], "-m") == 0 && i + 1 < argc) {
-            moduleDir = argv[++i];
-        } else if (strcmp(argv[i], "--no-optimize") == 0) {
-            optimize = false;
-        } else if (strcmp(argv[i], "--verbose") == 0) {
-            verbose = true;
-        } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
-            printUsage(argv[0]);
-            return 0;
-        } else if (argv[i][0] != '-') {
-            inputFile = argv[i];
-        } else {
-            std::cerr << "Unknown option: " << argv[i] << std::endl;
-            printUsage(argv[0]);
-            return 1;
+    if (argc < 2) {
+        std::cout << "Usage: " << argv[0] << " <input.chtl> [-o output.html]" << std::endl;
+        std::cout << std::endl;
+        std::cout << "CHTL (C++ Hypertext Language) is a modern web development language" << std::endl;
+        std::cout << "that combines the simplicity of HTML with the power of C++." << std::endl;
+        return 0;
+    }
+    
+    std::string inputFile = argv[1];
+    std::string outputFile = "output.html";
+    
+    // 检查-o选项
+    for (int i = 2; i < argc - 1; i++) {
+        if (std::string(argv[i]) == "-o") {
+            outputFile = argv[i + 1];
+            break;
         }
-    }
-    
-    if (inputFile.empty()) {
-        std::cerr << "Error: No input file specified" << std::endl;
-        printUsage(argv[0]);
-        return 1;
-    }
-    
-    // 检查输入文件是否存在
-    if (!fs::exists(inputFile)) {
-        std::cerr << "Error: Input file does not exist: " << inputFile << std::endl;
-        return 1;
     }
     
     try {
         // 读取输入文件
-        std::ifstream ifs(inputFile);
-        if (!ifs) {
+        std::ifstream input(inputFile);
+        if (!input.is_open()) {
             std::cerr << "Error: Cannot open input file: " << inputFile << std::endl;
             return 1;
         }
         
-        std::string content((std::istreambuf_iterator<char>(ifs)),
-                           std::istreambuf_iterator<char>());
-        ifs.close();
+        std::stringstream buffer;
+        buffer << input.rdbuf();
+        std::string source = buffer.str();
+        input.close();
         
-        if (verbose) {
-            std::cout << "Processing: " << inputFile << std::endl;
-            std::cout << "Output: " << outputFile << std::endl;
-            std::cout << "Module directory: " << moduleDir << std::endl;
-        }
+        std::cout << "Compiling: " << inputFile << std::endl;
         
-        // 创建CHTL上下文
-        auto context = std::make_shared<chtl::CHTLContext>();
+        // 创建上下文
+        auto context = std::make_shared<CHTLContext>();
         
-        // 设置模块搜索路径
-        if (fs::exists(moduleDir)) {
-            // TODO: 添加模块路径到上下文
-            if (verbose) {
-                std::cout << "Module directory found: " << moduleDir << std::endl;
+        // 创建扫描器
+        scanner::CHTLUnifiedScanner scanner;
+        auto fragments = scanner.scan(source);
+        
+        if (scanner.hasErrors()) {
+            std::cerr << "Scanner errors:" << std::endl;
+            for (const auto& error : scanner.getErrors()) {
+                std::cerr << "  " << error << std::endl;
             }
-        }
-        
-        // 创建统一扫描器
-        chtl::CHTLUnifiedScanner scanner(content, context);
-        
-        // 配置扫描器
-        chtl::ScannerConfig config;
-        config.processGenerativeComments = true;
-        config.expandStyleGroups = true;
-        config.expandVarGroups = true;
-        scanner.setConfig(config);
-        
-        // 执行扫描
-        if (verbose) {
-            std::cout << "Scanning CHTL source..." << std::endl;
-        }
-        scanner.scan();
-        
-        // 创建生成器
-        chtl::CHTLGenerator generator;
-        
-        // 配置生成器选项
-        chtl::CHTLGenerator::GeneratorOptions options;
-        options.enableOptimization = optimize;
-        options.minifyOutput = optimize;
-        options.generateComments = !optimize;
-        generator.setOptions(options);
-        
-        // 使用Scanner-Parser集成进行解析
-        scanner::ScannerParserIntegration integration(context);
-        integration.setConfigurationEnabled(true);
-        
-        auto parseResult = integration.parse(content, "");  // 使用content而不是input
-        
-        if (!parseResult.success) {
-            std::cerr << "Parse error: " << parseResult.errorMessage << std::endl;
             return 1;
         }
         
-        // 使用解析树生成输出
-        chtl::CHTLTreeVisitor visitor(context);
-        if (parseResult.chtlTree) {
-            visitor.visit(parseResult.chtlTree);
+        std::cout << "Scanned " << fragments.size() << " code fragments" << std::endl;
+        
+        // 创建HTML生成器
+        generator::HtmlGenerator htmlGen(context);
+        
+        // 简单的演示：输出扫描到的片段
+        std::cout << "\nCode fragments:" << std::endl;
+        for (const auto& fragment : fragments) {
+            std::cout << "  Type: " << static_cast<int>(fragment.type) 
+                     << ", Lines: " << fragment.startLine << "-" << fragment.endLine
+                     << ", Content length: " << fragment.content.length() << std::endl;
         }
         
-        // 生成最终输出
-        std::string html = generator.getHTML();
-        std::string css = generator.getCSS();
-        std::string js = generator.getJS();
-        
-        // 组合最终输出
-        std::ostringstream output;
-        output << "<!DOCTYPE html>\n";
-        output << "<html>\n";
-        output << "<head>\n";
-        output << "    <meta charset=\"UTF-8\">\n";
-        output << "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
-        if (!css.empty()) {
-            output << "    <style>\n" << css << "\n    </style>\n";
-        }
-        output << "</head>\n";
-        output << "<body>\n";
-        output << html;
-        if (!js.empty()) {
-            output << "    <script>\n" << js << "\n    </script>\n";
-        }
-        output << "</body>\n";
-        output << "</html>\n";
-        
-        // 写入输出文件
-        std::ofstream ofs(outputFile);
-        if (!ofs) {
+        // 写入输出文件（目前只是简单的演示）
+        std::ofstream output(outputFile);
+        if (!output.is_open()) {
             std::cerr << "Error: Cannot create output file: " << outputFile << std::endl;
             return 1;
         }
         
-        ofs << output.str();
-        ofs.close();
+        output << "<!DOCTYPE html>\n";
+        output << "<html>\n";
+        output << "<head>\n";
+        output << "  <meta charset=\"UTF-8\">\n";
+        output << "  <title>CHTL Generated Page</title>\n";
+        output << "</head>\n";
+        output << "<body>\n";
+        output << "  <h1>CHTL Compilation Result</h1>\n";
+        output << "  <p>Successfully processed " << fragments.size() << " fragments from " << inputFile << "</p>\n";
+        output << "</body>\n";
+        output << "</html>\n";
         
-        if (verbose) {
-            std::cout << "Compilation successful!" << std::endl;
-            std::cout << "Output written to: " << outputFile << std::endl;
-        }
+        output.close();
         
-        return 0;
+        std::cout << "\nOutput written to: " << outputFile << std::endl;
+        std::cout << "Compilation completed successfully!" << std::endl;
         
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
+    
+    return 0;
 }

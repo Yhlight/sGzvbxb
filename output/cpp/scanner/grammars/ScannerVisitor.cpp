@@ -2,6 +2,6 @@
 // Generated from grammars/Scanner.g4 by ANTLR 4.13.1
 
 
-#include "ScannerBaseListener.h"
+#include "ScannerVisitor.h"
 
 

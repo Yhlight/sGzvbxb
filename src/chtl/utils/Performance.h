@@ -8,6 +8,11 @@
 #include <iomanip>
 #include <algorithm>
 #include <thread>
+#include <vector>
+#include <list>
+#include <numeric>
+#include <cmath>
+#include <atomic>
 
 namespace chtl {
 namespace utils {

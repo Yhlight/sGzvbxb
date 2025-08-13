@@ -10,7 +10,7 @@
 #include "antlr4-runtime.h"
 #include "../generated/javascript/grammars/JavaScriptLexer.h"
 #include "../generated/javascript/grammars/JavaScriptParser.h"
-#include "generated/JSParserBaseVisitor.h"
+#include "../generated/javascript/grammars/JavaScriptBaseVisitor.h"
 
 namespace chtl {
 

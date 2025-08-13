@@ -2,7 +2,7 @@
 // Generated from grammars/Scanner.g4 by ANTLR 4.13.1
 
 
-#include "ScannerListener.h"
+#include "ScannerVisitor.h"
 
 #include "ScannerParser.h"
 
@@ -181,16 +181,12 @@ size_t ScannerParser::DocumentContext::getRuleIndex() const {
   return ScannerParser::RuleDocument;
 }
 
-void ScannerParser::DocumentContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterDocument(this);
-}
 
-void ScannerParser::DocumentContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitDocument(this);
+std::any ScannerParser::DocumentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<ScannerVisitor*>(visitor))
+    return parserVisitor->visitDocument(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 ScannerParser::DocumentContext* ScannerParser::document() {
@@ -250,16 +246,12 @@ size_t ScannerParser::CodeBlockContext::getRuleIndex() const {
   return ScannerParser::RuleCodeBlock;
 }
 
-void ScannerParser::CodeBlockContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterCodeBlock(this);
-}
 
-void ScannerParser::CodeBlockContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitCodeBlock(this);
+std::any ScannerParser::CodeBlockContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<ScannerVisitor*>(visitor))
+    return parserVisitor->visitCodeBlock(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 ScannerParser::CodeBlockContext* ScannerParser::codeBlock() {
@@ -339,16 +331,12 @@ size_t ScannerParser::ChtlBlockContext::getRuleIndex() const {
   return ScannerParser::RuleChtlBlock;
 }
 
-void ScannerParser::ChtlBlockContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterChtlBlock(this);
-}
 
-void ScannerParser::ChtlBlockContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitChtlBlock(this);
+std::any ScannerParser::ChtlBlockContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<ScannerVisitor*>(visitor))
+    return parserVisitor->visitChtlBlock(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 ScannerParser::ChtlBlockContext* ScannerParser::chtlBlock() {
@@ -435,16 +423,12 @@ size_t ScannerParser::ChtlElementContext::getRuleIndex() const {
   return ScannerParser::RuleChtlElement;
 }
 
-void ScannerParser::ChtlElementContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterChtlElement(this);
-}
 
-void ScannerParser::ChtlElementContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitChtlElement(this);
+std::any ScannerParser::ChtlElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<ScannerVisitor*>(visitor))
+    return parserVisitor->visitChtlElement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 ScannerParser::ChtlElementContext* ScannerParser::chtlElement() {
@@ -514,16 +498,12 @@ size_t ScannerParser::ElementStartContext::getRuleIndex() const {
   return ScannerParser::RuleElementStart;
 }
 
-void ScannerParser::ElementStartContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterElementStart(this);
-}
 
-void ScannerParser::ElementStartContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitElementStart(this);
+std::any ScannerParser::ElementStartContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<ScannerVisitor*>(visitor))
+    return parserVisitor->visitElementStart(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 ScannerParser::ElementStartContext* ScannerParser::elementStart() {
@@ -602,16 +582,12 @@ size_t ScannerParser::ElementEndContext::getRuleIndex() const {
   return ScannerParser::RuleElementEnd;
 }
 
-void ScannerParser::ElementEndContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterElementEnd(this);
-}
 
-void ScannerParser::ElementEndContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitElementEnd(this);
+std::any ScannerParser::ElementEndContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<ScannerVisitor*>(visitor))
+    return parserVisitor->visitElementEnd(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 ScannerParser::ElementEndContext* ScannerParser::elementEnd() {
@@ -667,16 +643,12 @@ size_t ScannerParser::ElementContentContext::getRuleIndex() const {
   return ScannerParser::RuleElementContent;
 }
 
-void ScannerParser::ElementContentContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterElementContent(this);
-}
 
-void ScannerParser::ElementContentContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitElementContent(this);
+std::any ScannerParser::ElementContentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<ScannerVisitor*>(visitor))
+    return parserVisitor->visitElementContent(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 ScannerParser::ElementContentContext* ScannerParser::elementContent() {
@@ -759,16 +731,12 @@ size_t ScannerParser::ChtlAttributeContext::getRuleIndex() const {
   return ScannerParser::RuleChtlAttribute;
 }
 
-void ScannerParser::ChtlAttributeContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterChtlAttribute(this);
-}
 
-void ScannerParser::ChtlAttributeContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitChtlAttribute(this);
+std::any ScannerParser::ChtlAttributeContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<ScannerVisitor*>(visitor))
+    return parserVisitor->visitChtlAttribute(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 ScannerParser::ChtlAttributeContext* ScannerParser::chtlAttribute() {
@@ -838,16 +806,12 @@ size_t ScannerParser::ChtlDeclarationContext::getRuleIndex() const {
   return ScannerParser::RuleChtlDeclaration;
 }
 
-void ScannerParser::ChtlDeclarationContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterChtlDeclaration(this);
-}
 
-void ScannerParser::ChtlDeclarationContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitChtlDeclaration(this);
+std::any ScannerParser::ChtlDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<ScannerVisitor*>(visitor))
+    return parserVisitor->visitChtlDeclaration(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 ScannerParser::ChtlDeclarationContext* ScannerParser::chtlDeclaration() {
@@ -983,16 +947,12 @@ size_t ScannerParser::ChtlStatementContext::getRuleIndex() const {
   return ScannerParser::RuleChtlStatement;
 }
 
-void ScannerParser::ChtlStatementContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterChtlStatement(this);
-}
 
-void ScannerParser::ChtlStatementContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitChtlStatement(this);
+std::any ScannerParser::ChtlStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<ScannerVisitor*>(visitor))
+    return parserVisitor->visitChtlStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 ScannerParser::ChtlStatementContext* ScannerParser::chtlStatement() {
@@ -1087,16 +1047,12 @@ size_t ScannerParser::TextBlockContext::getRuleIndex() const {
   return ScannerParser::RuleTextBlock;
 }
 
-void ScannerParser::TextBlockContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterTextBlock(this);
-}
 
-void ScannerParser::TextBlockContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitTextBlock(this);
+std::any ScannerParser::TextBlockContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<ScannerVisitor*>(visitor))
+    return parserVisitor->visitTextBlock(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 ScannerParser::TextBlockContext* ScannerParser::textBlock() {
@@ -1148,16 +1104,12 @@ size_t ScannerParser::TextContentContext::getRuleIndex() const {
   return ScannerParser::RuleTextContent;
 }
 
-void ScannerParser::TextContentContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterTextContent(this);
-}
 
-void ScannerParser::TextContentContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<ScannerListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitTextContent(this);
+std::any ScannerParser::TextContentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<ScannerVisitor*>(visitor))
+    return parserVisitor->visitTextContent(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 ScannerParser::TextContentContext* ScannerParser::textContent() {

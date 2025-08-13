@@ -3,6 +3,7 @@
 
 
 #include "CHTLJavaScriptListener.h"
+#include "CHTLJavaScriptVisitor.h"
 
 #include "CHTLJavaScriptParser.h"
 
@@ -877,6 +878,14 @@ void CHTLJavaScriptParser::PrimaryExpressionContext::exitRule(tree::ParseTreeLis
     parserListener->exitPrimaryExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::PrimaryExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitPrimaryExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::PrimaryExpressionContext* CHTLJavaScriptParser::primaryExpression() {
   PrimaryExpressionContext *_localctx = _tracker.createInstance<PrimaryExpressionContext>(_ctx, getState());
   enterRule(_localctx, 0, CHTLJavaScriptParser::RulePrimaryExpression);
@@ -1031,6 +1040,14 @@ void CHTLJavaScriptParser::ChtlSelectorContext::exitRule(tree::ParseTreeListener
     parserListener->exitChtlSelector(this);
 }
 
+
+std::any CHTLJavaScriptParser::ChtlSelectorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitChtlSelector(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ChtlSelectorContext* CHTLJavaScriptParser::chtlSelector() {
   ChtlSelectorContext *_localctx = _tracker.createInstance<ChtlSelectorContext>(_ctx, getState());
   enterRule(_localctx, 2, CHTLJavaScriptParser::RuleChtlSelector);
@@ -1094,6 +1111,14 @@ void CHTLJavaScriptParser::SelectorExpressionContext::exitRule(tree::ParseTreeLi
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitSelectorExpression(this);
+}
+
+
+std::any CHTLJavaScriptParser::SelectorExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitSelectorExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::SelectorExpressionContext* CHTLJavaScriptParser::selectorExpression() {
@@ -1208,6 +1233,14 @@ void CHTLJavaScriptParser::SelectorIdentifierContext::exitRule(tree::ParseTreeLi
     parserListener->exitSelectorIdentifier(this);
 }
 
+
+std::any CHTLJavaScriptParser::SelectorIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitSelectorIdentifier(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::SelectorIdentifierContext* CHTLJavaScriptParser::selectorIdentifier() {
   SelectorIdentifierContext *_localctx = _tracker.createInstance<SelectorIdentifierContext>(_ctx, getState());
   enterRule(_localctx, 6, CHTLJavaScriptParser::RuleSelectorIdentifier);
@@ -1259,6 +1292,14 @@ void CHTLJavaScriptParser::SelectorIndexContext::exitRule(tree::ParseTreeListene
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitSelectorIndex(this);
+}
+
+
+std::any CHTLJavaScriptParser::SelectorIndexContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitSelectorIndex(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::SelectorIndexContext* CHTLJavaScriptParser::selectorIndex() {
@@ -1330,6 +1371,14 @@ void CHTLJavaScriptParser::ComplexSelectorContext::exitRule(tree::ParseTreeListe
     parserListener->exitComplexSelector(this);
 }
 
+
+std::any CHTLJavaScriptParser::ComplexSelectorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitComplexSelector(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ComplexSelectorContext* CHTLJavaScriptParser::complexSelector() {
   ComplexSelectorContext *_localctx = _tracker.createInstance<ComplexSelectorContext>(_ctx, getState());
   enterRule(_localctx, 10, CHTLJavaScriptParser::RuleComplexSelector);
@@ -1394,6 +1443,14 @@ void CHTLJavaScriptParser::SelectorPartContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitSelectorPart(this);
+}
+
+
+std::any CHTLJavaScriptParser::SelectorPartContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitSelectorPart(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::SelectorPartContext* CHTLJavaScriptParser::selectorPart() {
@@ -1503,6 +1560,14 @@ void CHTLJavaScriptParser::MemberExpressionContext::exitRule(tree::ParseTreeList
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitMemberExpression(this);
+}
+
+
+std::any CHTLJavaScriptParser::MemberExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitMemberExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 
@@ -1764,6 +1829,14 @@ void CHTLJavaScriptParser::CallExpressionContext::exitRule(tree::ParseTreeListen
 }
 
 
+std::any CHTLJavaScriptParser::CallExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitCallExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
+
 CHTLJavaScriptParser::CallExpressionContext* CHTLJavaScriptParser::callExpression() {
    return callExpression(0);
 }
@@ -2008,6 +2081,14 @@ void CHTLJavaScriptParser::AnimateCallContext::exitRule(tree::ParseTreeListener 
     parserListener->exitAnimateCall(this);
 }
 
+
+std::any CHTLJavaScriptParser::AnimateCallContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAnimateCall(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::AnimateCallContext* CHTLJavaScriptParser::animateCall() {
   AnimateCallContext *_localctx = _tracker.createInstance<AnimateCallContext>(_ctx, getState());
   enterRule(_localctx, 18, CHTLJavaScriptParser::RuleAnimateCall);
@@ -2065,6 +2146,14 @@ void CHTLJavaScriptParser::ListenConfigContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitListenConfig(this);
+}
+
+
+std::any CHTLJavaScriptParser::ListenConfigContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitListenConfig(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ListenConfigContext* CHTLJavaScriptParser::listenConfig() {
@@ -2126,6 +2215,14 @@ void CHTLJavaScriptParser::EventHandlerListContext::exitRule(tree::ParseTreeList
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitEventHandlerList(this);
+}
+
+
+std::any CHTLJavaScriptParser::EventHandlerListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitEventHandlerList(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::EventHandlerListContext* CHTLJavaScriptParser::eventHandlerList() {
@@ -2204,6 +2301,14 @@ void CHTLJavaScriptParser::EventHandlerContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitEventHandler(this);
+}
+
+
+std::any CHTLJavaScriptParser::EventHandlerContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitEventHandler(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::EventHandlerContext* CHTLJavaScriptParser::eventHandler() {
@@ -2289,6 +2394,14 @@ void CHTLJavaScriptParser::DelegateConfigContext::exitRule(tree::ParseTreeListen
     parserListener->exitDelegateConfig(this);
 }
 
+
+std::any CHTLJavaScriptParser::DelegateConfigContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitDelegateConfig(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::DelegateConfigContext* CHTLJavaScriptParser::delegateConfig() {
   DelegateConfigContext *_localctx = _tracker.createInstance<DelegateConfigContext>(_ctx, getState());
   enterRule(_localctx, 26, CHTLJavaScriptParser::RuleDelegateConfig);
@@ -2365,6 +2478,14 @@ void CHTLJavaScriptParser::DelegatePropertyContext::exitRule(tree::ParseTreeList
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitDelegateProperty(this);
+}
+
+
+std::any CHTLJavaScriptParser::DelegatePropertyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitDelegateProperty(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::DelegatePropertyContext* CHTLJavaScriptParser::delegateProperty() {
@@ -2461,6 +2582,14 @@ void CHTLJavaScriptParser::SelectorArrayContext::exitRule(tree::ParseTreeListene
     parserListener->exitSelectorArray(this);
 }
 
+
+std::any CHTLJavaScriptParser::SelectorArrayContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitSelectorArray(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::SelectorArrayContext* CHTLJavaScriptParser::selectorArray() {
   SelectorArrayContext *_localctx = _tracker.createInstance<SelectorArrayContext>(_ctx, getState());
   enterRule(_localctx, 30, CHTLJavaScriptParser::RuleSelectorArray);
@@ -2533,6 +2662,14 @@ void CHTLJavaScriptParser::AnimateConfigContext::exitRule(tree::ParseTreeListene
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAnimateConfig(this);
+}
+
+
+std::any CHTLJavaScriptParser::AnimateConfigContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAnimateConfig(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::AnimateConfigContext* CHTLJavaScriptParser::animateConfig() {
@@ -2631,6 +2768,14 @@ void CHTLJavaScriptParser::AnimatePropertyContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAnimateProperty(this);
+}
+
+
+std::any CHTLJavaScriptParser::AnimatePropertyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAnimateProperty(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::AnimatePropertyContext* CHTLJavaScriptParser::animateProperty() {
@@ -2840,6 +2985,14 @@ void CHTLJavaScriptParser::CssBlockContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitCssBlock(this);
 }
 
+
+std::any CHTLJavaScriptParser::CssBlockContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitCssBlock(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::CssBlockContext* CHTLJavaScriptParser::cssBlock() {
   CssBlockContext *_localctx = _tracker.createInstance<CssBlockContext>(_ctx, getState());
   enterRule(_localctx, 36, CHTLJavaScriptParser::RuleCssBlock);
@@ -2908,6 +3061,14 @@ void CHTLJavaScriptParser::CssPropertyContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCssProperty(this);
+}
+
+
+std::any CHTLJavaScriptParser::CssPropertyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitCssProperty(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::CssPropertyContext* CHTLJavaScriptParser::cssProperty() {
@@ -2994,6 +3155,14 @@ void CHTLJavaScriptParser::PropertyNameContext::exitRule(tree::ParseTreeListener
     parserListener->exitPropertyName(this);
 }
 
+
+std::any CHTLJavaScriptParser::PropertyNameContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitPropertyName(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::PropertyNameContext* CHTLJavaScriptParser::propertyName() {
   PropertyNameContext *_localctx = _tracker.createInstance<PropertyNameContext>(_ctx, getState());
   enterRule(_localctx, 40, CHTLJavaScriptParser::RulePropertyName);
@@ -3070,6 +3239,14 @@ void CHTLJavaScriptParser::PropertyValueContext::exitRule(tree::ParseTreeListene
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitPropertyValue(this);
+}
+
+
+std::any CHTLJavaScriptParser::PropertyValueContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitPropertyValue(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::PropertyValueContext* CHTLJavaScriptParser::propertyValue() {
@@ -3160,6 +3337,14 @@ void CHTLJavaScriptParser::CssFunctionContext::exitRule(tree::ParseTreeListener 
     parserListener->exitCssFunction(this);
 }
 
+
+std::any CHTLJavaScriptParser::CssFunctionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitCssFunction(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::CssFunctionContext* CHTLJavaScriptParser::cssFunction() {
   CssFunctionContext *_localctx = _tracker.createInstance<CssFunctionContext>(_ctx, getState());
   enterRule(_localctx, 44, CHTLJavaScriptParser::RuleCssFunction);
@@ -3231,6 +3416,14 @@ void CHTLJavaScriptParser::CssFunctionArgumentsContext::exitRule(tree::ParseTree
     parserListener->exitCssFunctionArguments(this);
 }
 
+
+std::any CHTLJavaScriptParser::CssFunctionArgumentsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitCssFunctionArguments(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::CssFunctionArgumentsContext* CHTLJavaScriptParser::cssFunctionArguments() {
   CssFunctionArgumentsContext *_localctx = _tracker.createInstance<CssFunctionArgumentsContext>(_ctx, getState());
   enterRule(_localctx, 46, CHTLJavaScriptParser::RuleCssFunctionArguments);
@@ -3299,6 +3492,14 @@ void CHTLJavaScriptParser::WhenArrayContext::exitRule(tree::ParseTreeListener *l
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitWhenArray(this);
+}
+
+
+std::any CHTLJavaScriptParser::WhenArrayContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitWhenArray(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::WhenArrayContext* CHTLJavaScriptParser::whenArray() {
@@ -3375,6 +3576,14 @@ void CHTLJavaScriptParser::WhenItemContext::exitRule(tree::ParseTreeListener *li
     parserListener->exitWhenItem(this);
 }
 
+
+std::any CHTLJavaScriptParser::WhenItemContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitWhenItem(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::WhenItemContext* CHTLJavaScriptParser::whenItem() {
   WhenItemContext *_localctx = _tracker.createInstance<WhenItemContext>(_ctx, getState());
   enterRule(_localctx, 50, CHTLJavaScriptParser::RuleWhenItem);
@@ -3447,6 +3656,14 @@ void CHTLJavaScriptParser::WhenPropertyContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitWhenProperty(this);
+}
+
+
+std::any CHTLJavaScriptParser::WhenPropertyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitWhenProperty(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::WhenPropertyContext* CHTLJavaScriptParser::whenProperty() {
@@ -3555,6 +3772,14 @@ void CHTLJavaScriptParser::LiteralContext::exitRule(tree::ParseTreeListener *lis
     parserListener->exitLiteral(this);
 }
 
+
+std::any CHTLJavaScriptParser::LiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLiteral(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::LiteralContext* CHTLJavaScriptParser::literal() {
   LiteralContext *_localctx = _tracker.createInstance<LiteralContext>(_ctx, getState());
   enterRule(_localctx, 54, CHTLJavaScriptParser::RuleLiteral);
@@ -3619,6 +3844,14 @@ void CHTLJavaScriptParser::ProgramContext::exitRule(tree::ParseTreeListener *lis
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitProgram(this);
+}
+
+
+std::any CHTLJavaScriptParser::ProgramContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitProgram(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ProgramContext* CHTLJavaScriptParser::program() {
@@ -3690,6 +3923,14 @@ void CHTLJavaScriptParser::SourceElementsContext::exitRule(tree::ParseTreeListen
     parserListener->exitSourceElements(this);
 }
 
+
+std::any CHTLJavaScriptParser::SourceElementsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitSourceElements(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::SourceElementsContext* CHTLJavaScriptParser::sourceElements() {
   SourceElementsContext *_localctx = _tracker.createInstance<SourceElementsContext>(_ctx, getState());
   enterRule(_localctx, 58, CHTLJavaScriptParser::RuleSourceElements);
@@ -3757,6 +3998,14 @@ void CHTLJavaScriptParser::SourceElementContext::exitRule(tree::ParseTreeListene
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitSourceElement(this);
+}
+
+
+std::any CHTLJavaScriptParser::SourceElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitSourceElement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::SourceElementContext* CHTLJavaScriptParser::sourceElement() {
@@ -3835,6 +4084,14 @@ void CHTLJavaScriptParser::DeclarationContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitDeclaration(this);
+}
+
+
+std::any CHTLJavaScriptParser::DeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitDeclaration(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::DeclarationContext* CHTLJavaScriptParser::declaration() {
@@ -3926,6 +4183,14 @@ void CHTLJavaScriptParser::HoistableDeclarationContext::exitRule(tree::ParseTree
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitHoistableDeclaration(this);
+}
+
+
+std::any CHTLJavaScriptParser::HoistableDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitHoistableDeclaration(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::HoistableDeclarationContext* CHTLJavaScriptParser::hoistableDeclaration() {
@@ -4020,6 +4285,14 @@ void CHTLJavaScriptParser::FunctionDeclarationContext::exitRule(tree::ParseTreeL
     parserListener->exitFunctionDeclaration(this);
 }
 
+
+std::any CHTLJavaScriptParser::FunctionDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFunctionDeclaration(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::FunctionDeclarationContext* CHTLJavaScriptParser::functionDeclaration() {
   FunctionDeclarationContext *_localctx = _tracker.createInstance<FunctionDeclarationContext>(_ctx, getState());
   enterRule(_localctx, 66, CHTLJavaScriptParser::RuleFunctionDeclaration);
@@ -4102,6 +4375,14 @@ void CHTLJavaScriptParser::GeneratorDeclarationContext::exitRule(tree::ParseTree
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitGeneratorDeclaration(this);
+}
+
+
+std::any CHTLJavaScriptParser::GeneratorDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitGeneratorDeclaration(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::GeneratorDeclarationContext* CHTLJavaScriptParser::generatorDeclaration() {
@@ -4190,6 +4471,14 @@ void CHTLJavaScriptParser::AsyncFunctionDeclarationContext::exitRule(tree::Parse
     parserListener->exitAsyncFunctionDeclaration(this);
 }
 
+
+std::any CHTLJavaScriptParser::AsyncFunctionDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAsyncFunctionDeclaration(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::AsyncFunctionDeclarationContext* CHTLJavaScriptParser::asyncFunctionDeclaration() {
   AsyncFunctionDeclarationContext *_localctx = _tracker.createInstance<AsyncFunctionDeclarationContext>(_ctx, getState());
   enterRule(_localctx, 70, CHTLJavaScriptParser::RuleAsyncFunctionDeclaration);
@@ -4274,6 +4563,14 @@ void CHTLJavaScriptParser::AsyncGeneratorDeclarationContext::exitRule(tree::Pars
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAsyncGeneratorDeclaration(this);
+}
+
+
+std::any CHTLJavaScriptParser::AsyncGeneratorDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAsyncGeneratorDeclaration(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::AsyncGeneratorDeclarationContext* CHTLJavaScriptParser::asyncGeneratorDeclaration() {
@@ -4364,6 +4661,14 @@ void CHTLJavaScriptParser::ClassDeclarationContext::exitRule(tree::ParseTreeList
     parserListener->exitClassDeclaration(this);
 }
 
+
+std::any CHTLJavaScriptParser::ClassDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitClassDeclaration(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ClassDeclarationContext* CHTLJavaScriptParser::classDeclaration() {
   ClassDeclarationContext *_localctx = _tracker.createInstance<ClassDeclarationContext>(_ctx, getState());
   enterRule(_localctx, 74, CHTLJavaScriptParser::RuleClassDeclaration);
@@ -4434,6 +4739,14 @@ void CHTLJavaScriptParser::ClassExtendsContext::exitRule(tree::ParseTreeListener
     parserListener->exitClassExtends(this);
 }
 
+
+std::any CHTLJavaScriptParser::ClassExtendsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitClassExtends(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ClassExtendsContext* CHTLJavaScriptParser::classExtends() {
   ClassExtendsContext *_localctx = _tracker.createInstance<ClassExtendsContext>(_ctx, getState());
   enterRule(_localctx, 76, CHTLJavaScriptParser::RuleClassExtends);
@@ -4491,6 +4804,14 @@ void CHTLJavaScriptParser::ClassBodyContext::exitRule(tree::ParseTreeListener *l
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitClassBody(this);
+}
+
+
+std::any CHTLJavaScriptParser::ClassBodyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitClassBody(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ClassBodyContext* CHTLJavaScriptParser::classBody() {
@@ -4558,6 +4879,14 @@ void CHTLJavaScriptParser::ClassElementContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitClassElement(this);
+}
+
+
+std::any CHTLJavaScriptParser::ClassElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitClassElement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ClassElementContext* CHTLJavaScriptParser::classElement() {
@@ -4665,6 +4994,14 @@ void CHTLJavaScriptParser::MethodDefinitionContext::exitRule(tree::ParseTreeList
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitMethodDefinition(this);
+}
+
+
+std::any CHTLJavaScriptParser::MethodDefinitionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitMethodDefinition(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::MethodDefinitionContext* CHTLJavaScriptParser::methodDefinition() {
@@ -4884,6 +5221,14 @@ void CHTLJavaScriptParser::FieldDefinitionContext::exitRule(tree::ParseTreeListe
     parserListener->exitFieldDefinition(this);
 }
 
+
+std::any CHTLJavaScriptParser::FieldDefinitionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFieldDefinition(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::FieldDefinitionContext* CHTLJavaScriptParser::fieldDefinition() {
   FieldDefinitionContext *_localctx = _tracker.createInstance<FieldDefinitionContext>(_ctx, getState());
   enterRule(_localctx, 84, CHTLJavaScriptParser::RuleFieldDefinition);
@@ -4950,6 +5295,14 @@ void CHTLJavaScriptParser::LexicalDeclarationContext::exitRule(tree::ParseTreeLi
     parserListener->exitLexicalDeclaration(this);
 }
 
+
+std::any CHTLJavaScriptParser::LexicalDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLexicalDeclaration(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::LexicalDeclarationContext* CHTLJavaScriptParser::lexicalDeclaration() {
   LexicalDeclarationContext *_localctx = _tracker.createInstance<LexicalDeclarationContext>(_ctx, getState());
   enterRule(_localctx, 86, CHTLJavaScriptParser::RuleLexicalDeclaration);
@@ -5001,6 +5354,14 @@ void CHTLJavaScriptParser::LetOrConstContext::exitRule(tree::ParseTreeListener *
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitLetOrConst(this);
+}
+
+
+std::any CHTLJavaScriptParser::LetOrConstContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLetOrConst(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::LetOrConstContext* CHTLJavaScriptParser::letOrConst() {
@@ -5068,6 +5429,14 @@ void CHTLJavaScriptParser::BindingListContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBindingList(this);
+}
+
+
+std::any CHTLJavaScriptParser::BindingListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingList(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::BindingListContext* CHTLJavaScriptParser::bindingList() {
@@ -5142,6 +5511,14 @@ void CHTLJavaScriptParser::LexicalBindingContext::exitRule(tree::ParseTreeListen
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitLexicalBinding(this);
+}
+
+
+std::any CHTLJavaScriptParser::LexicalBindingContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLexicalBinding(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::LexicalBindingContext* CHTLJavaScriptParser::lexicalBinding() {
@@ -5290,6 +5667,14 @@ void CHTLJavaScriptParser::StatementContext::exitRule(tree::ParseTreeListener *l
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitStatement(this);
+}
+
+
+std::any CHTLJavaScriptParser::StatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::StatementContext* CHTLJavaScriptParser::statement() {
@@ -5467,6 +5852,14 @@ void CHTLJavaScriptParser::BlockStatementContext::exitRule(tree::ParseTreeListen
     parserListener->exitBlockStatement(this);
 }
 
+
+std::any CHTLJavaScriptParser::BlockStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBlockStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::BlockStatementContext* CHTLJavaScriptParser::blockStatement() {
   BlockStatementContext *_localctx = _tracker.createInstance<BlockStatementContext>(_ctx, getState());
   enterRule(_localctx, 96, CHTLJavaScriptParser::RuleBlockStatement);
@@ -5538,6 +5931,14 @@ void CHTLJavaScriptParser::StatementListContext::exitRule(tree::ParseTreeListene
     parserListener->exitStatementList(this);
 }
 
+
+std::any CHTLJavaScriptParser::StatementListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitStatementList(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::StatementListContext* CHTLJavaScriptParser::statementList() {
   StatementListContext *_localctx = _tracker.createInstance<StatementListContext>(_ctx, getState());
   enterRule(_localctx, 98, CHTLJavaScriptParser::RuleStatementList);
@@ -5603,6 +6004,14 @@ void CHTLJavaScriptParser::VariableStatementContext::exitRule(tree::ParseTreeLis
     parserListener->exitVariableStatement(this);
 }
 
+
+std::any CHTLJavaScriptParser::VariableStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitVariableStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::VariableStatementContext* CHTLJavaScriptParser::variableStatement() {
   VariableStatementContext *_localctx = _tracker.createInstance<VariableStatementContext>(_ctx, getState());
   enterRule(_localctx, 100, CHTLJavaScriptParser::RuleVariableStatement);
@@ -5662,6 +6071,14 @@ void CHTLJavaScriptParser::VariableDeclarationListContext::exitRule(tree::ParseT
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitVariableDeclarationList(this);
+}
+
+
+std::any CHTLJavaScriptParser::VariableDeclarationListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitVariableDeclarationList(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::VariableDeclarationListContext* CHTLJavaScriptParser::variableDeclarationList() {
@@ -5736,6 +6153,14 @@ void CHTLJavaScriptParser::VariableDeclarationContext::exitRule(tree::ParseTreeL
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitVariableDeclaration(this);
+}
+
+
+std::any CHTLJavaScriptParser::VariableDeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitVariableDeclaration(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::VariableDeclarationContext* CHTLJavaScriptParser::variableDeclaration() {
@@ -5818,6 +6243,14 @@ void CHTLJavaScriptParser::EmptyStatementContext::exitRule(tree::ParseTreeListen
     parserListener->exitEmptyStatement(this);
 }
 
+
+std::any CHTLJavaScriptParser::EmptyStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitEmptyStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::EmptyStatementContext* CHTLJavaScriptParser::emptyStatement() {
   EmptyStatementContext *_localctx = _tracker.createInstance<EmptyStatementContext>(_ctx, getState());
   enterRule(_localctx, 106, CHTLJavaScriptParser::RuleEmptyStatement);
@@ -5869,6 +6302,14 @@ void CHTLJavaScriptParser::ExpressionStatementContext::exitRule(tree::ParseTreeL
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitExpressionStatement(this);
+}
+
+
+std::any CHTLJavaScriptParser::ExpressionStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitExpressionStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ExpressionStatementContext* CHTLJavaScriptParser::expressionStatement() {
@@ -5932,6 +6373,14 @@ void CHTLJavaScriptParser::IfStatementContext::exitRule(tree::ParseTreeListener 
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitIfStatement(this);
+}
+
+
+std::any CHTLJavaScriptParser::IfStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitIfStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::IfStatementContext* CHTLJavaScriptParser::ifStatement() {
@@ -6024,6 +6473,14 @@ void CHTLJavaScriptParser::IterationStatementContext::exitRule(tree::ParseTreeLi
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitIterationStatement(this);
+}
+
+
+std::any CHTLJavaScriptParser::IterationStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitIterationStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::IterationStatementContext* CHTLJavaScriptParser::iterationStatement() {
@@ -6121,6 +6578,14 @@ void CHTLJavaScriptParser::DoWhileStatementContext::exitRule(tree::ParseTreeList
     parserListener->exitDoWhileStatement(this);
 }
 
+
+std::any CHTLJavaScriptParser::DoWhileStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitDoWhileStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::DoWhileStatementContext* CHTLJavaScriptParser::doWhileStatement() {
   DoWhileStatementContext *_localctx = _tracker.createInstance<DoWhileStatementContext>(_ctx, getState());
   enterRule(_localctx, 114, CHTLJavaScriptParser::RuleDoWhileStatement);
@@ -6188,6 +6653,14 @@ void CHTLJavaScriptParser::WhileStatementContext::exitRule(tree::ParseTreeListen
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitWhileStatement(this);
+}
+
+
+std::any CHTLJavaScriptParser::WhileStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitWhileStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::WhileStatementContext* CHTLJavaScriptParser::whileStatement() {
@@ -6261,6 +6734,14 @@ void CHTLJavaScriptParser::ForStatementContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitForStatement(this);
+}
+
+
+std::any CHTLJavaScriptParser::ForStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitForStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ForStatementContext* CHTLJavaScriptParser::forStatement() {
@@ -6366,6 +6847,14 @@ void CHTLJavaScriptParser::ForInitContext::exitRule(tree::ParseTreeListener *lis
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitForInit(this);
+}
+
+
+std::any CHTLJavaScriptParser::ForInitContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitForInit(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ForInitContext* CHTLJavaScriptParser::forInit() {
@@ -6490,6 +6979,14 @@ void CHTLJavaScriptParser::ForInStatementContext::exitRule(tree::ParseTreeListen
     parserListener->exitForInStatement(this);
 }
 
+
+std::any CHTLJavaScriptParser::ForInStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitForInStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ForInStatementContext* CHTLJavaScriptParser::forInStatement() {
   ForInStatementContext *_localctx = _tracker.createInstance<ForInStatementContext>(_ctx, getState());
   enterRule(_localctx, 122, CHTLJavaScriptParser::RuleForInStatement);
@@ -6561,6 +7058,14 @@ void CHTLJavaScriptParser::ForOfStatementContext::exitRule(tree::ParseTreeListen
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitForOfStatement(this);
+}
+
+
+std::any CHTLJavaScriptParser::ForOfStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitForOfStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ForOfStatementContext* CHTLJavaScriptParser::forOfStatement() {
@@ -6647,6 +7152,14 @@ void CHTLJavaScriptParser::ForInBindingContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitForInBinding(this);
+}
+
+
+std::any CHTLJavaScriptParser::ForInBindingContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitForInBinding(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ForInBindingContext* CHTLJavaScriptParser::forInBinding() {
@@ -6766,6 +7279,14 @@ void CHTLJavaScriptParser::ContinueStatementContext::exitRule(tree::ParseTreeLis
     parserListener->exitContinueStatement(this);
 }
 
+
+std::any CHTLJavaScriptParser::ContinueStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitContinueStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ContinueStatementContext* CHTLJavaScriptParser::continueStatement() {
   ContinueStatementContext *_localctx = _tracker.createInstance<ContinueStatementContext>(_ctx, getState());
   enterRule(_localctx, 128, CHTLJavaScriptParser::RuleContinueStatement);
@@ -6832,6 +7353,14 @@ void CHTLJavaScriptParser::BreakStatementContext::exitRule(tree::ParseTreeListen
     parserListener->exitBreakStatement(this);
 }
 
+
+std::any CHTLJavaScriptParser::BreakStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBreakStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::BreakStatementContext* CHTLJavaScriptParser::breakStatement() {
   BreakStatementContext *_localctx = _tracker.createInstance<BreakStatementContext>(_ctx, getState());
   enterRule(_localctx, 130, CHTLJavaScriptParser::RuleBreakStatement);
@@ -6896,6 +7425,14 @@ void CHTLJavaScriptParser::ReturnStatementContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitReturnStatement(this);
+}
+
+
+std::any CHTLJavaScriptParser::ReturnStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitReturnStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ReturnStatementContext* CHTLJavaScriptParser::returnStatement() {
@@ -6969,6 +7506,14 @@ void CHTLJavaScriptParser::WithStatementContext::exitRule(tree::ParseTreeListene
     parserListener->exitWithStatement(this);
 }
 
+
+std::any CHTLJavaScriptParser::WithStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitWithStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::WithStatementContext* CHTLJavaScriptParser::withStatement() {
   WithStatementContext *_localctx = _tracker.createInstance<WithStatementContext>(_ctx, getState());
   enterRule(_localctx, 134, CHTLJavaScriptParser::RuleWithStatement);
@@ -7032,6 +7577,14 @@ void CHTLJavaScriptParser::LabelledStatementContext::exitRule(tree::ParseTreeLis
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitLabelledStatement(this);
+}
+
+
+std::any CHTLJavaScriptParser::LabelledStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLabelledStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::LabelledStatementContext* CHTLJavaScriptParser::labelledStatement() {
@@ -7101,6 +7654,14 @@ void CHTLJavaScriptParser::SwitchStatementContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitSwitchStatement(this);
+}
+
+
+std::any CHTLJavaScriptParser::SwitchStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitSwitchStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::SwitchStatementContext* CHTLJavaScriptParser::switchStatement() {
@@ -7202,6 +7763,14 @@ void CHTLJavaScriptParser::CaseClauseContext::exitRule(tree::ParseTreeListener *
     parserListener->exitCaseClause(this);
 }
 
+
+std::any CHTLJavaScriptParser::CaseClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitCaseClause(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::CaseClauseContext* CHTLJavaScriptParser::caseClause() {
   CaseClauseContext *_localctx = _tracker.createInstance<CaseClauseContext>(_ctx, getState());
   enterRule(_localctx, 140, CHTLJavaScriptParser::RuleCaseClause);
@@ -7271,6 +7840,14 @@ void CHTLJavaScriptParser::DefaultClauseContext::exitRule(tree::ParseTreeListene
     parserListener->exitDefaultClause(this);
 }
 
+
+std::any CHTLJavaScriptParser::DefaultClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitDefaultClause(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::DefaultClauseContext* CHTLJavaScriptParser::defaultClause() {
   DefaultClauseContext *_localctx = _tracker.createInstance<DefaultClauseContext>(_ctx, getState());
   enterRule(_localctx, 142, CHTLJavaScriptParser::RuleDefaultClause);
@@ -7338,6 +7915,14 @@ void CHTLJavaScriptParser::ThrowStatementContext::exitRule(tree::ParseTreeListen
     parserListener->exitThrowStatement(this);
 }
 
+
+std::any CHTLJavaScriptParser::ThrowStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitThrowStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ThrowStatementContext* CHTLJavaScriptParser::throwStatement() {
   ThrowStatementContext *_localctx = _tracker.createInstance<ThrowStatementContext>(_ctx, getState());
   enterRule(_localctx, 144, CHTLJavaScriptParser::RuleThrowStatement);
@@ -7401,6 +7986,14 @@ void CHTLJavaScriptParser::TryStatementContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitTryStatement(this);
+}
+
+
+std::any CHTLJavaScriptParser::TryStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitTryStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::TryStatementContext* CHTLJavaScriptParser::tryStatement() {
@@ -7500,6 +8093,14 @@ void CHTLJavaScriptParser::CatchClauseContext::exitRule(tree::ParseTreeListener 
     parserListener->exitCatchClause(this);
 }
 
+
+std::any CHTLJavaScriptParser::CatchClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitCatchClause(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::CatchClauseContext* CHTLJavaScriptParser::catchClause() {
   CatchClauseContext *_localctx = _tracker.createInstance<CatchClauseContext>(_ctx, getState());
   enterRule(_localctx, 148, CHTLJavaScriptParser::RuleCatchClause);
@@ -7570,6 +8171,14 @@ void CHTLJavaScriptParser::CatchParameterContext::exitRule(tree::ParseTreeListen
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCatchParameter(this);
+}
+
+
+std::any CHTLJavaScriptParser::CatchParameterContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitCatchParameter(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::CatchParameterContext* CHTLJavaScriptParser::catchParameter() {
@@ -7645,6 +8254,14 @@ void CHTLJavaScriptParser::FinallyClauseContext::exitRule(tree::ParseTreeListene
     parserListener->exitFinallyClause(this);
 }
 
+
+std::any CHTLJavaScriptParser::FinallyClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFinallyClause(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::FinallyClauseContext* CHTLJavaScriptParser::finallyClause() {
   FinallyClauseContext *_localctx = _tracker.createInstance<FinallyClauseContext>(_ctx, getState());
   enterRule(_localctx, 152, CHTLJavaScriptParser::RuleFinallyClause);
@@ -7694,6 +8311,14 @@ void CHTLJavaScriptParser::DebuggerStatementContext::exitRule(tree::ParseTreeLis
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitDebuggerStatement(this);
+}
+
+
+std::any CHTLJavaScriptParser::DebuggerStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitDebuggerStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::DebuggerStatementContext* CHTLJavaScriptParser::debuggerStatement() {
@@ -7753,6 +8378,14 @@ void CHTLJavaScriptParser::ImportStatementContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitImportStatement(this);
+}
+
+
+std::any CHTLJavaScriptParser::ImportStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitImportStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ImportStatementContext* CHTLJavaScriptParser::importStatement() {
@@ -7843,6 +8476,14 @@ void CHTLJavaScriptParser::ImportClauseContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitImportClause(this);
+}
+
+
+std::any CHTLJavaScriptParser::ImportClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitImportClause(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ImportClauseContext* CHTLJavaScriptParser::importClause() {
@@ -7944,6 +8585,14 @@ void CHTLJavaScriptParser::ImportedDefaultBindingContext::exitRule(tree::ParseTr
     parserListener->exitImportedDefaultBinding(this);
 }
 
+
+std::any CHTLJavaScriptParser::ImportedDefaultBindingContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitImportedDefaultBinding(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ImportedDefaultBindingContext* CHTLJavaScriptParser::importedDefaultBinding() {
   ImportedDefaultBindingContext *_localctx = _tracker.createInstance<ImportedDefaultBindingContext>(_ctx, getState());
   enterRule(_localctx, 160, CHTLJavaScriptParser::RuleImportedDefaultBinding);
@@ -7995,6 +8644,14 @@ void CHTLJavaScriptParser::NamespaceImportContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitNamespaceImport(this);
+}
+
+
+std::any CHTLJavaScriptParser::NamespaceImportContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitNamespaceImport(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::NamespaceImportContext* CHTLJavaScriptParser::namespaceImport() {
@@ -8052,6 +8709,14 @@ void CHTLJavaScriptParser::NamedImportsContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitNamedImports(this);
+}
+
+
+std::any CHTLJavaScriptParser::NamedImportsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitNamedImports(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::NamedImportsContext* CHTLJavaScriptParser::namedImports() {
@@ -8143,6 +8808,14 @@ void CHTLJavaScriptParser::ImportsListContext::exitRule(tree::ParseTreeListener 
     parserListener->exitImportsList(this);
 }
 
+
+std::any CHTLJavaScriptParser::ImportsListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitImportsList(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ImportsListContext* CHTLJavaScriptParser::importsList() {
   ImportsListContext *_localctx = _tracker.createInstance<ImportsListContext>(_ctx, getState());
   enterRule(_localctx, 166, CHTLJavaScriptParser::RuleImportsList);
@@ -8213,6 +8886,14 @@ void CHTLJavaScriptParser::ImportSpecifierContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitImportSpecifier(this);
+}
+
+
+std::any CHTLJavaScriptParser::ImportSpecifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitImportSpecifier(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ImportSpecifierContext* CHTLJavaScriptParser::importSpecifier() {
@@ -8287,6 +8968,14 @@ void CHTLJavaScriptParser::ModuleSpecifierContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitModuleSpecifier(this);
+}
+
+
+std::any CHTLJavaScriptParser::ModuleSpecifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitModuleSpecifier(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ModuleSpecifierContext* CHTLJavaScriptParser::moduleSpecifier() {
@@ -8364,6 +9053,14 @@ void CHTLJavaScriptParser::ExportStatementContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitExportStatement(this);
+}
+
+
+std::any CHTLJavaScriptParser::ExportStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitExportStatement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ExportStatementContext* CHTLJavaScriptParser::exportStatement() {
@@ -8505,6 +9202,14 @@ void CHTLJavaScriptParser::ExportClauseContext::exitRule(tree::ParseTreeListener
     parserListener->exitExportClause(this);
 }
 
+
+std::any CHTLJavaScriptParser::ExportClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitExportClause(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ExportClauseContext* CHTLJavaScriptParser::exportClause() {
   ExportClauseContext *_localctx = _tracker.createInstance<ExportClauseContext>(_ctx, getState());
   enterRule(_localctx, 174, CHTLJavaScriptParser::RuleExportClause);
@@ -8612,6 +9317,14 @@ void CHTLJavaScriptParser::ExportsListContext::exitRule(tree::ParseTreeListener 
     parserListener->exitExportsList(this);
 }
 
+
+std::any CHTLJavaScriptParser::ExportsListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitExportsList(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ExportsListContext* CHTLJavaScriptParser::exportsList() {
   ExportsListContext *_localctx = _tracker.createInstance<ExportsListContext>(_ctx, getState());
   enterRule(_localctx, 176, CHTLJavaScriptParser::RuleExportsList);
@@ -8682,6 +9395,14 @@ void CHTLJavaScriptParser::ExportSpecifierContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitExportSpecifier(this);
+}
+
+
+std::any CHTLJavaScriptParser::ExportSpecifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitExportSpecifier(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ExportSpecifierContext* CHTLJavaScriptParser::exportSpecifier() {
@@ -8760,6 +9481,14 @@ void CHTLJavaScriptParser::ExpressionContext::exitRule(tree::ParseTreeListener *
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitExpression(this);
+}
+
+
+std::any CHTLJavaScriptParser::ExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ExpressionContext* CHTLJavaScriptParser::expression() {
@@ -8850,6 +9579,14 @@ void CHTLJavaScriptParser::AssignmentExpressionContext::exitRule(tree::ParseTree
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAssignmentExpression(this);
+}
+
+
+std::any CHTLJavaScriptParser::AssignmentExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAssignmentExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::AssignmentExpressionContext* CHTLJavaScriptParser::assignmentExpression() {
@@ -8943,6 +9680,14 @@ void CHTLJavaScriptParser::AssignmentOperatorContext::exitRule(tree::ParseTreeLi
     parserListener->exitAssignmentOperator(this);
 }
 
+
+std::any CHTLJavaScriptParser::AssignmentOperatorContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAssignmentOperator(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::AssignmentOperatorContext* CHTLJavaScriptParser::assignmentOperator() {
   AssignmentOperatorContext *_localctx = _tracker.createInstance<AssignmentOperatorContext>(_ctx, getState());
   enterRule(_localctx, 184, CHTLJavaScriptParser::RuleAssignmentOperator);
@@ -9011,6 +9756,14 @@ void CHTLJavaScriptParser::ConditionalExpressionContext::exitRule(tree::ParseTre
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitConditionalExpression(this);
+}
+
+
+std::any CHTLJavaScriptParser::ConditionalExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitConditionalExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ConditionalExpressionContext* CHTLJavaScriptParser::conditionalExpression() {
@@ -9085,6 +9838,14 @@ void CHTLJavaScriptParser::CoalesceExpressionContext::exitRule(tree::ParseTreeLi
     parserListener->exitCoalesceExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::CoalesceExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitCoalesceExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::CoalesceExpressionContext* CHTLJavaScriptParser::coalesceExpression() {
   CoalesceExpressionContext *_localctx = _tracker.createInstance<CoalesceExpressionContext>(_ctx, getState());
   enterRule(_localctx, 188, CHTLJavaScriptParser::RuleCoalesceExpression);
@@ -9151,6 +9912,14 @@ void CHTLJavaScriptParser::LogicalORExpressionContext::exitRule(tree::ParseTreeL
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitLogicalORExpression(this);
+}
+
+
+std::any CHTLJavaScriptParser::LogicalORExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLogicalORExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::LogicalORExpressionContext* CHTLJavaScriptParser::logicalORExpression() {
@@ -9223,6 +9992,14 @@ void CHTLJavaScriptParser::LogicalANDExpressionContext::exitRule(tree::ParseTree
     parserListener->exitLogicalANDExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::LogicalANDExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLogicalANDExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::LogicalANDExpressionContext* CHTLJavaScriptParser::logicalANDExpression() {
   LogicalANDExpressionContext *_localctx = _tracker.createInstance<LogicalANDExpressionContext>(_ctx, getState());
   enterRule(_localctx, 192, CHTLJavaScriptParser::RuleLogicalANDExpression);
@@ -9291,6 +10068,14 @@ void CHTLJavaScriptParser::BitwiseORExpressionContext::exitRule(tree::ParseTreeL
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBitwiseORExpression(this);
+}
+
+
+std::any CHTLJavaScriptParser::BitwiseORExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBitwiseORExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::BitwiseORExpressionContext* CHTLJavaScriptParser::bitwiseORExpression() {
@@ -9363,6 +10148,14 @@ void CHTLJavaScriptParser::BitwiseXORExpressionContext::exitRule(tree::ParseTree
     parserListener->exitBitwiseXORExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::BitwiseXORExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBitwiseXORExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::BitwiseXORExpressionContext* CHTLJavaScriptParser::bitwiseXORExpression() {
   BitwiseXORExpressionContext *_localctx = _tracker.createInstance<BitwiseXORExpressionContext>(_ctx, getState());
   enterRule(_localctx, 196, CHTLJavaScriptParser::RuleBitwiseXORExpression);
@@ -9433,6 +10226,14 @@ void CHTLJavaScriptParser::BitwiseANDExpressionContext::exitRule(tree::ParseTree
     parserListener->exitBitwiseANDExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::BitwiseANDExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBitwiseANDExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::BitwiseANDExpressionContext* CHTLJavaScriptParser::bitwiseANDExpression() {
   BitwiseANDExpressionContext *_localctx = _tracker.createInstance<BitwiseANDExpressionContext>(_ctx, getState());
   enterRule(_localctx, 198, CHTLJavaScriptParser::RuleBitwiseANDExpression);
@@ -9501,6 +10302,14 @@ void CHTLJavaScriptParser::EqualityExpressionContext::exitRule(tree::ParseTreeLi
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitEqualityExpression(this);
+}
+
+
+std::any CHTLJavaScriptParser::EqualityExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitEqualityExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::EqualityExpressionContext* CHTLJavaScriptParser::equalityExpression() {
@@ -9580,6 +10389,14 @@ void CHTLJavaScriptParser::RelationalExpressionContext::exitRule(tree::ParseTree
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitRelationalExpression(this);
+}
+
+
+std::any CHTLJavaScriptParser::RelationalExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitRelationalExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::RelationalExpressionContext* CHTLJavaScriptParser::relationalExpression() {
@@ -9663,6 +10480,14 @@ void CHTLJavaScriptParser::ShiftExpressionContext::exitRule(tree::ParseTreeListe
     parserListener->exitShiftExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::ShiftExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitShiftExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ShiftExpressionContext* CHTLJavaScriptParser::shiftExpression() {
   ShiftExpressionContext *_localctx = _tracker.createInstance<ShiftExpressionContext>(_ctx, getState());
   enterRule(_localctx, 204, CHTLJavaScriptParser::RuleShiftExpression);
@@ -9742,6 +10567,14 @@ void CHTLJavaScriptParser::AdditiveExpressionContext::exitRule(tree::ParseTreeLi
     parserListener->exitAdditiveExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::AdditiveExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAdditiveExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::AdditiveExpressionContext* CHTLJavaScriptParser::additiveExpression() {
   AdditiveExpressionContext *_localctx = _tracker.createInstance<AdditiveExpressionContext>(_ctx, getState());
   enterRule(_localctx, 206, CHTLJavaScriptParser::RuleAdditiveExpression);
@@ -9817,6 +10650,14 @@ void CHTLJavaScriptParser::MultiplicativeExpressionContext::exitRule(tree::Parse
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitMultiplicativeExpression(this);
+}
+
+
+std::any CHTLJavaScriptParser::MultiplicativeExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitMultiplicativeExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::MultiplicativeExpressionContext* CHTLJavaScriptParser::multiplicativeExpression() {
@@ -9901,6 +10742,14 @@ void CHTLJavaScriptParser::ExponentiationExpressionContext::exitRule(tree::Parse
     parserListener->exitExponentiationExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::ExponentiationExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitExponentiationExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ExponentiationExpressionContext* CHTLJavaScriptParser::exponentiationExpression() {
   ExponentiationExpressionContext *_localctx = _tracker.createInstance<ExponentiationExpressionContext>(_ctx, getState());
   enterRule(_localctx, 210, CHTLJavaScriptParser::RuleExponentiationExpression);
@@ -9967,6 +10816,14 @@ void CHTLJavaScriptParser::UnaryExpressionContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitUnaryExpression(this);
+}
+
+
+std::any CHTLJavaScriptParser::UnaryExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitUnaryExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::UnaryExpressionContext* CHTLJavaScriptParser::unaryExpression() {
@@ -10108,6 +10965,14 @@ void CHTLJavaScriptParser::UpdateExpressionContext::exitRule(tree::ParseTreeList
     parserListener->exitUpdateExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::UpdateExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitUpdateExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::UpdateExpressionContext* CHTLJavaScriptParser::updateExpression() {
   UpdateExpressionContext *_localctx = _tracker.createInstance<UpdateExpressionContext>(_ctx, getState());
   enterRule(_localctx, 214, CHTLJavaScriptParser::RuleUpdateExpression);
@@ -10211,6 +11076,14 @@ void CHTLJavaScriptParser::LeftHandSideExpressionContext::exitRule(tree::ParseTr
     parserListener->exitLeftHandSideExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::LeftHandSideExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitLeftHandSideExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::LeftHandSideExpressionContext* CHTLJavaScriptParser::leftHandSideExpression() {
   LeftHandSideExpressionContext *_localctx = _tracker.createInstance<LeftHandSideExpressionContext>(_ctx, getState());
   enterRule(_localctx, 216, CHTLJavaScriptParser::RuleLeftHandSideExpression);
@@ -10285,6 +11158,14 @@ void CHTLJavaScriptParser::NewExpressionContext::exitRule(tree::ParseTreeListene
     parserListener->exitNewExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::NewExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitNewExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::NewExpressionContext* CHTLJavaScriptParser::newExpression() {
   NewExpressionContext *_localctx = _tracker.createInstance<NewExpressionContext>(_ctx, getState());
   enterRule(_localctx, 218, CHTLJavaScriptParser::RuleNewExpression);
@@ -10357,6 +11238,14 @@ void CHTLJavaScriptParser::SuperCallContext::exitRule(tree::ParseTreeListener *l
     parserListener->exitSuperCall(this);
 }
 
+
+std::any CHTLJavaScriptParser::SuperCallContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitSuperCall(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::SuperCallContext* CHTLJavaScriptParser::superCall() {
   SuperCallContext *_localctx = _tracker.createInstance<SuperCallContext>(_ctx, getState());
   enterRule(_localctx, 220, CHTLJavaScriptParser::RuleSuperCall);
@@ -10410,6 +11299,14 @@ void CHTLJavaScriptParser::ImportCallContext::exitRule(tree::ParseTreeListener *
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitImportCall(this);
+}
+
+
+std::any CHTLJavaScriptParser::ImportCallContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitImportCall(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ImportCallContext* CHTLJavaScriptParser::importCall() {
@@ -10469,6 +11366,14 @@ void CHTLJavaScriptParser::ArgumentsContext::exitRule(tree::ParseTreeListener *l
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitArguments(this);
+}
+
+
+std::any CHTLJavaScriptParser::ArgumentsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArguments(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ArgumentsContext* CHTLJavaScriptParser::arguments() {
@@ -10542,6 +11447,14 @@ void CHTLJavaScriptParser::ArgumentListContext::exitRule(tree::ParseTreeListener
     parserListener->exitArgumentList(this);
 }
 
+
+std::any CHTLJavaScriptParser::ArgumentListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArgumentList(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ArgumentListContext* CHTLJavaScriptParser::argumentList() {
   ArgumentListContext *_localctx = _tracker.createInstance<ArgumentListContext>(_ctx, getState());
   enterRule(_localctx, 226, CHTLJavaScriptParser::RuleArgumentList);
@@ -10606,6 +11519,14 @@ void CHTLJavaScriptParser::ArgumentContext::exitRule(tree::ParseTreeListener *li
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitArgument(this);
+}
+
+
+std::any CHTLJavaScriptParser::ArgumentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArgument(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ArgumentContext* CHTLJavaScriptParser::argument() {
@@ -10710,6 +11631,14 @@ void CHTLJavaScriptParser::MetaPropertyContext::exitRule(tree::ParseTreeListener
     parserListener->exitMetaProperty(this);
 }
 
+
+std::any CHTLJavaScriptParser::MetaPropertyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitMetaProperty(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::MetaPropertyContext* CHTLJavaScriptParser::metaProperty() {
   MetaPropertyContext *_localctx = _tracker.createInstance<MetaPropertyContext>(_ctx, getState());
   enterRule(_localctx, 230, CHTLJavaScriptParser::RuleMetaProperty);
@@ -10788,6 +11717,14 @@ void CHTLJavaScriptParser::ParenthesizedExpressionContext::exitRule(tree::ParseT
     parserListener->exitParenthesizedExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::ParenthesizedExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitParenthesizedExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ParenthesizedExpressionContext* CHTLJavaScriptParser::parenthesizedExpression() {
   ParenthesizedExpressionContext *_localctx = _tracker.createInstance<ParenthesizedExpressionContext>(_ctx, getState());
   enterRule(_localctx, 232, CHTLJavaScriptParser::RuleParenthesizedExpression);
@@ -10841,6 +11778,14 @@ void CHTLJavaScriptParser::NullLiteralContext::exitRule(tree::ParseTreeListener 
     parserListener->exitNullLiteral(this);
 }
 
+
+std::any CHTLJavaScriptParser::NullLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitNullLiteral(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::NullLiteralContext* CHTLJavaScriptParser::nullLiteral() {
   NullLiteralContext *_localctx = _tracker.createInstance<NullLiteralContext>(_ctx, getState());
   enterRule(_localctx, 234, CHTLJavaScriptParser::RuleNullLiteral);
@@ -10888,6 +11833,14 @@ void CHTLJavaScriptParser::BooleanLiteralContext::exitRule(tree::ParseTreeListen
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBooleanLiteral(this);
+}
+
+
+std::any CHTLJavaScriptParser::BooleanLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBooleanLiteral(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::BooleanLiteralContext* CHTLJavaScriptParser::booleanLiteral() {
@@ -10965,6 +11918,14 @@ void CHTLJavaScriptParser::NumericLiteralContext::exitRule(tree::ParseTreeListen
     parserListener->exitNumericLiteral(this);
 }
 
+
+std::any CHTLJavaScriptParser::NumericLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitNumericLiteral(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::NumericLiteralContext* CHTLJavaScriptParser::numericLiteral() {
   NumericLiteralContext *_localctx = _tracker.createInstance<NumericLiteralContext>(_ctx, getState());
   enterRule(_localctx, 238, CHTLJavaScriptParser::RuleNumericLiteral);
@@ -11027,6 +11988,14 @@ void CHTLJavaScriptParser::StringLiteralContext::exitRule(tree::ParseTreeListene
     parserListener->exitStringLiteral(this);
 }
 
+
+std::any CHTLJavaScriptParser::StringLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitStringLiteral(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::StringLiteralContext* CHTLJavaScriptParser::stringLiteral() {
   StringLiteralContext *_localctx = _tracker.createInstance<StringLiteralContext>(_ctx, getState());
   enterRule(_localctx, 240, CHTLJavaScriptParser::RuleStringLiteral);
@@ -11078,6 +12047,14 @@ void CHTLJavaScriptParser::ArrayLiteralContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitArrayLiteral(this);
+}
+
+
+std::any CHTLJavaScriptParser::ArrayLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArrayLiteral(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ArrayLiteralContext* CHTLJavaScriptParser::arrayLiteral() {
@@ -11152,6 +12129,14 @@ void CHTLJavaScriptParser::ElementListContext::exitRule(tree::ParseTreeListener 
     parserListener->exitElementList(this);
 }
 
+
+std::any CHTLJavaScriptParser::ElementListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitElementList(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ElementListContext* CHTLJavaScriptParser::elementList() {
   ElementListContext *_localctx = _tracker.createInstance<ElementListContext>(_ctx, getState());
   enterRule(_localctx, 244, CHTLJavaScriptParser::RuleElementList);
@@ -11216,6 +12201,14 @@ void CHTLJavaScriptParser::ArrayElementContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitArrayElement(this);
+}
+
+
+std::any CHTLJavaScriptParser::ArrayElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArrayElement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ArrayElementContext* CHTLJavaScriptParser::arrayElement() {
@@ -11331,6 +12324,14 @@ void CHTLJavaScriptParser::ObjectLiteralContext::exitRule(tree::ParseTreeListene
     parserListener->exitObjectLiteral(this);
 }
 
+
+std::any CHTLJavaScriptParser::ObjectLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitObjectLiteral(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ObjectLiteralContext* CHTLJavaScriptParser::objectLiteral() {
   ObjectLiteralContext *_localctx = _tracker.createInstance<ObjectLiteralContext>(_ctx, getState());
   enterRule(_localctx, 248, CHTLJavaScriptParser::RuleObjectLiteral);
@@ -11425,6 +12426,14 @@ void CHTLJavaScriptParser::PropertyDefinitionListContext::exitRule(tree::ParseTr
     parserListener->exitPropertyDefinitionList(this);
 }
 
+
+std::any CHTLJavaScriptParser::PropertyDefinitionListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitPropertyDefinitionList(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::PropertyDefinitionListContext* CHTLJavaScriptParser::propertyDefinitionList() {
   PropertyDefinitionListContext *_localctx = _tracker.createInstance<PropertyDefinitionListContext>(_ctx, getState());
   enterRule(_localctx, 250, CHTLJavaScriptParser::RulePropertyDefinitionList);
@@ -11503,6 +12512,14 @@ void CHTLJavaScriptParser::PropertyDefinitionContext::exitRule(tree::ParseTreeLi
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitPropertyDefinition(this);
+}
+
+
+std::any CHTLJavaScriptParser::PropertyDefinitionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitPropertyDefinition(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::PropertyDefinitionContext* CHTLJavaScriptParser::propertyDefinition() {
@@ -11603,6 +12620,14 @@ void CHTLJavaScriptParser::FunctionExpressionContext::exitRule(tree::ParseTreeLi
     parserListener->exitFunctionExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::FunctionExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFunctionExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::FunctionExpressionContext* CHTLJavaScriptParser::functionExpression() {
   FunctionExpressionContext *_localctx = _tracker.createInstance<FunctionExpressionContext>(_ctx, getState());
   enterRule(_localctx, 254, CHTLJavaScriptParser::RuleFunctionExpression);
@@ -11693,6 +12718,14 @@ void CHTLJavaScriptParser::GeneratorExpressionContext::exitRule(tree::ParseTreeL
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitGeneratorExpression(this);
+}
+
+
+std::any CHTLJavaScriptParser::GeneratorExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitGeneratorExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::GeneratorExpressionContext* CHTLJavaScriptParser::generatorExpression() {
@@ -11789,6 +12822,14 @@ void CHTLJavaScriptParser::AsyncFunctionExpressionContext::exitRule(tree::ParseT
     parserListener->exitAsyncFunctionExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::AsyncFunctionExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAsyncFunctionExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::AsyncFunctionExpressionContext* CHTLJavaScriptParser::asyncFunctionExpression() {
   AsyncFunctionExpressionContext *_localctx = _tracker.createInstance<AsyncFunctionExpressionContext>(_ctx, getState());
   enterRule(_localctx, 258, CHTLJavaScriptParser::RuleAsyncFunctionExpression);
@@ -11881,6 +12922,14 @@ void CHTLJavaScriptParser::AsyncGeneratorExpressionContext::exitRule(tree::Parse
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAsyncGeneratorExpression(this);
+}
+
+
+std::any CHTLJavaScriptParser::AsyncGeneratorExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAsyncGeneratorExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::AsyncGeneratorExpressionContext* CHTLJavaScriptParser::asyncGeneratorExpression() {
@@ -11979,6 +13028,14 @@ void CHTLJavaScriptParser::ClassExpressionContext::exitRule(tree::ParseTreeListe
     parserListener->exitClassExpression(this);
 }
 
+
+std::any CHTLJavaScriptParser::ClassExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitClassExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ClassExpressionContext* CHTLJavaScriptParser::classExpression() {
   ClassExpressionContext *_localctx = _tracker.createInstance<ClassExpressionContext>(_ctx, getState());
   enterRule(_localctx, 262, CHTLJavaScriptParser::RuleClassExpression);
@@ -12061,6 +13118,14 @@ void CHTLJavaScriptParser::ArrowFunctionContext::exitRule(tree::ParseTreeListene
     parserListener->exitArrowFunction(this);
 }
 
+
+std::any CHTLJavaScriptParser::ArrowFunctionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArrowFunction(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ArrowFunctionContext* CHTLJavaScriptParser::arrowFunction() {
   ArrowFunctionContext *_localctx = _tracker.createInstance<ArrowFunctionContext>(_ctx, getState());
   enterRule(_localctx, 264, CHTLJavaScriptParser::RuleArrowFunction);
@@ -12120,6 +13185,14 @@ void CHTLJavaScriptParser::AsyncArrowFunctionContext::exitRule(tree::ParseTreeLi
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitAsyncArrowFunction(this);
+}
+
+
+std::any CHTLJavaScriptParser::AsyncArrowFunctionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitAsyncArrowFunction(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::AsyncArrowFunctionContext* CHTLJavaScriptParser::asyncArrowFunction() {
@@ -12183,6 +13256,14 @@ void CHTLJavaScriptParser::ArrowParametersContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitArrowParameters(this);
+}
+
+
+std::any CHTLJavaScriptParser::ArrowParametersContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArrowParameters(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ArrowParametersContext* CHTLJavaScriptParser::arrowParameters() {
@@ -12274,6 +13355,14 @@ void CHTLJavaScriptParser::ArrowBodyContext::exitRule(tree::ParseTreeListener *l
     parserListener->exitArrowBody(this);
 }
 
+
+std::any CHTLJavaScriptParser::ArrowBodyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArrowBody(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ArrowBodyContext* CHTLJavaScriptParser::arrowBody() {
   ArrowBodyContext *_localctx = _tracker.createInstance<ArrowBodyContext>(_ctx, getState());
   enterRule(_localctx, 270, CHTLJavaScriptParser::RuleArrowBody);
@@ -12346,6 +13435,14 @@ void CHTLJavaScriptParser::YieldExpressionContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitYieldExpression(this);
+}
+
+
+std::any CHTLJavaScriptParser::YieldExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitYieldExpression(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::YieldExpressionContext* CHTLJavaScriptParser::yieldExpression() {
@@ -12431,6 +13528,14 @@ void CHTLJavaScriptParser::TemplateLiteralContext::exitRule(tree::ParseTreeListe
     parserListener->exitTemplateLiteral(this);
 }
 
+
+std::any CHTLJavaScriptParser::TemplateLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitTemplateLiteral(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::TemplateLiteralContext* CHTLJavaScriptParser::templateLiteral() {
   TemplateLiteralContext *_localctx = _tracker.createInstance<TemplateLiteralContext>(_ctx, getState());
   enterRule(_localctx, 274, CHTLJavaScriptParser::RuleTemplateLiteral);
@@ -12499,6 +13604,14 @@ void CHTLJavaScriptParser::TemplateSpansContext::exitRule(tree::ParseTreeListene
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitTemplateSpans(this);
+}
+
+
+std::any CHTLJavaScriptParser::TemplateSpansContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitTemplateSpans(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::TemplateSpansContext* CHTLJavaScriptParser::templateSpans() {
@@ -12583,6 +13696,14 @@ void CHTLJavaScriptParser::TemplateSpanContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitTemplateSpan(this);
+}
+
+
+std::any CHTLJavaScriptParser::TemplateSpanContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitTemplateSpan(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::TemplateSpanContext* CHTLJavaScriptParser::templateSpan() {
@@ -12674,6 +13795,14 @@ void CHTLJavaScriptParser::TemplateMiddleContext::exitRule(tree::ParseTreeListen
     parserListener->exitTemplateMiddle(this);
 }
 
+
+std::any CHTLJavaScriptParser::TemplateMiddleContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitTemplateMiddle(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::TemplateMiddleContext* CHTLJavaScriptParser::templateMiddle() {
   TemplateMiddleContext *_localctx = _tracker.createInstance<TemplateMiddleContext>(_ctx, getState());
   enterRule(_localctx, 280, CHTLJavaScriptParser::RuleTemplateMiddle);
@@ -12727,6 +13856,14 @@ void CHTLJavaScriptParser::RegularExpressionLiteralContext::exitRule(tree::Parse
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitRegularExpressionLiteral(this);
+}
+
+
+std::any CHTLJavaScriptParser::RegularExpressionLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitRegularExpressionLiteral(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::RegularExpressionLiteralContext* CHTLJavaScriptParser::regularExpressionLiteral() {
@@ -12788,6 +13925,14 @@ void CHTLJavaScriptParser::FormalParameterListContext::exitRule(tree::ParseTreeL
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitFormalParameterList(this);
+}
+
+
+std::any CHTLJavaScriptParser::FormalParameterListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFormalParameterList(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::FormalParameterListContext* CHTLJavaScriptParser::formalParameterList() {
@@ -12890,6 +14035,14 @@ void CHTLJavaScriptParser::FormalParameterContext::exitRule(tree::ParseTreeListe
     parserListener->exitFormalParameter(this);
 }
 
+
+std::any CHTLJavaScriptParser::FormalParameterContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFormalParameter(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::FormalParameterContext* CHTLJavaScriptParser::formalParameter() {
   FormalParameterContext *_localctx = _tracker.createInstance<FormalParameterContext>(_ctx, getState());
   enterRule(_localctx, 286, CHTLJavaScriptParser::RuleFormalParameter);
@@ -12945,6 +14098,14 @@ void CHTLJavaScriptParser::RestParameterContext::exitRule(tree::ParseTreeListene
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitRestParameter(this);
+}
+
+
+std::any CHTLJavaScriptParser::RestParameterContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitRestParameter(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::RestParameterContext* CHTLJavaScriptParser::restParameter() {
@@ -13027,6 +14188,14 @@ void CHTLJavaScriptParser::BindingElementContext::exitRule(tree::ParseTreeListen
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBindingElement(this);
+}
+
+
+std::any CHTLJavaScriptParser::BindingElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingElement(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::BindingElementContext* CHTLJavaScriptParser::bindingElement() {
@@ -13123,6 +14292,14 @@ void CHTLJavaScriptParser::BindingPatternContext::exitRule(tree::ParseTreeListen
     parserListener->exitBindingPattern(this);
 }
 
+
+std::any CHTLJavaScriptParser::BindingPatternContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingPattern(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::BindingPatternContext* CHTLJavaScriptParser::bindingPattern() {
   BindingPatternContext *_localctx = _tracker.createInstance<BindingPatternContext>(_ctx, getState());
   enterRule(_localctx, 292, CHTLJavaScriptParser::RuleBindingPattern);
@@ -13191,6 +14368,14 @@ void CHTLJavaScriptParser::ObjectBindingPatternContext::exitRule(tree::ParseTree
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitObjectBindingPattern(this);
+}
+
+
+std::any CHTLJavaScriptParser::ObjectBindingPatternContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitObjectBindingPattern(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::ObjectBindingPatternContext* CHTLJavaScriptParser::objectBindingPattern() {
@@ -13285,6 +14470,14 @@ void CHTLJavaScriptParser::BindingPropertyListContext::exitRule(tree::ParseTreeL
     parserListener->exitBindingPropertyList(this);
 }
 
+
+std::any CHTLJavaScriptParser::BindingPropertyListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingPropertyList(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::BindingPropertyListContext* CHTLJavaScriptParser::bindingPropertyList() {
   BindingPropertyListContext *_localctx = _tracker.createInstance<BindingPropertyListContext>(_ctx, getState());
   enterRule(_localctx, 296, CHTLJavaScriptParser::RuleBindingPropertyList);
@@ -13359,6 +14552,14 @@ void CHTLJavaScriptParser::BindingPropertyContext::exitRule(tree::ParseTreeListe
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBindingProperty(this);
+}
+
+
+std::any CHTLJavaScriptParser::BindingPropertyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingProperty(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::BindingPropertyContext* CHTLJavaScriptParser::bindingProperty() {
@@ -13444,6 +14645,14 @@ void CHTLJavaScriptParser::ArrayBindingPatternContext::exitRule(tree::ParseTreeL
     parserListener->exitArrayBindingPattern(this);
 }
 
+
+std::any CHTLJavaScriptParser::ArrayBindingPatternContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitArrayBindingPattern(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ArrayBindingPatternContext* CHTLJavaScriptParser::arrayBindingPattern() {
   ArrayBindingPatternContext *_localctx = _tracker.createInstance<ArrayBindingPatternContext>(_ctx, getState());
   enterRule(_localctx, 300, CHTLJavaScriptParser::RuleArrayBindingPattern);
@@ -13521,6 +14730,14 @@ void CHTLJavaScriptParser::BindingElementListContext::exitRule(tree::ParseTreeLi
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBindingElementList(this);
+}
+
+
+std::any CHTLJavaScriptParser::BindingElementListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingElementList(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::BindingElementListContext* CHTLJavaScriptParser::bindingElementList() {
@@ -13620,6 +14837,14 @@ void CHTLJavaScriptParser::BindingElisionContext::exitRule(tree::ParseTreeListen
     parserListener->exitBindingElision(this);
 }
 
+
+std::any CHTLJavaScriptParser::BindingElisionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingElision(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::BindingElisionContext* CHTLJavaScriptParser::bindingElision() {
   BindingElisionContext *_localctx = _tracker.createInstance<BindingElisionContext>(_ctx, getState());
   enterRule(_localctx, 304, CHTLJavaScriptParser::RuleBindingElision);
@@ -13671,6 +14896,14 @@ void CHTLJavaScriptParser::FunctionBodyContext::exitRule(tree::ParseTreeListener
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitFunctionBody(this);
+}
+
+
+std::any CHTLJavaScriptParser::FunctionBodyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFunctionBody(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::FunctionBodyContext* CHTLJavaScriptParser::functionBody() {
@@ -13736,6 +14969,14 @@ void CHTLJavaScriptParser::InitializerContext::exitRule(tree::ParseTreeListener 
     parserListener->exitInitializer(this);
 }
 
+
+std::any CHTLJavaScriptParser::InitializerContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitInitializer(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::InitializerContext* CHTLJavaScriptParser::initializer() {
   InitializerContext *_localctx = _tracker.createInstance<InitializerContext>(_ctx, getState());
   enterRule(_localctx, 308, CHTLJavaScriptParser::RuleInitializer);
@@ -13789,6 +15030,14 @@ void CHTLJavaScriptParser::BindingIdentifierContext::exitRule(tree::ParseTreeLis
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBindingIdentifier(this);
+}
+
+
+std::any CHTLJavaScriptParser::BindingIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitBindingIdentifier(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::BindingIdentifierContext* CHTLJavaScriptParser::bindingIdentifier() {
@@ -13868,6 +15117,14 @@ void CHTLJavaScriptParser::IdentifierContext::exitRule(tree::ParseTreeListener *
     parserListener->exitIdentifier(this);
 }
 
+
+std::any CHTLJavaScriptParser::IdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitIdentifier(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::IdentifierContext* CHTLJavaScriptParser::identifier() {
   IdentifierContext *_localctx = _tracker.createInstance<IdentifierContext>(_ctx, getState());
   enterRule(_localctx, 312, CHTLJavaScriptParser::RuleIdentifier);
@@ -13933,6 +15190,14 @@ void CHTLJavaScriptParser::IdentifierNameContext::exitRule(tree::ParseTreeListen
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitIdentifierName(this);
+}
+
+
+std::any CHTLJavaScriptParser::IdentifierNameContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitIdentifierName(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::IdentifierNameContext* CHTLJavaScriptParser::identifierName() {
@@ -14063,6 +15328,14 @@ void CHTLJavaScriptParser::ReservedWordContext::exitRule(tree::ParseTreeListener
     parserListener->exitReservedWord(this);
 }
 
+
+std::any CHTLJavaScriptParser::ReservedWordContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitReservedWord(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::ReservedWordContext* CHTLJavaScriptParser::reservedWord() {
   ReservedWordContext *_localctx = _tracker.createInstance<ReservedWordContext>(_ctx, getState());
   enterRule(_localctx, 316, CHTLJavaScriptParser::RuleReservedWord);
@@ -14186,6 +15459,14 @@ void CHTLJavaScriptParser::KeywordContext::exitRule(tree::ParseTreeListener *lis
     parserListener->exitKeyword(this);
 }
 
+
+std::any CHTLJavaScriptParser::KeywordContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitKeyword(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 CHTLJavaScriptParser::KeywordContext* CHTLJavaScriptParser::keyword() {
   KeywordContext *_localctx = _tracker.createInstance<KeywordContext>(_ctx, getState());
   enterRule(_localctx, 318, CHTLJavaScriptParser::RuleKeyword);
@@ -14243,6 +15524,14 @@ void CHTLJavaScriptParser::FutureReservedWordContext::exitRule(tree::ParseTreeLi
   auto parserListener = dynamic_cast<CHTLJavaScriptListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitFutureReservedWord(this);
+}
+
+
+std::any CHTLJavaScriptParser::FutureReservedWordContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CHTLJavaScriptVisitor*>(visitor))
+    return parserVisitor->visitFutureReservedWord(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 CHTLJavaScriptParser::FutureReservedWordContext* CHTLJavaScriptParser::futureReservedWord() {
