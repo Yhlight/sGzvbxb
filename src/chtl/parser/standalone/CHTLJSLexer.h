@@ -33,11 +33,11 @@ protected:
             // 读取指令类型
             std::string directive = readDirective();
             if (directive == "Element") {
-                return std::make_shared<Token>(TokenType::AT_ELEMENT, "@Element", startLine, startColumn);
+                return std::make_shared<Token>(TokenType::KEYWORD_ELEMENT, "@Element", startLine, startColumn);
             } else if (directive == "Style") {
-                return std::make_shared<Token>(TokenType::AT_STYLE, "@Style", startLine, startColumn);
+                return std::make_shared<Token>(TokenType::KEYWORD_STYLE_GROUP, "@Style", startLine, startColumn);
             } else if (directive == "Var") {
-                return std::make_shared<Token>(TokenType::AT_VAR, "@Var", startLine, startColumn);
+                return std::make_shared<Token>(TokenType::KEYWORD_VAR_GROUP, "@Var", startLine, startColumn);
             } else {
                 return std::make_shared<Token>(TokenType::AT, "@" + directive, startLine, startColumn);
             }
@@ -56,7 +56,7 @@ protected:
         
         // var 关键字（仅用于CHTL扩展）
         if (matchKeyword("var")) {
-            return std::make_shared<Token>(TokenType::KEYWORD_VAR, "var", startLine, startColumn);
+            return std::make_shared<Token>(TokenType::IDENTIFIER, "var", startLine, startColumn);
         }
         
         // from 关键字（用于命名空间）

@@ -222,7 +222,7 @@ public:
     static SpecializationOperation parseDeleteStatement(const std::string& statement);
     
     // 解析插入语句
-    static InsertOperation parseInsertStatement(const std::string& statement);
+    static CustomElement::InsertOperation parseInsertStatement(const std::string& statement);
     
     // 解析变量特例化
     static std::pair<std::string, std::string> parseVariableSpecialization(const std::string& expr);

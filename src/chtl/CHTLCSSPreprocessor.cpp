@@ -368,9 +368,8 @@ void CSSPreprocessor::processValue() {
             
             // 不是变量组使用，回退并输出原文
             size_t currentPos = scanner->getPosition();
-            for (size_t i = savePos; i < currentPos; i++) {
-                valueBuffer << input[i];
-            }
+            // 简单地输出变量名本身
+            valueBuffer << varGroup << "(" << varName;
         } else {
             valueBuffer << scanner->advance();
         }
@@ -391,7 +390,7 @@ std::string CSSPreprocessor::expandStyleGroup(const std::string& name) {
     
     // 从模板管理器获取样式组
     if (templateManager) {
-        auto styleTemplate = templateManager->findTemplate(TemplateType::Style, name);
+        auto styleTemplate = templateManager->findTemplate(name, TemplateType::STYLE);
         if (styleTemplate) {
             auto styles = std::static_pointer_cast<StyleTemplate>(styleTemplate)->getAllStyles();
             for (const auto& [prop, value] : styles) {
@@ -405,10 +404,12 @@ std::string CSSPreprocessor::expandStyleGroup(const std::string& name) {
     
     // 从自定义管理器获取样式组
     if (customManager) {
-        auto customStyle = customManager->findCustom(CustomType::Style, name);
+        auto customStyle = customManager->findCustomStyle(name);
         if (customStyle) {
             auto styleGroup = std::static_pointer_cast<CustomStyleGroup>(customStyle);
-            auto styles = styleGroup->getEffectiveStyles();
+            // TODO: 需要传递正确的templateMap参数
+            std::unordered_map<std::string, std::shared_ptr<StyleTemplate>> emptyMap;
+            auto styles = styleGroup->getEffectiveStyles(emptyMap);
             
             for (const auto& [prop, value] : styles) {
                 if (styleGroup->requiresValue(prop) && value.empty()) {
@@ -442,7 +443,7 @@ std::string CSSPreprocessor::resolveVariable(const std::string& varGroup, const 
     
     // 从模板管理器获取变量组
     if (templateManager) {
-        auto varTemplate = templateManager->findTemplate(TemplateType::Var, varGroup);
+        auto varTemplate = templateManager->findTemplate(varGroup, TemplateType::VAR);
         if (varTemplate) {
             auto varGroupTemplate = std::static_pointer_cast<VarTemplate>(varTemplate);
             std::string value = varGroupTemplate->getVariable(varName);
@@ -456,10 +457,11 @@ std::string CSSPreprocessor::resolveVariable(const std::string& varGroup, const 
     
     // 从自定义管理器获取变量组
     if (customManager) {
-        auto customVar = customManager->findCustom(CustomType::Var, varGroup);
+        auto customVar = customManager->findCustomVar(varGroup);
         if (customVar) {
             auto varGroupCustom = std::static_pointer_cast<CustomVarGroup>(customVar);
-            std::string value = varGroupCustom->getVariable(varName);
+            auto valueOpt = varGroupCustom->getVariable(varName);
+            std::string value = valueOpt.value_or("");
             
             if (!value.empty()) {
                 resolvedVarGroups[varGroup][varName] = value;

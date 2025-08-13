@@ -70,6 +70,8 @@ enum class TokenType {
     // 操作符
     LBRACE,             // {
     RBRACE,             // }
+    DOUBLE_LBRACE,      // {{
+    DOUBLE_RBRACE,      // }}
     LBRACKET,           // [
     RBRACKET,           // ]
     LPAREN,             // (

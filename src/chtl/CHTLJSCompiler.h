@@ -8,9 +8,9 @@
 #include <unordered_set>
 #include <sstream>
 #include "CHTLContext.h"
-#include "../../generated/JavaScriptLexer.h"
-#include "../../generated/JavaScriptParser.h"
-#include "../../generated/JavaScriptBaseListener.h"
+#include "../../generated/javascript/grammars/JavaScriptLexer.h"
+#include "../../generated/javascript/grammars/JavaScriptParser.h"
+#include "../../generated/javascript/grammars/JavaScriptBaseListener.h"
 
 namespace chtl {
 

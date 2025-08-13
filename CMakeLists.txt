@@ -93,6 +93,12 @@ file(GLOB_RECURSE CHTL_CORE_SOURCES
     src/chtl/utils/*.cpp
 )
 
+# 临时排除有问题的文件
+list(REMOVE_ITEM SCANNER_SOURCES 
+    ${CMAKE_SOURCE_DIR}/src/chtl/scanner/ScannerParserIntegration.cpp
+    ${CMAKE_SOURCE_DIR}/src/chtl/scanner/ScannerIntegrator.cpp
+)
+
 # ===== CHTL独立解析器 =====
 file(GLOB_RECURSE CHTL_PARSER_SOURCES
     src/chtl/parser/standalone/ParserRuntime.cpp

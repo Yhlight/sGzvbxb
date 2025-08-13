@@ -20,13 +20,13 @@ public:
         while (tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
             // 只处理CHTL特有的结构
             if (tokens_->LT(1)->getType() == TokenType::AT ||
-                tokens_->LT(1)->getType() == TokenType::AT_ELEMENT ||
-                tokens_->LT(1)->getType() == TokenType::AT_STYLE ||
-                tokens_->LT(1)->getType() == TokenType::AT_VAR) {
+                tokens_->LT(1)->getType() == TokenType::KEYWORD_ELEMENT ||
+                tokens_->LT(1)->getType() == TokenType::KEYWORD_STYLE_GROUP ||
+                tokens_->LT(1)->getType() == TokenType::KEYWORD_VAR_GROUP) {
                 ctx->addChild(chtlDirective());
             } else if (tokens_->LT(1)->getType() == TokenType::DOUBLE_LBRACE) {
                 ctx->addChild(chtlInterpolation());
-            } else if (tokens_->LT(1)->getType() == TokenType::KEYWORD_VAR &&
+            } else if (tokens_->LT(1)->getText() == "var" &&
                       tokens_->LT(2)->getType() == TokenType::IDENTIFIER &&
                       tokens_->LT(3)->getType() == TokenType::EQUALS &&
                       tokens_->LT(4)->getType() == TokenType::AT) {
@@ -60,7 +60,7 @@ private:
         }
         
         // 可选的参数（仅Element）
-        if (atToken->getType() == TokenType::AT_ELEMENT && match(TokenType::LPAREN)) {
+        if (atToken->getType() == TokenType::KEYWORD_ELEMENT && match(TokenType::LPAREN)) {
             ctx->addChild(argumentList());
             consume(TokenType::RPAREN, "Expected )");
         }
@@ -94,7 +94,7 @@ private:
     std::shared_ptr<ParseContext> chtlVarDeclaration() {
         auto ctx = std::make_shared<ParseContext>("chtlVarDeclaration");
         
-        consume(TokenType::KEYWORD_VAR, "Expected var");
+        consume(TokenType::IDENTIFIER, "Expected var");
         
         auto varName = consume(TokenType::IDENTIFIER, "Expected variable name");
         ctx->addChild(std::make_shared<TerminalNode>(varName));
@@ -120,11 +120,11 @@ private:
         // 收集所有非CHTL特有的token作为原始JS
         while (tokens_->LT(1)->getType() != TokenType::EOF_TOKEN &&
                tokens_->LT(1)->getType() != TokenType::AT &&
-               tokens_->LT(1)->getType() != TokenType::AT_ELEMENT &&
-               tokens_->LT(1)->getType() != TokenType::AT_STYLE &&
-               tokens_->LT(1)->getType() != TokenType::AT_VAR &&
+               tokens_->LT(1)->getType() != TokenType::KEYWORD_ELEMENT &&
+               tokens_->LT(1)->getType() != TokenType::KEYWORD_STYLE_GROUP &&
+               tokens_->LT(1)->getType() != TokenType::KEYWORD_VAR_GROUP &&
                tokens_->LT(1)->getType() != TokenType::DOUBLE_LBRACE &&
-               !(tokens_->LT(1)->getType() == TokenType::KEYWORD_VAR &&
+                               !(tokens_->LT(1)->getText() == "var" &&
                  tokens_->LT(2)->getType() == TokenType::IDENTIFIER &&
                  tokens_->LT(3)->getType() == TokenType::EQUALS &&
                  tokens_->LT(4)->getType() == TokenType::AT)) {

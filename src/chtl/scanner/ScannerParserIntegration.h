@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../CHTLUnifiedScanner.h"
-#include "../generated/CHTLLexer.h"
+#include "../../generated/chtl/grammars/CHTLLexer.h"
 #include "../generated/CHTLParser.h"
 #include "../generated/CSSLexer.h"
 #include "../generated/CSSParser.h"

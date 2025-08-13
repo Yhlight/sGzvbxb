@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 #include <optional>
 #include "CHTLContext.h"
 
@@ -88,9 +89,13 @@ public:
         const std::unordered_map<std::string, std::shared_ptr<StyleTemplate>>& templateMap) const;
 };
 
+// 前向声明
+class CustomElement;
+
 // 元素模板
 class ElementTemplate : public TemplateDefinition {
-private:
+    friend class CustomElement;  // 允许CustomElement访问私有成员
+public:
     struct ElementNode {
         std::string name;
         std::unordered_map<std::string, std::string> attributes;
@@ -100,6 +105,7 @@ private:
         bool hasStyleBlock;
     };
     
+private:
     std::vector<std::shared_ptr<ElementNode>> elements;
     std::vector<std::string> inheritedTemplates;
     
@@ -119,6 +125,9 @@ public:
     // 获取所有元素（包括继承的）
     std::vector<std::shared_ptr<ElementNode>> getAllElements(
         const std::unordered_map<std::string, std::shared_ptr<ElementTemplate>>& templateMap) const;
+    
+    // 访问器方法
+    const std::vector<std::shared_ptr<ElementNode>>& getElements() const { return elements; }
 };
 
 // 变量组模板

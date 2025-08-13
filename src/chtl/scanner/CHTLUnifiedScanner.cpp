@@ -1,6 +1,7 @@
 #include "CHTLUnifiedScanner.h"
 #include <algorithm>
 #include <cctype>
+#include <sstream>
 
 namespace chtl {
 namespace scanner {

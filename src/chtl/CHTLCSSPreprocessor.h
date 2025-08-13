@@ -13,6 +13,9 @@
 
 namespace chtl {
 
+// 前向声明
+class CSSCompiler;
+
 // CSS预处理状态
 enum class CSSPreprocessState {
     Normal,              // 普通CSS

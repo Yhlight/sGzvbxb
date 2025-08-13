@@ -66,8 +66,8 @@ public:
     bool hasErrors() const { return !errors_.empty(); }
     const std::vector<std::string>& getErrors() const { return errors_; }
     
-private:
-    // 当前位置
+protected:
+    // 当前位置 - 改为protected以便派生类访问
     size_t pos_;
     size_t line_;
     size_t column_;
@@ -76,23 +76,10 @@ private:
     // 上下文栈
     std::stack<ScannerContext> contextStack_;
     
-    // 片段处理器
-    std::unordered_map<FragmentType, std::function<void(const CodeFragment&)>> handlers_;
-    
     // 错误列表
     std::vector<std::string> errors_;
     
-    // 扫描方法
-    void scanTopLevel(std::vector<CodeFragment>& fragments);
-    void scanHTMLElement(std::vector<CodeFragment>& fragments);
-    void scanStyleBlock(std::vector<CodeFragment>& fragments);
-    void scanScriptBlock(std::vector<CodeFragment>& fragments);
-    void scanCHTLJavaScript(std::vector<CodeFragment>& fragments);
-    void scanTemplate(std::vector<CodeFragment>& fragments);
-    void scanCustom(std::vector<CodeFragment>& fragments);
-    void scanOrigin(std::vector<CodeFragment>& fragments, const std::string& originType);
-    
-    // 辅助方法
+    // 辅助方法 - 改为protected以便派生类使用
     char peek() const;
     char peekNext() const;
     char peekAhead(size_t n) const;
@@ -100,6 +87,7 @@ private:
     void skipWhitespace();
     bool match(const std::string& text);
     bool matchKeyword(const std::string& keyword);
+    bool matchAt(size_t position, const std::string& text) const;  // 添加缺失的声明
     std::string readUntil(const std::string& delimiter);
     std::string readUntilAny(const std::vector<std::string>& delimiters);
     std::string readIdentifier();
@@ -111,12 +99,27 @@ private:
     void popContext();
     ScannerContext currentContext() const;
     
-    // 片段创建
+    // 片段创建 - 改为protected以便派生类使用
     void addFragment(std::vector<CodeFragment>& fragments, 
                     FragmentType type, 
                     const std::string& content,
                     size_t startLine, size_t startColumn,
                     size_t endLine, size_t endColumn);
+    
+private:
+    // 片段处理器
+    std::unordered_map<FragmentType, std::function<void(const CodeFragment&)>> handlers_;
+                    
+private:
+    // 扫描方法
+    void scanTopLevel(std::vector<CodeFragment>& fragments);
+    void scanHTMLElement(std::vector<CodeFragment>& fragments);
+    void scanStyleBlock(std::vector<CodeFragment>& fragments);
+    void scanScriptBlock(std::vector<CodeFragment>& fragments);
+    void scanCHTLJavaScript(std::vector<CodeFragment>& fragments);
+    void scanTemplate(std::vector<CodeFragment>& fragments);
+    void scanCustom(std::vector<CodeFragment>& fragments);
+    void scanOrigin(std::vector<CodeFragment>& fragments, const std::string& originType);
     
     // 错误处理
     void reportError(const std::string& message);

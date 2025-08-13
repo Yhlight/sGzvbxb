@@ -152,12 +152,16 @@ class CSSOptimizer {
 public:
     // 优化选项
     struct Options {
-        bool mergeRules = true;         // 合并相同选择器的规则
-        bool removeEmptyRules = true;   // 移除空规则
-        bool shorthandProperties = true; // 使用简写属性
-        bool removeRedundant = true;    // 移除冗余声明
-        bool optimizeColors = true;     // 优化颜色值
-        bool optimizeUnits = true;      // 优化单位
+        bool mergeRules;         // 合并相同选择器的规则
+        bool removeEmptyRules;   // 移除空规则
+        bool shorthandProperties; // 使用简写属性
+        bool removeRedundant;    // 移除冗余声明
+        bool optimizeColors;     // 优化颜色值
+        bool optimizeUnits;      // 优化单位
+        
+        Options() : mergeRules(true), removeEmptyRules(true), 
+                   shorthandProperties(true), removeRedundant(true),
+                   optimizeColors(true), optimizeUnits(true) {}
     };
     
 private:

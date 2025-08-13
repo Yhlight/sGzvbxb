@@ -8,8 +8,8 @@
 #include <vector>
 #include <random>
 #include "antlr4-runtime.h"
-#include "generated/JSLexer.h"
-#include "generated/JSParser.h"
+#include "../generated/javascript/grammars/JavaScriptLexer.h"
+#include "../generated/javascript/grammars/JavaScriptParser.h"
 #include "generated/JSParserBaseVisitor.h"
 
 namespace chtl {
