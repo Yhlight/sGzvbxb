@@ -122,10 +122,9 @@ set(SCANNER_SOURCES
 
 # ===== 配置系统 - 由CHTL独立处理 =====
 file(GLOB_RECURSE CONFIG_SOURCES
-    # 暂时禁用配置系统，需要修复API不匹配问题
-    # src/chtl/config/ConfigurationSystem_v2.cpp
-    # src/chtl/parser/standalone/ConfigLexer.cpp
-    # src/chtl/parser/standalone/ConfigParser.cpp
+    # 使用不依赖ANTLR4的独立配置系统
+    src/chtl/config/ConfigurationSystem.cpp
+    src/chtl/parser/standalone/ConfigParser.cpp
 )
 
 # ===== CSS解析器 - 使用ANTLR4 =====

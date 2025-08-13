@@ -96,6 +96,19 @@ enum class TokenType {
     GREATER,            // >
     LESS,               // <
     TILDE,              // ~
+    ARROW,              // ->
+    BANG,               // !
+    BANG_EQUAL,         // !=
+    LESS_EQUAL,         // <=
+    GREATER_EQUAL,      // >=
+    
+    // 数据类型
+    BOOLEAN,            // true/false
+    NULL_LITERAL,       // null
+    
+    // 配置关键字
+    KEYWORD_CONFIGURATION, // Configuration
+    KEYWORD_NAME,       // Name
     
     // 注释
     COMMENT,            // //

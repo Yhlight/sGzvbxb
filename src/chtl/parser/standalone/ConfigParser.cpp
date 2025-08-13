@@ -1,5 +1,4 @@
 #include "ConfigParser.h"
-#include "ConfigLexer.h"
 #include <sstream>
 
 namespace chtl {

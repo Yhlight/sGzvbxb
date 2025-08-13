@@ -8,7 +8,7 @@ namespace chtl {
 namespace config {
 
 // 使用独立的配置解析器，不依赖ANTLR4
-bool ConfigurationSystem::loadFromFile(const std::string& filepath) {
+bool ConfigurationSystem::loadConfigurationFromFile(const std::string& filepath) {
     std::ifstream file(filepath);
     if (!file.is_open()) {
         std::cerr << "Error: Cannot open configuration file: " << filepath << std::endl;
@@ -19,10 +19,10 @@ bool ConfigurationSystem::loadFromFile(const std::string& filepath) {
     buffer << file.rdbuf();
     std::string content = buffer.str();
     
-    return loadFromString(content);
+    return loadConfiguration(content);
 }
 
-bool ConfigurationSystem::loadFromString(const std::string& content) {
+bool ConfigurationSystem::loadConfiguration(const std::string& content) {
     // 使用独立的配置解析器
     parser::ConfigLexer lexer(content);
     auto tokens = lexer.tokenize();
@@ -37,36 +37,42 @@ bool ConfigurationSystem::loadFromString(const std::string& content) {
     }
     
     // 清空现有配置
-    configurations_.clear();
-    nameGroups_.clear();
+    configItems.clear();
+    nameGroup = NameGroup();
     
     // 处理解析结果
     for (const auto& [groupName, entries] : result.groups) {
         if (groupName == "DEFAULT" || groupName.empty()) {
             // 默认组直接处理
             for (const auto& [key, value] : entries) {
-                configurations_[key] = value;
+                configItems[key] = ConfigValue{value};
             }
         } else if (groupName == "Configuration") {
             // 配置组
             for (const auto& [key, value] : entries) {
-                configurations_[key] = value;
+                configItems[key] = ConfigValue{value};
             }
-        } else {
+        } else if (groupName == "Name") {
             // 名称组
-            NameGroup group;
-            group.name = groupName;
+            nameGroup.name = "Name";
             
             for (const auto& [key, value] : entries) {
-                group.options[key] = value;
+                nameGroup.types[key] = value;
             }
-            
-            nameGroups_[groupName] = group;
         }
     }
     
     // 应用默认配置
-    applyDefaults();
+    // 应用默认值
+    if (configItems.find("indexInitialCount") != configItems.end()) {
+        indexInitialCount = std::get<int>(configItems["indexInitialCount"].value);
+    }
+    if (configItems.find("disableNameGroup") != configItems.end()) {
+        disableNameGroup = std::get<bool>(configItems["disableNameGroup"].value);
+    }
+    if (configItems.find("debugMode") != configItems.end()) {
+        debugMode = std::get<bool>(configItems["debugMode"].value);
+    }
     
     // 验证配置
     if (!validateConfiguration()) {
@@ -77,7 +83,7 @@ bool ConfigurationSystem::loadFromString(const std::string& content) {
 }
 
 // 保存配置到文件
-bool ConfigurationSystem::saveToFile(const std::string& filepath) const {
+bool saveConfigurationToFile(const std::string& filepath) {
     std::ofstream file(filepath);
     if (!file.is_open()) {
         std::cerr << "Error: Cannot create configuration file: " << filepath << std::endl;
