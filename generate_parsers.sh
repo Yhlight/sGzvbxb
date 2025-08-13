@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ANTLR4 jar文件路径
-ANTLR_JAR="/tmp/antlr-4.13.1-complete.jar"
+ANTLR_JAR="$(dirname "$0")/tools/antlr-4.13.1-complete.jar"
 
 # 检查jar文件是否存在
 if [ ! -f "$ANTLR_JAR" ]; then

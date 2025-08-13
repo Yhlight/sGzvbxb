@@ -1,0 +1,30 @@
+// 简单的CHTL Hello World示例
+
+html
+{
+    head
+    {
+        title
+        {
+            text { "Hello CHTL" }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: container;
+            
+            h1
+            {
+                text { "Hello, CHTL!" }
+            }
+            
+            p
+            {
+                text { "欢迎来到CHTL的世界" }
+            }
+        }
+    }
+}

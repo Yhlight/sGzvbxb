@@ -13,7 +13,7 @@ public:
     PrecisionScanner();
     
     // 重写扫描方法以实现精准切割
-    std::vector<CodeFragment> scan(const std::string& input) override;
+    std::vector<CodeFragment> scan(const std::string& input);
     
 private:
     // 精准切割script块

@@ -77,7 +77,7 @@
         // 禁用方括号自动补全，避免与CHTL的[]关键字冲突
         "editor.autoClosingBrackets": "never",
         "editor.autoSurround": "never",
-        "editor.wordBasedSuggestions": false,
+        "editor.wordBasedSuggestions": "off",
         "editor.suggest.showKeywords": true,
         "editor.suggest.insertMode": "replace"
     },
