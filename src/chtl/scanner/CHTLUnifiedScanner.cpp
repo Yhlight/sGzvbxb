@@ -153,11 +153,8 @@ void CHTLUnifiedScanner::scanScriptBlock(std::vector<CodeFragment>& fragments) {
         
         // 检查CHTL扩展标记
         if (scanPos + 1 < input_.size()) {
-            // @Element, @Style, @Var
-            if (input_[scanPos] == '@' && 
-                (matchAt(scanPos + 1, "Element") || 
-                 matchAt(scanPos + 1, "Style") || 
-                 matchAt(scanPos + 1, "Var"))) {
+            // -> 操作符
+            if (input_[scanPos] == '-' && input_[scanPos + 1] == '>') {
                 hasCHTLExtensions = true;
                 break;
             }
@@ -166,51 +163,30 @@ void CHTLUnifiedScanner::scanScriptBlock(std::vector<CodeFragment>& fragments) {
                 hasCHTLExtensions = true;
                 break;
             }
-            // var x = @...
-            if (matchAt(scanPos, "var") && scanPos + 3 < input_.size()) {
-                size_t tempPos = scanPos + 3;
-                while (tempPos < input_.size() && std::isspace(input_[tempPos])) tempPos++;
-                while (tempPos < input_.size() && (std::isalnum(input_[tempPos]) || input_[tempPos] == '_')) tempPos++;
-                while (tempPos < input_.size() && std::isspace(input_[tempPos])) tempPos++;
-                if (tempPos < input_.size() && input_[tempPos] == '=') {
-                    tempPos++;
-                    while (tempPos < input_.size() && std::isspace(input_[tempPos])) tempPos++;
-                    if (tempPos < input_.size() && input_[tempPos] == '@') {
-                        hasCHTLExtensions = true;
-                        break;
-                    }
-                }
+            // listen 方法调用
+            if (matchAt(scanPos, ".listen(") || 
+                (scanPos > 0 && std::isspace(input_[scanPos-1]) && matchAt(scanPos, "listen("))) {
+                hasCHTLExtensions = true;
+                break;
+            }
+            // animate 方法调用
+            if (matchAt(scanPos, ".animate(") || 
+                (scanPos > 0 && std::isspace(input_[scanPos-1]) && matchAt(scanPos, "animate("))) {
+                hasCHTLExtensions = true;
+                break;
             }
         }
         
         scanPos++;
     }
     
-    // 根据是否有CHTL扩展决定片段类型
+    // 根据是否有CHTL JS扩展决定片段类型
     if (hasCHTLExtensions) {
+        // 有CHTL JS特征，标记为CHTL_JS片段
         scanCHTLJavaScript(fragments);
     } else {
-        // 纯JavaScript，收集整个块
-        std::string jsContent;
-        braceCount = 1;
-        
-        while (pos_ < input_.size() && braceCount > 0) {
-            char c = peek();
-            
-            if (c == '{') {
-                braceCount++;
-            } else if (c == '}') {
-                braceCount--;
-                if (braceCount == 0) break;
-            }
-            
-            jsContent += advance();
-        }
-        
-        if (!jsContent.empty()) {
-            addFragment(fragments, FragmentType::JS, jsContent,
-                       startLine, startColumn, line_, column_);
-        }
+        // 没有CHTL JS特征，进一步检查是否需要混合处理
+        scanMixedScriptContent(fragments);
     }
 }
 
@@ -239,6 +215,77 @@ void CHTLUnifiedScanner::scanCHTLJavaScript(std::vector<CodeFragment>& fragments
     if (!chtlJsContent.empty()) {
         addFragment(fragments, FragmentType::CHTL_JS, chtlJsContent,
                    startLine, startColumn, line_, column_);
+    }
+}
+
+void CHTLUnifiedScanner::scanMixedScriptContent(std::vector<CodeFragment>& fragments) {
+    size_t startLine = line_;
+    size_t startColumn = column_;
+    int braceCount = 1;
+    std::string currentContent;
+    FragmentType currentType = FragmentType::JS;
+    size_t fragmentStart = pos_;
+    size_t fragmentStartLine = line_;
+    size_t fragmentStartColumn = column_;
+    
+    while (pos_ < input_.size() && braceCount > 0) {
+        char c = peek();
+        
+        // 检查是否遇到CHTL特征
+        if (c == '@' && pos_ + 1 < input_.size()) {
+            // 检查是否是@Var等CHTL特征
+            if (matchAt(pos_ + 1, "Var") || 
+                matchAt(pos_ + 1, "Element") || 
+                matchAt(pos_ + 1, "Style")) {
+                
+                // 保存当前JS片段
+                if (!currentContent.empty()) {
+                    addFragment(fragments, FragmentType::JS, currentContent,
+                               fragmentStartLine, fragmentStartColumn, line_, column_);
+                }
+                
+                // 开始收集CHTL片段
+                fragmentStart = pos_;
+                fragmentStartLine = line_;
+                fragmentStartColumn = column_;
+                currentContent = "";
+                
+                // 收集@Var表达式
+                while (pos_ < input_.size() && 
+                       (std::isalnum(peek()) || peek() == '@' || peek() == '_' || 
+                        peek() == '(' || peek() == ')' || peek() == '.')) {
+                    currentContent += advance();
+                }
+                
+                // 添加CHTL片段
+                if (!currentContent.empty()) {
+                    addFragment(fragments, FragmentType::CHTL, currentContent,
+                               fragmentStartLine, fragmentStartColumn, line_, column_);
+                }
+                
+                // 重置为JS模式
+                currentContent = "";
+                fragmentStart = pos_;
+                fragmentStartLine = line_;
+                fragmentStartColumn = column_;
+                continue;
+            }
+        }
+        
+        if (c == '{') {
+            braceCount++;
+        } else if (c == '}') {
+            braceCount--;
+            if (braceCount == 0) break;
+        }
+        
+        currentContent += advance();
+    }
+    
+    // 保存最后的JS片段
+    if (!currentContent.empty()) {
+        addFragment(fragments, FragmentType::JS, currentContent,
+                   fragmentStartLine, fragmentStartColumn, line_, column_);
     }
 }
 

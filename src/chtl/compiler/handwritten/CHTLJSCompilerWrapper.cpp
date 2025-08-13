@@ -1,5 +1,6 @@
 #include "CHTLJSCompilerWrapper.h"
 #include "../../parser/standalone/CHTLJSLexer.h"
+#include "../../parser/standalone/CHTLJSCodeGenerator.h"
 #include "../../error/ErrorCollector.h"
 #include <sstream>
 
@@ -39,13 +40,10 @@ CompileResult CHTLJSCompilerWrapper::compile(const scanner::CodeFragment& fragme
             return result;
         }
         
-        // TODO: 实现代码生成
-        // 目前直接返回原始代码，后续需要实现CHTL JS特性的转换
-        result.output = fragment.content;
+        // 使用代码生成器生成JavaScript
+        parser::CHTLJSCodeGenerator generator;
+        result.output = generator.generate(parseTree);
         result.success = true;
-        
-        // 添加注释标记这是CHTL JS代码
-        result.output = "/* CHTL JS Enhanced Code */\n" + result.output;
         
     } catch (const std::exception& e) {
         result.success = false;
