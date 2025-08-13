@@ -1,0 +1,137 @@
+{
+    "name": "chtl-language-support",
+    "displayName": "CHTL Language Support",
+    "description": "Language support for CHTL (C++ Hypertext Language)",
+    "version": "0.1.0",
+    "publisher": "chtl-team",
+    "engines": {
+        "vscode": "^1.74.0"
+    },
+    "categories": [
+        "Programming Languages",
+        "Formatters",
+        "Linters"
+    ],
+    "activationEvents": [
+        "onLanguage:chtl"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "languages": [{
+            "id": "chtl",
+            "aliases": ["CHTL", "chtl"],
+            "extensions": [".chtl"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "chtl",
+            "scopeName": "source.chtl",
+            "path": "./syntaxes/chtl.tmLanguage.json"
+        }],
+        "configuration": {
+            "type": "object",
+            "title": "CHTL",
+            "properties": {
+                "chtl.compiler.path": {
+                    "type": "string",
+                    "default": "chtl",
+                    "description": "Path to the CHTL compiler executable"
+                },
+                "chtl.formatting.enable": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable CHTL formatting"
+                },
+                "chtl.linting.enable": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable CHTL linting"
+                },
+                "chtl.autocomplete.enable": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable CHTL autocomplete"
+                },
+                "chtl.autocomplete.showHTMLElements": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show HTML elements in autocomplete"
+                },
+                "chtl.autocomplete.showCHTLDirectives": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show CHTL directives in autocomplete"
+                },
+                "chtl.validation.validateOnType": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Validate CHTL files while typing"
+                },
+                "chtl.validation.validateOnSave": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Validate CHTL files on save"
+                }
+            }
+        },
+        "commands": [
+            {
+                "command": "chtl.compile",
+                "title": "CHTL: Compile Current File"
+            },
+            {
+                "command": "chtl.compileAll",
+                "title": "CHTL: Compile All Files"
+            },
+            {
+                "command": "chtl.preview",
+                "title": "CHTL: Preview in Browser"
+            },
+            {
+                "command": "chtl.format",
+                "title": "CHTL: Format Document"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "chtl.compile",
+                "key": "ctrl+shift+b",
+                "mac": "cmd+shift+b",
+                "when": "resourceExtname == .chtl"
+            },
+            {
+                "command": "chtl.preview",
+                "key": "ctrl+shift+v",
+                "mac": "cmd+shift+v",
+                "when": "resourceExtname == .chtl"
+            }
+        ],
+        "snippets": [
+            {
+                "language": "chtl",
+                "path": "./snippets/chtl-snippets.json"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.74.0",
+        "@types/node": "^18.x",
+        "@typescript-eslint/eslint-plugin": "^5.45.0",
+        "@typescript-eslint/parser": "^5.45.0",
+        "eslint": "^8.28.0",
+        "typescript": "^4.9.3"
+    },
+    "dependencies": {
+        "vscode-languageclient": "^8.0.2",
+        "vscode-languageserver": "^8.0.2",
+        "vscode-languageserver-textdocument": "^1.0.8"
+    }
+}

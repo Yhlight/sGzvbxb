@@ -117,6 +117,9 @@ private:
     void skipToNextFeature();
     std::string scanUntilChar(char delimiter);
     std::string scanBalanced(char open, char close);
+    std::string scanIdentifier();
+    std::string peekWord();
+    bool isHTMLElement(const std::string& word);
 };
 
 } // namespace scanner
