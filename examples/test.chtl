@@ -1,0 +1,99 @@
+-- CHTL示例文件 - 使用珂朵莉模块
+-- 导入珂朵莉CMOD模块
+[Import] @Chtl from Chtholly
+
+-- 导入珂朵莉CJMOD模块
+[Import] @CJmod from Chtholly
+
+-- 定义页面
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                "珂朵莉 - 世界上最幸福的女孩"
+            }
+        }
+    }
+    
+    body
+    {
+        -- 使用珂朵莉的容器
+        @Element ChthollysContainer from Chtholly;
+        
+        div
+        {
+            -- 使用珂朵莉的标题
+            @Element ChthollysHeading from Chtholly;
+            
+            -- 使用珂朵莉的卡片
+            @Element ChthollysCard from Chtholly;
+            
+            -- 自定义卡片
+            div
+            {
+                style
+                {
+                    .custom-card
+                    {
+                        @Style ChthollysCustomCard from Chtholly
+                        {
+                            background-color: "#FFB6C1";
+                            border-color: "#DC143C";
+                        }
+                    }
+                }
+                
+                text
+                {
+                    "这是一个自定义的珂朵莉卡片"
+                }
+            }
+            
+            -- 使用珂朵莉的按钮
+            @Element ChthollysButton from Chtholly;
+            
+            -- 带有动画的按钮
+            button
+            {
+                id: animated-btn;
+                style
+                {
+                    .animated-btn
+                    {
+                        @Style ChthollysButton from Chtholly;
+                    }
+                }
+                
+                text
+                {
+                    "点击我看动画"
+                }
+                
+                script
+                {
+                    {{#animated-btn}}->listen({
+                        click: () => {
+                            chthollyGlow({{#animated-btn}}, "#FFD700", 1500);
+                            chthollyRotate({{#animated-btn}}, 360, 800);
+                        }
+                    });
+                }
+            }
+        }
+        
+        -- 全局脚本
+        script
+        {
+            -- 页面加载后淡入所有卡片
+            window.addEventListener('load', () => {
+                {{.chtholly-card}}->forEach((card) => {
+                    fadeIn(card, 600);
+                });
+            });
+        }
+    }
+}
