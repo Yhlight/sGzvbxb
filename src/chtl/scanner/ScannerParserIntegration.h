@@ -12,6 +12,7 @@
 #include <antlr4-runtime/antlr4-runtime.h>
 #include <memory>
 #include <vector>
+#include "../error/ANTLRErrorAdapter.h"
 
 namespace chtl {
 namespace scanner {
@@ -140,27 +141,8 @@ private:
     groupFragmentsByLanguage(const std::vector<ScanFragment>& fragments);
 };
 
-/**
- * 自定义错误监听器
- */
-class IntegrationErrorListener : public antlr4::BaseErrorListener {
-public:
-    void syntaxError(
-        antlr4::Recognizer* recognizer,
-        antlr4::Token* offendingSymbol,
-        size_t line,
-        size_t charPositionInLine,
-        const std::string& msg,
-        std::exception_ptr e
-    ) override;
-    
-    bool hasErrors() const { return !errors.empty(); }
-    const std::vector<std::string>& getErrors() const { return errors; }
-    void clearErrors() { errors.clear(); }
-    
-private:
-    std::vector<std::string> errors;
-};
+// 使用统一的错误处理系统
+// IntegrationErrorListener已被ANTLRErrorAdapter替代
 
 } // namespace scanner
 } // namespace chtl

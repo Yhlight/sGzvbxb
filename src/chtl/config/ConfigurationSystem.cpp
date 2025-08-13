@@ -2,87 +2,29 @@
 #include "../parser/standalone/ConfigParser.h"
 #include <fstream>
 #include <sstream>
-#include <iostream>
+#include <algorithm>
 
 namespace chtl {
 namespace config {
 
-// 辅助函数：将ConfigValue转换为字符串
-std::string configValueToString(const ConfigValue& value) {
-    if (std::holds_alternative<std::string>(value)) {
-        return std::get<std::string>(value);
-    } else if (std::holds_alternative<int>(value)) {
-        return std::to_string(std::get<int>(value));
-    } else if (std::holds_alternative<bool>(value)) {
-        return std::get<bool>(value) ? "true" : "false";
-    } else if (std::holds_alternative<std::vector<std::string>>(value)) {
-        const auto& vec = std::get<std::vector<std::string>>(value);
-        std::string result = "[";
-        for (size_t i = 0; i < vec.size(); ++i) {
-            if (i > 0) result += ", ";
-            result += vec[i];
-        }
-        result += "]";
-        return result;
-    }
-    return "";
-}
-
-// 辅助函数：从字符串创建ConfigValue
-ConfigValue parseConfigValue(const std::string& val) {
-    // 尝试解析为不同类型
-    if (val == "true" || val == "false") {
-        return ConfigValue(val == "true");
-    } else {
-        // 尝试解析为整数
-        try {
-            size_t pos;
-            int intVal = std::stoi(val, &pos);
-            if (pos == val.length()) {
-                return ConfigValue(intVal);
-            } else {
-                return ConfigValue(val); // 字符串
-            }
-        } catch (...) {
-            return ConfigValue(val); // 字符串
-        }
-    }
-}
-
-// 单例实现
-ConfigurationSystem& ConfigurationSystem::getInstance() {
-    static ConfigurationSystem instance;
-    return instance;
-}
-
-ConfigurationSystem::ConfigurationSystem() {
-    // 设置默认值
-    reset();
-}
-
-void ConfigurationSystem::reset() {
-    configItems.clear();
-    indexInitialCount = 0;
-    disableNameGroup = true;
-    debugMode = false;
-    nameGroup = NameGroup();
-}
-
-bool ConfigurationSystem::loadConfigurationFromFile(const std::string& filePath) {
-    std::ifstream file(filePath);
+// 使用独立的配置解析器，不依赖ANTLR4
+bool ConfigurationSystem::loadConfigurationFromFile(const std::string& filepath) {
+    std::ifstream file(filepath);
     if (!file.is_open()) {
-        std::cerr << "Error: Cannot open configuration file: " << filePath << std::endl;
+        std::cerr << "Error: Cannot open configuration file: " << filepath << std::endl;
         return false;
     }
     
     std::stringstream buffer;
     buffer << file.rdbuf();
-    return loadConfiguration(buffer.str());
+    std::string content = buffer.str();
+    
+    return loadConfiguration(content);
 }
 
-bool ConfigurationSystem::loadConfiguration(const std::string& configContent) {
-    // 使用独立的配置解析器（不依赖ANTLR）
-    parser::ConfigLexer lexer(configContent);
+bool ConfigurationSystem::loadConfiguration(const std::string& content) {
+    // 使用独立的配置解析器
+    parser::ConfigLexer lexer(content);
     auto tokens = lexer.tokenize();
     auto tokenStream = std::make_shared<parser::TokenStream>(tokens);
     
@@ -95,227 +37,262 @@ bool ConfigurationSystem::loadConfiguration(const std::string& configContent) {
     }
     
     // 清空现有配置
-    reset();
+    configItems.clear();
+    nameGroup = NameGroup();
     
     // 处理解析结果
     for (const auto& [groupName, entries] : result.groups) {
-        if (groupName == "Configuration" || groupName == "DEFAULT" || groupName.empty()) {
+        if (groupName == "DEFAULT" || groupName.empty()) {
+            // 默认组直接处理
+            for (const auto& [key, value] : entries) {
+                configItems[key] = ConfigValue{value};
+            }
+        } else if (groupName == "Configuration") {
             // 配置组
             for (const auto& [key, value] : entries) {
-                configItems[key] = parseConfigValue(value);
-                
-                // 更新特殊配置项
-                if (key == "indexInitialCount") {
-                    indexInitialCount = std::stoi(value);
-                } else if (key == "disableNameGroup") {
-                    disableNameGroup = (value == "true");
-                } else if (key == "debugMode") {
-                    debugMode = (value == "true");
-                }
+                configItems[key] = ConfigValue{value};
             }
         } else if (groupName == "Name") {
-            // 名称组 - 创建配置项映射
-            std::unordered_map<std::string, ConfigValue> nameItems;
+            // 名称组
+            nameGroup.name = "Name";
+            
             for (const auto& [key, value] : entries) {
-                nameItems[key] = parseConfigValue(value);
+                nameGroup.types[key] = value;
             }
-            nameGroup.initialize(nameItems);
         }
     }
     
-    return validateConfiguration();
-}
-
-bool ConfigurationSystem::validateConfiguration() const {
-    // 基本验证
-    return true;
-}
-
-std::string ConfigurationSystem::exportConfiguration() const {
-    std::stringstream ss;
-    
-    ss << "# CHTL Configuration\n\n";
-    ss << "[Configuration]\n";
-    
-    for (const auto& [key, value] : configItems) {
-        ss << key << " = " << configValueToString(value) << "\n";
+    // 应用默认配置
+    // 应用默认值
+    if (configItems.find("indexInitialCount") != configItems.end()) {
+        indexInitialCount = std::get<int>(configItems["indexInitialCount"].value);
+    }
+    if (configItems.find("disableNameGroup") != configItems.end()) {
+        disableNameGroup = std::get<bool>(configItems["disableNameGroup"].value);
+    }
+    if (configItems.find("debugMode") != configItems.end()) {
+        debugMode = std::get<bool>(configItems["debugMode"].value);
     }
     
-    // TODO: 导出NameGroup配置
-    
-    return ss.str();
-}
-
-bool ConfigurationSystem::isKeyword(const std::string& token, const std::string& keywordType) const {
-    // 简单实现
-    if (keywordType == "html") {
-        return token == "html" || token == "body" || token == "div" || 
-               token == "p" || token == "h1" || token == "h2" || token == "h3";
-    }
-    return false;
-}
-
-ConfigValue ConfigurationSystem::parseValue(const std::string& value) {
-    return parseConfigValue(value);
-}
-
-std::vector<std::string> ConfigurationSystem::parseArrayValue(const std::string& value) {
-    std::vector<std::string> result;
-    // 简单的数组解析
-    if (value.front() == '[' && value.back() == ']') {
-        std::string content = value.substr(1, value.length() - 2);
-        std::stringstream ss(content);
-        std::string item;
-        while (std::getline(ss, item, ',')) {
-            // 去除空白
-            item.erase(0, item.find_first_not_of(" \t"));
-            item.erase(item.find_last_not_of(" \t") + 1);
-            result.push_back(item);
-        }
-    }
-    return result;
-}
-
-// 模板特化已经在头文件中内联定义
-
-// NameGroup实现
-NameGroup::NameGroup() {
-    // 设置默认值
-    customStyle = {"@Style", "@style", "@CSS", "@Css", "@css"};
-    customElement = "@Element";
-    customVar = "@Var";
-    
-    templateStyle = "@Style";
-    templateElement = "@Element";
-    templateVar = "@Var";
-    
-    originHtml = "@Html";
-    originStyle = "@Style";
-    originJavaScript = "@JavaScript";
-    
-    importHtml = "@Html";
-    importStyle = "@Style";
-    importJavaScript = "@JavaScript";
-    importChtl = "@Chtl";
-    importCJmod = "@CJmod";
-    
-    keywordInherit = "inherit";
-    keywordDelete = "delete";
-    keywordInsert = "insert";
-    keywordAfter = "after";
-    keywordBefore = "before";
-    keywordReplace = "replace";
-    keywordAtTop = "at top";
-    keywordAtBottom = "at bottom";
-    keywordFrom = "from";
-    keywordAs = "as";
-    keywordExcept = "except";
-    
-    keywordText = "text";
-    keywordStyle = "style";
-    keywordScript = "script";
-    
-    keywordCustom = "[Custom]";
-    keywordTemplate = "[Template]";
-    keywordOrigin = "[Origin]";
-    keywordImport = "[Import]";
-    keywordNamespace = "[Namespace]";
-}
-
-void NameGroup::initialize(const std::unordered_map<std::string, ConfigValue>& items) {
-    // 辅助函数：获取字符串值
-    auto getString = [&items](const std::string& key, const std::string& defaultValue) -> std::string {
-        auto it = items.find(key);
-        if (it != items.end() && std::holds_alternative<std::string>(it->second)) {
-            return std::get<std::string>(it->second);
-        }
-        return defaultValue;
-    };
-    
-    // 辅助函数：获取字符串数组值
-    auto getStringArray = [&items](const std::string& key, const std::vector<std::string>& defaultValue) -> std::vector<std::string> {
-        auto it = items.find(key);
-        if (it != items.end() && std::holds_alternative<std::vector<std::string>>(it->second)) {
-            return std::get<std::vector<std::string>>(it->second);
-        }
-        return defaultValue;
-    };
-    
-    // 初始化各个字段
-    customStyle = getStringArray("CUSTOM_STYLE", customStyle);
-    customElement = getString("CUSTOM_ELEMENT", customElement);
-    customVar = getString("CUSTOM_VAR", customVar);
-    
-    templateStyle = getString("TEMPLATE_STYLE", templateStyle);
-    templateElement = getString("TEMPLATE_ELEMENT", templateElement);
-    templateVar = getString("TEMPLATE_VAR", templateVar);
-    
-    originHtml = getString("ORIGIN_HTML", originHtml);
-    originStyle = getString("ORIGIN_STYLE", originStyle);
-    originJavaScript = getString("ORIGIN_JAVASCRIPT", originJavaScript);
-    
-    importHtml = getString("IMPORT_HTML", importHtml);
-    importStyle = getString("IMPORT_STYLE", importStyle);
-    importJavaScript = getString("IMPORT_JAVASCRIPT", importJavaScript);
-    importChtl = getString("IMPORT_CHTL", importChtl);
-    importCJmod = getString("IMPORT_CJMOD", importCJmod);
-    
-    keywordInherit = getString("KEYWORD_INHERIT", keywordInherit);
-    keywordDelete = getString("KEYWORD_DELETE", keywordDelete);
-    keywordInsert = getString("KEYWORD_INSERT", keywordInsert);
-    keywordAfter = getString("KEYWORD_AFTER", keywordAfter);
-    keywordBefore = getString("KEYWORD_BEFORE", keywordBefore);
-    keywordReplace = getString("KEYWORD_REPLACE", keywordReplace);
-    keywordAtTop = getString("KEYWORD_ATTOP", keywordAtTop);
-    keywordAtBottom = getString("KEYWORD_ATBOTTOM", keywordAtBottom);
-    keywordFrom = getString("KEYWORD_FROM", keywordFrom);
-    keywordAs = getString("KEYWORD_AS", keywordAs);
-    keywordExcept = getString("KEYWORD_EXCEPT", keywordExcept);
-    
-    keywordText = getString("KEYWORD_TEXT", keywordText);
-    keywordStyle = getString("KEYWORD_STYLE", keywordStyle);
-    keywordScript = getString("KEYWORD_SCRIPT", keywordScript);
-    
-    keywordCustom = getString("KEYWORD_CUSTOM", keywordCustom);
-    keywordTemplate = getString("KEYWORD_TEMPLATE", keywordTemplate);
-    keywordOrigin = getString("KEYWORD_ORIGIN", keywordOrigin);
-    keywordImport = getString("KEYWORD_IMPORT", keywordImport);
-    keywordNamespace = getString("KEYWORD_NAMESPACE", keywordNamespace);
-    
-    // 获取选项数量限制
-    auto it = items.find("OPTION_COUNT");
-    if (it != items.end() && std::holds_alternative<int>(it->second)) {
-        optionCount = std::get<int>(it->second);
-    }
-}
-
-bool NameGroup::validate() const {
-    // 验证组选项数量
-    if (customStyle.size() > static_cast<size_t>(optionCount)) {
-        std::cerr << "Warning: CUSTOM_STYLE has " << customStyle.size() 
-                  << " options, exceeding OPTION_COUNT limit of " << optionCount << std::endl;
-    }
-    
-    // 验证必需字段不为空
-    if (customElement.empty() || customVar.empty() ||
-        templateStyle.empty() || templateElement.empty() || templateVar.empty()) {
+    // 验证配置
+    if (!validateConfiguration()) {
         return false;
     }
     
     return true;
 }
 
-std::vector<std::string> NameGroup::getAllKeywordVariants(const std::string& keywordType) const {
-    if (keywordType == "CUSTOM_STYLE") {
-        return customStyle;
-    } else if (keywordType == "CUSTOM_ELEMENT") {
-        return {customElement};
-    } else if (keywordType == "CUSTOM_VAR") {
-        return {customVar};
+// 保存配置到文件
+bool saveConfigurationToFile(const std::string& filepath) {
+    std::ofstream file(filepath);
+    if (!file.is_open()) {
+        std::cerr << "Error: Cannot create configuration file: " << filepath << std::endl;
+        return false;
     }
-    // ... 其他类型类似处理
     
-    return {};
+    // 写入头部注释
+    file << "# CHTL Configuration File\n";
+    file << "# Generated by CHTL Compiler\n\n";
+    
+    // 写入配置组
+    file << "[Configuration]\n";
+    for (const auto& [key, value] : configurations_) {
+        file << key << " = " << value << "\n";
+    }
+    file << "\n";
+    
+    // 写入名称组
+    for (const auto& [name, group] : nameGroups_) {
+        file << "[" << name << "]\n";
+        for (const auto& [key, value] : group.options) {
+            file << key << " = " << value << "\n";
+        }
+        file << "\n";
+    }
+    
+    return true;
+}
+
+// 获取配置值（带默认值）
+std::string ConfigurationSystem::getConfig(const std::string& key, 
+                                          const std::string& defaultValue) const {
+    auto it = configurations_.find(key);
+    if (it != configurations_.end()) {
+        return it->second;
+    }
+    return defaultValue;
+}
+
+// 设置配置值
+void ConfigurationSystem::setConfig(const std::string& key, const std::string& value) {
+    configurations_[key] = value;
+}
+
+// 获取名称组
+const ConfigurationSystem::NameGroup* ConfigurationSystem::getNameGroup(
+    const std::string& name) const {
+    auto it = nameGroups_.find(name);
+    if (it != nameGroups_.end()) {
+        return &it->second;
+    }
+    return nullptr;
+}
+
+// 添加名称组
+void ConfigurationSystem::addNameGroup(const NameGroup& group) {
+    nameGroups_[group.name] = group;
+}
+
+// 获取所有配置键
+std::vector<std::string> ConfigurationSystem::getConfigKeys() const {
+    std::vector<std::string> keys;
+    for (const auto& [key, _] : configurations_) {
+        keys.push_back(key);
+    }
+    return keys;
+}
+
+// 获取所有名称组
+std::vector<std::string> ConfigurationSystem::getNameGroups() const {
+    std::vector<std::string> names;
+    for (const auto& [name, _] : nameGroups_) {
+        names.push_back(name);
+    }
+    return names;
+}
+
+// 应用默认配置
+void ConfigurationSystem::applyDefaults() {
+    // 关键字映射默认值
+    if (configurations_.find("KEYWORD_TEMPLATE") == configurations_.end()) {
+        configurations_["KEYWORD_TEMPLATE"] = "[Template]";
+    }
+    if (configurations_.find("KEYWORD_CUSTOM") == configurations_.end()) {
+        configurations_["KEYWORD_CUSTOM"] = "[Custom]";
+    }
+    if (configurations_.find("KEYWORD_IMPORT") == configurations_.end()) {
+        configurations_["KEYWORD_IMPORT"] = "[Import]";
+    }
+    if (configurations_.find("KEYWORD_NAMESPACE") == configurations_.end()) {
+        configurations_["KEYWORD_NAMESPACE"] = "[Namespace]";
+    }
+    if (configurations_.find("KEYWORD_ORIGIN") == configurations_.end()) {
+        configurations_["KEYWORD_ORIGIN"] = "[Origin]";
+    }
+    
+    // @ 关键字
+    if (configurations_.find("KEYWORD_ELEMENT") == configurations_.end()) {
+        configurations_["KEYWORD_ELEMENT"] = "@Element";
+    }
+    if (configurations_.find("KEYWORD_STYLE") == configurations_.end()) {
+        configurations_["KEYWORD_STYLE"] = "@Style";
+    }
+    if (configurations_.find("KEYWORD_VAR") == configurations_.end()) {
+        configurations_["KEYWORD_VAR"] = "@Var";
+    }
+    
+    // 其他配置
+    if (configurations_.find("ENABLE_CUSTOM_KEYWORDS") == configurations_.end()) {
+        configurations_["ENABLE_CUSTOM_KEYWORDS"] = "true";
+    }
+    if (configurations_.find("OPTION_COUNT_LIMIT") == configurations_.end()) {
+        configurations_["OPTION_COUNT_LIMIT"] = "1000";
+    }
+}
+
+// 验证配置
+bool ConfigurationSystem::validateConfiguration() {
+    // 检查选项数量限制
+    std::string limitStr = getConfig("OPTION_COUNT_LIMIT", "1000");
+    try {
+        int limit = std::stoi(limitStr);
+        for (const auto& [name, group] : nameGroups_) {
+            if (group.options.size() > static_cast<size_t>(limit)) {
+                std::cerr << "Error: Name group '" << name 
+                         << "' exceeds option limit (" << limit << ")" << std::endl;
+                return false;
+            }
+        }
+    } catch (...) {
+        std::cerr << "Error: Invalid OPTION_COUNT_LIMIT value" << std::endl;
+        return false;
+    }
+    
+    // 检查关键字冲突
+    std::unordered_map<std::string, std::string> usedKeywords;
+    for (const auto& [key, value] : configurations_) {
+        if (key.find("KEYWORD_") == 0) {
+            if (usedKeywords.find(value) != usedKeywords.end()) {
+                std::cerr << "Error: Keyword conflict - '" << value 
+                         << "' used by both " << key << " and " 
+                         << usedKeywords[value] << std::endl;
+                return false;
+            }
+            usedKeywords[value] = key;
+        }
+    }
+    
+    return true;
+}
+
+// 创建示例配置文件
+void ConfigurationSystem::createExampleConfig(const std::string& filepath) {
+    std::ofstream file(filepath);
+    if (!file.is_open()) return;
+    
+    file << R"(# CHTL Configuration Example
+# This file demonstrates the configuration system
+
+[Configuration]
+# Enable custom keyword definitions
+ENABLE_CUSTOM_KEYWORDS = true
+
+# Maximum number of options per name group
+OPTION_COUNT_LIMIT = 1000
+
+# Keyword customization - Standard syntax
+KEYWORD_TEMPLATE = [Template]
+KEYWORD_CUSTOM = [Custom]
+KEYWORD_IMPORT = [Import]
+KEYWORD_NAMESPACE = [Namespace]
+KEYWORD_ORIGIN = [Origin]
+
+# @ keywords
+KEYWORD_ELEMENT = @Element
+KEYWORD_STYLE = @Style
+KEYWORD_VAR = @Var
+KEYWORD_MODULE = @Module
+KEYWORD_CHTL = @Chtl
+KEYWORD_CJMOD = @CJmod
+
+# Alternative syntax examples (commented out)
+# KEYWORD_TEMPLATE = Template
+# KEYWORD_CUSTOM = <custom>
+# KEYWORD_ELEMENT = Element:
+# KEYWORD_STYLE = ::Style
+
+# Name Groups - Define your own replacements
+[MyKeywords]
+BEGIN = {
+END = }
+DEFINE = :=
+USE = ->
+
+[PythonStyle]
+Template = class
+Element = def
+Style = style
+Import = import
+Namespace = module
+
+[EmojiStyle]
+Template = 📝
+Custom = ⚙️
+Element = 🏗️
+Style = 🎨
+Import = 📦
+Namespace = 🌐
+)";
 }
 
 } // namespace config

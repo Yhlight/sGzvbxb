@@ -5,6 +5,7 @@
 #include <set>
 
 #include "CHTLCSSPreprocessor.h"
+#include "error/ErrorCollector.h"
 
 namespace chtl {
 
@@ -269,8 +270,9 @@ std::string CSSCompilerListener::getIndent() const {
 }
 
 // CSSCompiler 实现
-CSSCompiler::CSSCompiler(std::shared_ptr<CHTLContext> ctx) 
-    : context(ctx), minify(false), preserveComments(false) {}
+CSSCompiler::CSSCompiler(std::shared_ptr<CHTLContext> ctx)
+    : context(ctx), minify(false), preserveComments(false),
+      errorReporter(error::ErrorManager::getInstance().getReporter()) {}
 
 std::string CSSCompiler::compile(const std::string& css) {
     antlr4::ANTLRInputStream input(css);
@@ -279,18 +281,16 @@ std::string CSSCompiler::compile(const std::string& css) {
     CSSParser parser(&tokens);
     
     // 错误处理
-    std::vector<std::string> errors;
-    CSSErrorListener errorListener(errors);
+    auto errorAdapter = error::createANTLRErrorAdapter(errorReporter);
+    errorAdapter->setCurrentFile(context ? context->getCurrentFile() : "unknown");
     parser.removeErrorListeners();
-    parser.addErrorListener(&errorListener);
+    parser.addErrorListener(errorAdapter.get());
     
     // 解析
     CSSParser::StylesheetContext* tree = parser.stylesheet();
     
-    if (!errors.empty()) {
-        for (const auto& error : errors) {
-            context->reportError(error);
-        }
+    // 错误已经通过errorReporter报告，这里只需要检查是否有错误发生
+    if (parser.getNumberOfSyntaxErrors() > 0) {
         return "";
     }
     
@@ -308,18 +308,17 @@ std::pair<std::string, std::vector<CSSRule>> CSSCompiler::compileWithAnalysis(co
     CSSParser parser(&tokens);
     
     // 错误处理
-    std::vector<std::string> errors;
-    CSSErrorListener errorListener(errors);
+    auto errorAdapter = error::createANTLRErrorAdapter(errorReporter);
+    errorAdapter->setCurrentFile(context ? context->getCurrentFile() : "unknown");
     parser.removeErrorListeners();
-    parser.addErrorListener(&errorListener);
+    parser.addErrorListener(errorAdapter.get());
     
     // 解析
     CSSParser::StylesheetContext* tree = parser.stylesheet();
     
-    if (!errors.empty()) {
-        for (const auto& error : errors) {
-            context->reportError(error);
-        }
+    // 错误已经通过errorReporter报告，这里只需要检查是否有错误发生
+    // 可以通过检查parser的错误数量来判断
+    if (parser.getNumberOfSyntaxErrors() > 0) {
         return {"", {}};
     }
     
@@ -337,9 +336,11 @@ bool CSSCompiler::validate(const std::string& css, std::vector<std::string>& err
     CSSParser parser(&tokens);
     
     // 错误处理
-    CSSErrorListener errorListener(errors);
+    auto errorCollector = std::make_shared<error::ErrorCollector>(errors);
+    auto errorAdapter = error::createANTLRErrorAdapter(errorCollector);
+    errorAdapter->setCurrentFile(context ? context->getCurrentFile() : "unknown");
     parser.removeErrorListeners();
-    parser.addErrorListener(&errorListener);
+    parser.addErrorListener(errorAdapter.get());
     
     // 解析
     parser.stylesheet();
@@ -364,17 +365,6 @@ std::string CSSCompiler::mergeCSSBlocks(const std::vector<std::string>& blocks) 
     }
     
     return merged.str();
-}
-
-void CSSCompiler::CSSErrorListener::syntaxError(antlr4::Recognizer* recognizer,
-                                               antlr4::Token* offendingSymbol,
-                                               size_t line,
-                                               size_t charPositionInLine,
-                                               const std::string& msg,
-                                               std::exception_ptr e) {
-    std::stringstream error;
-    error << "CSS Syntax Error at line " << line << ":" << charPositionInLine << " - " << msg;
-    errors.push_back(error.str());
 }
 
 // CSSOptimizer 实现

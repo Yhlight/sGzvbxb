@@ -10,6 +10,7 @@
 #include "../../generated/css/grammars/CSSLexer.h"
 #include "../../generated/css/grammars/CSSParser.h"
 #include "../../generated/css/grammars/CSSBaseListener.h"
+#include "error/ANTLRErrorAdapter.h"
 
 namespace chtl {
 
@@ -106,6 +107,7 @@ private:
     std::shared_ptr<CHTLContext> context;
     bool minify;
     bool preserveComments;
+    std::shared_ptr<error::IErrorReporter> errorReporter;
     
 public:
     CSSCompiler(std::shared_ptr<CHTLContext> ctx);
@@ -129,22 +131,12 @@ public:
     // 合并多个CSS块
     std::string mergeCSSBlocks(const std::vector<std::string>& blocks);
     
+    // 设置错误报告器
+    void setErrorReporter(std::shared_ptr<error::IErrorReporter> reporter) {
+        errorReporter = reporter;
+    }
+    
 private:
-    // 错误处理
-    class CSSErrorListener : public antlr4::BaseErrorListener {
-    private:
-        std::vector<std::string>& errors;
-        
-    public:
-        CSSErrorListener(std::vector<std::string>& errs) : errors(errs) {}
-        
-        void syntaxError(antlr4::Recognizer* recognizer,
-                        antlr4::Token* offendingSymbol,
-                        size_t line,
-                        size_t charPositionInLine,
-                        const std::string& msg,
-                        std::exception_ptr e) override;
-    };
 };
 
 // CSS优化器

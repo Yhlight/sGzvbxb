@@ -11,6 +11,7 @@
 #include "../../generated/javascript/grammars/JavaScriptLexer.h"
 #include "../../generated/javascript/grammars/JavaScriptParser.h"
 #include "../../generated/javascript/grammars/JavaScriptBaseListener.h"
+#include "error/ANTLRErrorAdapter.h"
 
 namespace chtl {
 
@@ -163,6 +164,7 @@ private:
 class JSCompiler {
 private:
     std::shared_ptr<CHTLContext> context;
+    std::shared_ptr<error::IErrorReporter> errorReporter;
     
     // 编译选项
     struct Options {
@@ -207,22 +209,12 @@ public:
     // 语法检查
     bool checkSyntax(const std::string& js);
     
+    // 设置错误报告器
+    void setErrorReporter(std::shared_ptr<error::IErrorReporter> reporter) {
+        errorReporter = reporter;
+    }
+    
 private:
-    // 错误监听器
-    class JSErrorListener : public antlr4::BaseErrorListener {
-    private:
-        std::vector<std::string>& errors;
-        
-    public:
-        JSErrorListener(std::vector<std::string>& errs) : errors(errs) {}
-        
-        void syntaxError(antlr4::Recognizer* recognizer,
-                        antlr4::Token* offendingSymbol,
-                        size_t line,
-                        size_t charPositionInLine,
-                        const std::string& msg,
-                        std::exception_ptr e) override;
-    };
 };
 
 // JavaScript优化器

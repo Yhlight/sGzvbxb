@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <regex>
 #include <sstream>
+#include "error/ErrorCollector.h"
 
 namespace chtl {
 
@@ -246,7 +247,8 @@ void JSCompilerListener::reportWarning(const std::string& message, size_t line, 
 }
 
 // JSCompiler 实现
-JSCompiler::JSCompiler(std::shared_ptr<CHTLContext> ctx) : context(ctx) {}
+JSCompiler::JSCompiler(std::shared_ptr<CHTLContext> ctx) 
+    : context(ctx), errorReporter(error::ErrorManager::getInstance().getReporter()) {}
 
 std::string JSCompiler::compile(const std::string& js) {
     antlr4::ANTLRInputStream input(js);
@@ -255,18 +257,16 @@ std::string JSCompiler::compile(const std::string& js) {
     JavaScriptParser parser(&tokens);
     
     // 错误处理
-    std::vector<std::string> errors;
-    JSErrorListener errorListener(errors);
+    auto errorAdapter = error::createANTLRErrorAdapter(errorReporter);
+    errorAdapter->setCurrentFile(context ? context->getCurrentFile() : "unknown");
     parser.removeErrorListeners();
-    parser.addErrorListener(&errorListener);
+    parser.addErrorListener(errorAdapter.get());
     
     // 解析
     JavaScriptParser::ProgramContext* tree = parser.program();
     
-    if (!errors.empty()) {
-        for (const auto& error : errors) {
-            context->reportError(error);
-        }
+    // 错误已经通过errorReporter报告，这里只需要检查是否有错误发生
+    if (parser.getNumberOfSyntaxErrors() > 0) {
         return "";
     }
     
@@ -296,14 +296,16 @@ JSCompiler::CompileResult JSCompiler::compileWithAnalysis(const std::string& js)
     JavaScriptParser parser(&tokens);
     
     // 错误处理
-    JSErrorListener errorListener(result.errors);
+    auto errorCollector = std::make_shared<error::ErrorCollector>(result.errors);
+    auto errorAdapter = error::createANTLRErrorAdapter(errorCollector);
+    errorAdapter->setCurrentFile(context ? context->getCurrentFile() : "unknown");
     parser.removeErrorListeners();
-    parser.addErrorListener(&errorListener);
+    parser.addErrorListener(errorAdapter.get());
     
     // 解析
     JavaScriptParser::ProgramContext* tree = parser.program();
     
-    if (!result.errors.empty()) {
+    if (parser.getNumberOfSyntaxErrors() > 0) {
         return result;
     }
     
@@ -329,9 +331,12 @@ bool JSCompiler::validate(const std::string& js, std::vector<std::string>& error
     antlr4::CommonTokenStream tokens(&lexer);
     JavaScriptParser parser(&tokens);
     
-    JSErrorListener errorListener(errors);
+    // 错误处理
+    auto errorCollector = std::make_shared<error::ErrorCollector>(errors);
+    auto errorAdapter = error::createANTLRErrorAdapter(errorCollector);
+    errorAdapter->setCurrentFile(context ? context->getCurrentFile() : "unknown");
     parser.removeErrorListeners();
-    parser.addErrorListener(&errorListener);
+    parser.addErrorListener(errorAdapter.get());
     
     parser.program();
     
@@ -341,17 +346,6 @@ bool JSCompiler::validate(const std::string& js, std::vector<std::string>& error
 bool JSCompiler::checkSyntax(const std::string& js) {
     std::vector<std::string> errors;
     return validate(js, errors);
-}
-
-void JSCompiler::JSErrorListener::syntaxError(antlr4::Recognizer* recognizer,
-                                             antlr4::Token* offendingSymbol,
-                                             size_t line,
-                                             size_t charPositionInLine,
-                                             const std::string& msg,
-                                             std::exception_ptr e) {
-    std::stringstream error;
-    error << "JavaScript Syntax Error at line " << line << ":" << charPositionInLine << " - " << msg;
-    errors.push_back(error.str());
 }
 
 // JSOptimizer 实现
