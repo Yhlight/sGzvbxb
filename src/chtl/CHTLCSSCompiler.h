@@ -7,9 +7,9 @@
 #include <vector>
 #include <sstream>
 #include "CHTLContext.h"
-#include "../../generated/CSSLexer.h"
-#include "../../generated/CSSParser.h"
-#include "../../generated/CSSBaseListener.h"
+#include "../../generated/css/grammars/CSSLexer.h"
+#include "../../generated/css/grammars/CSSParser.h"
+#include "../../generated/css/grammars/CSSBaseListener.h"
 
 namespace chtl {
 

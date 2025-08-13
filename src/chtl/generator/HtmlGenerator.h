@@ -5,7 +5,7 @@
 #include <sstream>
 #include <map>
 #include <memory>
-#include "../core/Types.h"
+#include "../scanner/CHTLUnifiedScanner.h"
 
 namespace chtl {
 namespace generator {
