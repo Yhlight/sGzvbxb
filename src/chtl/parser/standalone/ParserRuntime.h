@@ -8,6 +8,8 @@
 #include <stack>
 #include <exception>
 #include <sstream>
+#include <functional>
+#include <iostream>
 
 namespace chtl {
 namespace parser {
