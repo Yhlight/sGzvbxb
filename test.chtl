@@ -1,17 +1,25 @@
 html {
-  body {
-    h1 {
-      text { "Welcome to CHTL!" }
+    head {
+        title { text { "CHTL Demo Page" } }
+        style {
+            body {
+                background-color: #f0f0f0;
+                font-family: Arial, sans-serif;
+            }
+            h1 {
+                color: #333;
+                text-align: center;
+            }
+        }
     }
-    p {
-      text { "CHTL - C++ Hypertext Language" }
+    body {
+        h1 { text { "Welcome to CHTL!" } }
+        div {
+            p { text { "CHTL is a C++ based hypertext language." } }
+            p { text { "It provides high performance and type safety for web development." } }
+        }
+        script {
+            console.log("CHTL page loaded!");
+        }
     }
-    style {
-      body { background: #f0f0f0; }
-      h1 { color: #333; }
-    }
-    script {
-      console.log("CHTL is running!");
-    }
-  }
 }

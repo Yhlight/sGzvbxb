@@ -92,6 +92,7 @@ file(GLOB_RECURSE CHTL_CORE_SOURCES
     src/chtl/module/*.cpp
     src/chtl/error/*.cpp
     src/chtl/utils/*.cpp
+    src/chtl/CHTLContext.cpp  # 添加CHTLContext实现
 )
 
 # 临时排除有问题的文件

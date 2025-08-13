@@ -90,6 +90,13 @@ public:
 
 // 配置项
 struct Configuration {
+    std::string defaultEncoding = "UTF-8";
+    std::string defaultOutput = "output.html";
+    bool generateSourceMap = false;
+    bool minifyOutput = false;
+    int optimizationLevel = 1;
+    
+    // 原有配置项
     int index_initial_count = 0;
     bool disable_name_group = false;
     bool debug_mode = false;

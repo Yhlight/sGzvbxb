@@ -1,149 +1,192 @@
 // CHTLContext.cpp - CHTL编译上下文实现
 #include "CHTLContext.h"
+#include <sstream>
+#include <algorithm>
 #include <iostream>
 
 namespace chtl {
 
+// 前向声明辅助函数
+void registerBuiltinSymbols(CHTLContext* ctx);
+
 CHTLContext::CHTLContext() 
-    : errorHandler(std::make_shared<CHTLErrorHandler>()),
-      currentMode(Mode::CHTL),
-      debugMode(false),
-      strictMode(false) {
+    : stateMachine(std::make_unique<CHTLStateMachine>()),
+      globalScope(std::make_shared<Scope>(ScopeType::GLOBAL, "global")),
+      currentFile("unknown"),
+      currentLine(1) {
     
-    // 初始化默认配置
-    initializeDefaultConfig();
+    // 初始化全局作用域
+    scopeStack.push(globalScope);
+    
+    // 初始化配置
+    config.defaultEncoding = "UTF-8";
+    config.defaultOutput = "output.html";
+    config.generateSourceMap = false;
+    config.minifyOutput = false;
+    config.optimizationLevel = 1;
+    
+    // 注册内置符号
+    registerBuiltinSymbols(this);
 }
 
-CHTLContext::~CHTLContext() = default;
-
-void CHTLContext::initializeDefaultConfig() {
-    // 设置默认的CHTL配置
-    config["version"] = "1.0.0";
-    config["encoding"] = "utf-8";
-    config["strict"] = false;
-    config["optimize"] = true;
-}
-
-void CHTLContext::setVariable(const std::string& name, const std::string& value) {
-    variables[name] = value;
-}
-
-std::string CHTLContext::getVariable(const std::string& name) const {
-    auto it = variables.find(name);
-    if (it != variables.end()) {
-        return it->second;
-    }
-    return "";
-}
-
-bool CHTLContext::hasVariable(const std::string& name) const {
-    return variables.find(name) != variables.end();
-}
-
-void CHTLContext::removeVariable(const std::string& name) {
-    variables.erase(name);
-}
-
-void CHTLContext::clearVariables() {
-    variables.clear();
-}
-
-void CHTLContext::pushScope() {
-    scopeStack.push(variables);
+void CHTLContext::pushScope(ScopeType type, const std::string& name) {
+    auto newScope = std::make_shared<Scope>(type, name, scopeStack.top());
+    scopeStack.push(newScope);
 }
 
 void CHTLContext::popScope() {
-    if (!scopeStack.empty()) {
-        variables = scopeStack.top();
+    if (scopeStack.size() > 1) {  // 保留全局作用域
         scopeStack.pop();
     }
 }
 
-void CHTLContext::setMode(Mode mode) {
-    currentMode = mode;
+std::shared_ptr<Scope> CHTLContext::getCurrentScope() const {
+    return scopeStack.top();
 }
 
-CHTLContext::Mode CHTLContext::getMode() const {
-    return currentMode;
-}
-
-void CHTLContext::setDebugMode(bool enabled) {
-    debugMode = enabled;
-}
-
-bool CHTLContext::isDebugMode() const {
-    return debugMode;
-}
-
-void CHTLContext::setStrictMode(bool enabled) {
-    strictMode = enabled;
-    config["strict"] = enabled;
-}
-
-bool CHTLContext::isStrictMode() const {
-    return strictMode;
-}
-
-void CHTLContext::setConfig(const std::string& key, const std::string& value) {
-    config[key] = value;
-}
-
-std::string CHTLContext::getConfig(const std::string& key) const {
-    auto it = config.find(key);
-    if (it != config.end()) {
-        return it->second;
+bool CHTLContext::registerSymbol(const std::string& name, SymbolType type, std::shared_ptr<void> definition) {
+    auto symbol = std::make_shared<Symbol>(name, type);
+    symbol->definition = definition;
+    symbol->source_file = currentFile;
+    symbol->line_number = currentLine;
+    
+    auto scope = getCurrentScope();
+    bool added = scope->addSymbol(symbol);
+    
+    // 如果是全局作用域，同时加入快速查找表
+    if (added && scope->getType() == ScopeType::GLOBAL) {
+        globalSymbols[name] = symbol;
     }
-    return "";
+    
+    return added;
 }
 
-bool CHTLContext::hasConfig(const std::string& key) const {
-    return config.find(key) != config.end();
+std::shared_ptr<Symbol> CHTLContext::lookupSymbol(const std::string& name) {
+    auto scope = getCurrentScope();
+    return scope->lookupSymbolRecursive(name);
 }
 
-void CHTLContext::addError(const std::string& message, int line, int column) {
-    if (errorHandler) {
-        errorHandler->reportError(message, "", line, column);
+std::shared_ptr<Symbol> CHTLContext::lookupSymbolWithNamespace(const std::string& name, const std::string& ns) {
+    // 简单实现：先查找名称空间，再查找符号
+    if (!ns.empty()) {
+        auto nsSymbol = lookupSymbol(ns);
+        if (nsSymbol && nsSymbol->type == SymbolType::NAMESPACE) {
+            // TODO: 实现名称空间内的符号查找
+        }
     }
+    return lookupSymbol(name);
 }
 
-void CHTLContext::addWarning(const std::string& message, int line, int column) {
-    if (errorHandler) {
-        errorHandler->reportWarning(message, "", line, column);
-    }
+void CHTLContext::addImport(const std::string& path, const std::string& alias) {
+    imports[alias.empty() ? path : alias] = path;
 }
 
-bool CHTLContext::hasErrors() const {
-    return errorHandler && errorHandler->hasErrors();
+bool CHTLContext::isImported(const std::string& name) const {
+    return imports.find(name) != imports.end();
 }
 
-std::vector<CHTLError> CHTLContext::getErrors() const {
-    if (errorHandler) {
-        return errorHandler->getErrors();
-    }
-    return {};
-}
-
-void CHTLContext::clearErrors() {
-    if (errorHandler) {
-        errorHandler->clear();
+void CHTLContext::setConfigValue(const std::string& key, const std::string& value) {
+    // 根据key设置对应的配置项
+    if (key == "encoding") {
+        config.defaultEncoding = value;
+    } else if (key == "output") {
+        config.defaultOutput = value;
+    } else if (key == "sourceMap") {
+        config.generateSourceMap = (value == "true");
+    } else if (key == "minify") {
+        config.minifyOutput = (value == "true");
+    } else if (key == "optimization") {
+        config.optimizationLevel = std::stoi(value);
     }
 }
 
-std::shared_ptr<CHTLErrorHandler> CHTLContext::getErrorHandler() const {
-    return errorHandler;
+bool CHTLContext::checkConstraints(const std::string& feature) const {
+    // 检查当前作用域的约束
+    auto scope = scopeStack.top();
+    return scope->isAllowed(feature);
+}
+
+void CHTLContext::addConstraint(const std::string& constraint) {
+    // 向当前作用域添加约束
+    auto scope = scopeStack.top();
+    scope->addConstraint(constraint);
+}
+
+std::string CHTLContext::generateAutoClassName(const std::string& base) {
+    int& counter = autoGeneratedNames[base + "_class"];
+    counter++;
+    return base + "_" + std::to_string(counter);
+}
+
+std::string CHTLContext::generateAutoId(const std::string& base) {
+    int& counter = autoGeneratedNames[base + "_id"];
+    counter++;
+    return base + "_" + std::to_string(counter);
+}
+
+void CHTLContext::reportError(const std::string& message) {
+    std::stringstream ss;
+    ss << "Error in " << currentFile << ":" << currentLine << " - " << message;
+    // 这里应该抛出异常或记录到错误管理器
+    throw std::runtime_error(ss.str());
+}
+
+void CHTLContext::reportWarning(const std::string& message) {
+    std::stringstream ss;
+    ss << "Warning in " << currentFile << ":" << currentLine << " - " << message;
+    // 这里应该记录到警告列表
+    // 暂时输出到标准错误
+    std::cerr << ss.str() << std::endl;
+}
+
+bool CHTLContext::validate() const {
+    // 验证作用域栈是否正确（应该只剩下全局作用域）
+    if (scopeStack.size() != 1) {
+        return false;
+    }
+    
+    return true;
 }
 
 void CHTLContext::reset() {
-    clearVariables();
-    clearErrors();
-    currentMode = Mode::CHTL;
-    debugMode = false;
-    strictMode = false;
-    initializeDefaultConfig();
-    
-    // 清空作用域栈
-    while (!scopeStack.empty()) {
+    // 清空作用域栈，保留全局作用域
+    while (scopeStack.size() > 1) {
         scopeStack.pop();
+    }
+    
+    // 重置其他状态
+    globalSymbols.clear();
+    imports.clear();
+    autoGeneratedNames.clear();
+    currentLine = 1;
+    currentFile = "unknown";
+    
+    // 重新注册内置符号
+    registerBuiltinSymbols(this);
+}
+
+// 注册内置符号的辅助函数
+void registerBuiltinSymbols(CHTLContext* ctx) {
+    // 注册内置HTML标签
+    std::vector<std::string> builtinTags = {
+        "html", "head", "body", "div", "span", "p", "a", "img",
+        "h1", "h2", "h3", "h4", "h5", "h6",
+        "ul", "ol", "li", "table", "tr", "td", "th",
+        "form", "input", "button", "select", "option", "textarea",
+        "header", "footer", "nav", "main", "article", "section"
+    };
+    
+    for (const auto& tag : builtinTags) {
+        ctx->registerSymbol(tag, SymbolType::ELEMENT);
+    }
+    
+    // 注册内置函数
+    std::vector<std::string> builtinFunctions = {
+        "text", "style", "script", "import", "include"
+    };
+    
+    for (const auto& func : builtinFunctions) {
+        ctx->registerSymbol(func, SymbolType::ELEMENT);  // 暂时用ELEMENT代替FUNCTION
     }
 }
 
