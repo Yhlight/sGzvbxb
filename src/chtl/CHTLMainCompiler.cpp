@@ -1,4 +1,6 @@
 #include "CHTLMainCompiler.h"
+#include "compiler/antlr/CSSCompilerWrapper.h"
+#include "compiler/antlr/JSCompilerWrapper.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -99,7 +101,14 @@ void CHTLMainCompiler::setMinifyCSS(bool minify) {
     // 获取CSS编译器并设置选项
     auto cssCompiler = dispatcher_->getCompiler(scanner::FragmentType::CSS);
     if (cssCompiler) {
-        // TODO: 需要向下转型来访问特定选项
+        // 使用dynamic_cast安全地向下转型到CSSCompilerWrapper
+        auto cssWrapper = dynamic_cast<compiler::antlr::CSSCompilerWrapper*>(cssCompiler.get());
+        if (cssWrapper) {
+            cssWrapper->setMinify(minify);
+        } else {
+            // 如果不是预期的类型，记录警告
+            std::cerr << "警告: CSS编译器不是CSSCompilerWrapper类型，无法设置minify选项" << std::endl;
+        }
     }
 }
 
@@ -107,7 +116,14 @@ void CHTLMainCompiler::setMinifyJS(bool minify) {
     // 获取JS编译器并设置选项
     auto jsCompiler = dispatcher_->getCompiler(scanner::FragmentType::JS);
     if (jsCompiler) {
-        // TODO: 需要向下转型来访问特定选项
+        // 使用dynamic_cast安全地向下转型到JSCompilerWrapper
+        auto jsWrapper = dynamic_cast<compiler::antlr::JSCompilerWrapper*>(jsCompiler.get());
+        if (jsWrapper) {
+            jsWrapper->setMinify(minify);
+        } else {
+            // 如果不是预期的类型，记录警告
+            std::cerr << "警告: JS编译器不是JSCompilerWrapper类型，无法设置minify选项" << std::endl;
+        }
     }
 }
 
