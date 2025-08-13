@@ -13,8 +13,8 @@ void CHTLMainCompiler::initialize() {
     // 创建上下文
     context_ = std::make_shared<CHTLContext>();
     
-    // 创建扫描器
-    scanner_ = std::make_unique<scanner::CHTLUnifiedScanner>();
+    // 创建精确扫描器
+    scanner_ = std::make_unique<scanner::PrecisionScanner>();
     
     // 创建调度器并注册编译器
     dispatcher_ = compiler::createStandardDispatcher(context_);

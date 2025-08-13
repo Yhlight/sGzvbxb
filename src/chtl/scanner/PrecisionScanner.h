@@ -2,104 +2,75 @@
 #define CHTL_PRECISION_SCANNER_H
 
 #include "CHTLUnifiedScanner.h"
-#include <deque>
+#include <stack>
 
 namespace chtl {
 namespace scanner {
 
-// 精准扫描器 - 能够精确切割混合代码并分发给正确的编译器
+// 精确扫描器 - 对CHTL和CHTL JS进行字符级别的精确截断
+// 对CSS和JS进行块级别的宽松处理
 class PrecisionScanner : public CHTLUnifiedScanner {
 public:
     PrecisionScanner();
     
-    // 重写扫描方法以实现精准切割
-    std::vector<CodeFragment> scan(const std::string& input);
+    // 重写扫描方法，实现精确截断
+    std::vector<CodeFragment> scan(const std::string& input) override;
     
 private:
-    // 精准切割script块
-    void preciseScanScriptBlock(std::vector<CodeFragment>& fragments);
-    
-    // 精准切割style块中的CHTL扩展
-    void preciseScanStyleBlock(std::vector<CodeFragment>& fragments);
-    
-    // 切割混合内容
-    struct MixedFragment {
-        FragmentType type;
-        std::string content;
-        size_t startPos;
-        size_t endPos;
-        size_t startLine;
-        size_t startColumn;
-        size_t endLine;
-        size_t endColumn;
+    enum class ScanMode {
+        CHTL,        // CHTL模式 - 严格截断
+        STYLE_BLOCK, // style块内 - 判断是局部还是全局
+        SCRIPT_BLOCK,// script块内 - 混合处理
+        CSS,         // CSS模式 - 宽松块处理
+        JS,          // JS模式 - 宽松块处理  
+        CHTL_JS      // CHTL JS模式 - 严格截断
     };
     
-    // 分析script块并切割成多个片段
-    std::vector<MixedFragment> analyzeScriptContent(
-        const std::string& content,
-        size_t basePos,
-        size_t baseLine,
-        size_t baseColumn
-    );
-    
-    // 分析style块中的CHTL变量引用
-    std::vector<MixedFragment> analyzeStyleContent(
-        const std::string& content,
-        size_t basePos,
-        size_t baseLine,
-        size_t baseColumn
-    );
-    
-    // 检测CHTL扩展的精确位置
-    struct CHTLExtension {
-        enum Type {
-            AT_DIRECTIVE,      // @Element, @Style, @Var
-            INTERPOLATION,     // {{ }}
-            VAR_DECLARATION    // var x = @...
-        };
-        
-        Type type;
-        size_t startPos;
-        size_t endPos;
-        std::string content;
+    struct ScanContext {
+        ScanMode mode;
+        size_t braceLevel;
+        bool isGlobalStyle;  // 是否是全局style
+        bool inElement;      // 是否在元素内部
     };
     
-    std::vector<CHTLExtension> findCHTLExtensions(const std::string& content);
+    std::stack<ScanContext> contextStack_;
     
-    // 将内容按CHTL扩展位置切割
-    std::vector<MixedFragment> splitByExtensions(
-        const std::string& content,
-        const std::vector<CHTLExtension>& extensions,
-        size_t basePos,
-        size_t baseLine,
-        size_t baseColumn
-    );
+    // 精确扫描方法
+    void scanPrecise(std::vector<CodeFragment>& fragments);
     
-    // 计算行列位置
-    struct Position {
-        size_t line;
-        size_t column;
-    };
+    // CHTL特征的字符级别扫描
+    bool scanCHTLFeature(std::vector<CodeFragment>& fragments);
+    bool scanAtDirective(std::vector<CodeFragment>& fragments);
+    bool scanTemplateDirective(std::vector<CodeFragment>& fragments);
+    bool scanCustomDirective(std::vector<CodeFragment>& fragments);
+    bool scanTextBlock(std::vector<CodeFragment>& fragments);
     
-    Position calculatePosition(const std::string& content, size_t pos,
-                              size_t baseLine, size_t baseColumn);
+    // CHTL JS特征的字符级别扫描
+    bool scanCHTLJSFeature(std::vector<CodeFragment>& fragments);
+    bool scanInterpolation(std::vector<CodeFragment>& fragments);
+    bool scanChainOperator(std::vector<CodeFragment>& fragments);
+    bool scanListenMethod(std::vector<CodeFragment>& fragments);
+    bool scanAnimateFunction(std::vector<CodeFragment>& fragments);
     
-    // 验证切割的完整性
-    bool validateFragments(const std::vector<MixedFragment>& fragments,
-                          const std::string& originalContent);
-};
-
-// 扫描器工厂 - 创建合适的扫描器实例
-class ScannerFactory {
-public:
-    enum ScannerType {
-        UNIFIED,    // 基础统一扫描器
-        PRECISION   // 精准切割扫描器
-    };
+    // 块级别扫描（宽松）
+    void scanCSSBlock(std::vector<CodeFragment>& fragments);
+    void scanJSBlock(std::vector<CodeFragment>& fragments);
     
-    static std::unique_ptr<CHTLUnifiedScanner> create(
-        ScannerType type = PRECISION
-    );
+    // 辅助方法
+    bool matchExact(const std::string& pattern);
+    bool isAtBoundary();  // 检查是否在单词边界
+    void skipWhitespace();
+    std::string scanIdentifier();
+    std::string scanUntil(char delimiter);
+    std::string scanUntilPattern(const std::string& pattern);
+    std::string scanBalancedBraces();
+    
+    // 上下文管理
+    void pushContext(ScanMode mode);
+    void popContext();
+    ScanMode currentMode() const;
+    bool isInScript() const;
+    bool isInStyle() const;
 };
 
 } // namespace scanner

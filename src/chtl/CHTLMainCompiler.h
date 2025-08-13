@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 #include "CHTLContext.h"
-#include "scanner/CHTLUnifiedScanner.h"
+#include "scanner/PrecisionScanner.h"
 #include "compiler/CompilerDispatcher.h"
 
 namespace chtl {
@@ -65,7 +65,7 @@ public:
 private:
     // 核心组件
     std::shared_ptr<CHTLContext> context_;
-    std::unique_ptr<scanner::CHTLUnifiedScanner> scanner_;
+    std::unique_ptr<scanner::PrecisionScanner> scanner_;
     std::unique_ptr<compiler::CompilerDispatcher> dispatcher_;
     
     // 编译状态
