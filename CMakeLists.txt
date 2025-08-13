@@ -93,6 +93,14 @@ file(GLOB_RECURSE CHTL_CORE_SOURCES
     src/chtl/error/*.cpp
     src/chtl/utils/*.cpp
     src/chtl/CHTLContext.cpp  # 添加CHTLContext实现
+    src/chtl/CHTLMainCompiler.cpp  # 添加主编译器
+)
+
+# ===== 编译器架构 - 新增 =====
+file(GLOB_RECURSE COMPILER_ARCH_SOURCES
+    src/chtl/compiler/CompilerDispatcher.cpp
+    src/chtl/compiler/handwritten/*.cpp
+    src/chtl/compiler/antlr/*.cpp
 )
 
 # 临时排除有问题的文件
@@ -172,6 +180,7 @@ add_library(chtl_core STATIC
     ${CHTL_PARSER_SOURCES}
     ${SCANNER_SOURCES}
     ${CONFIG_SOURCES}
+    ${COMPILER_ARCH_SOURCES}
 )
 
 # CSS/JS库（依赖ANTLR4）
