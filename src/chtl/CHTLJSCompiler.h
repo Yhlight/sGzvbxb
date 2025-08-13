@@ -152,7 +152,9 @@ private:
     void exitScope();
     
     // 符号管理
-    void registerSymbol(const std::string& name, const std::string& type, bool isConst = false, bool isLet = false);
+    void registerSymbol(const std::string& name, const std::string& type, 
+                       bool isConst = false, bool isLet = false, 
+                       antlr4::ParserRuleContext* ctx = nullptr);
     void markSymbolAsUsed(const std::string& name);
     
     // 错误报告
