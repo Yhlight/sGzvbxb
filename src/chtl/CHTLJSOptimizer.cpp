@@ -57,9 +57,9 @@ void JSVariableObfuscator::initializeReservedIdentifiers() {
 std::string JSVariableObfuscator::obfuscate(const std::string& jsCode) {
     // 创建ANTLR输入流
     antlr4::ANTLRInputStream input(jsCode);
-    JSLexer lexer(&input);
+    JavaScriptLexer lexer(&input);
     antlr4::CommonTokenStream tokens(&lexer);
-    JSParser parser(&tokens);
+    JavaScriptParser parser(&tokens);
     
     // 解析
     auto tree = parser.program();
@@ -88,13 +88,14 @@ std::string JSVariableObfuscator::rebuildCode(antlr4::tree::ParseTree* tree,
             result << jsCode.substr(lastEnd, token->getStartIndex() - lastEnd);
         }
         
-        if (token->getType() == JSLexer::Identifier) {
-            std::string originalName = token->getText();
-            std::string obfuscatedName = getObfuscatedName(originalName);
-            result << obfuscatedName;
-        } else {
+        // TODO: 需要找到正确的Identifier token类型
+        // if (token->getType() == JavaScriptLexer::Identifier) {
+        //     std::string originalName = token->getText();
+        //     std::string obfuscatedName = getObfuscatedName(originalName);
+        //     result << obfuscatedName;
+        // } else {
             result << token->getText();
-        }
+        // }
         
         lastEnd = token->getStopIndex() + 1;
     }
@@ -107,25 +108,25 @@ std::string JSVariableObfuscator::rebuildCode(antlr4::tree::ParseTree* tree,
     return result.str();
 }
 
-antlrcpp::Any JSVariableObfuscator::visitProgram(JSParser::ProgramContext* ctx) {
+antlrcpp::Any JSVariableObfuscator::visitProgram(JavaScriptParser::ProgramContext* ctx) {
     return visitChildren(ctx);
 }
 
-antlrcpp::Any JSVariableObfuscator::visitVariableDeclaration(JSParser::VariableDeclarationContext* ctx) {
-    // 获取变量名
-    if (ctx->Identifier()) {
-        std::string varName = ctx->Identifier()->getText();
-        if (!isReserved(varName)) {
-            addVariable(varName);
-        }
-    }
+antlrcpp::Any JSVariableObfuscator::visitVariableDeclaration(JavaScriptParser::VariableDeclarationContext* ctx) {
+    // TODO: 需要根据新的语法结构更新
+    // if (ctx->Identifier()) {
+    //     std::string varName = ctx->Identifier()->getText();
+    //     if (!isReserved(varName)) {
+    //         addVariable(varName);
+    //     }
+    // }
     return visitChildren(ctx);
 }
 
-antlrcpp::Any JSVariableObfuscator::visitFunctionDeclaration(JSParser::FunctionDeclarationContext* ctx) {
-    // 函数名
-    if (ctx->Identifier()) {
-        std::string funcName = ctx->Identifier()->getText();
+antlrcpp::Any JSVariableObfuscator::visitFunctionDeclaration(JavaScriptParser::FunctionDeclarationContext* ctx) {
+    // TODO: 需要更新为使用identifier()方法
+    if (ctx->identifier()) {
+        std::string funcName = ctx->identifier()->getText();
         if (!isReserved(funcName)) {
             addVariable(funcName, false, true);
         }
@@ -143,30 +144,31 @@ antlrcpp::Any JSVariableObfuscator::visitFunctionDeclaration(JSParser::FunctionD
     return nullptr;
 }
 
-antlrcpp::Any JSVariableObfuscator::visitFormalParameterList(JSParser::FormalParameterListContext* ctx) {
-    // 处理函数参数
-    auto identifiers = ctx->Identifier();
-    for (auto id : identifiers) {
-        std::string paramName = id->getText();
-        if (!isReserved(paramName)) {
-            addVariable(paramName, true);
-        }
-    }
+antlrcpp::Any JSVariableObfuscator::visitFormalParameterList(JavaScriptParser::FormalParameterListContext* ctx) {
+    // TODO: 需要根据新的语法结构更新参数处理
+    // auto identifiers = ctx->Identifier();
+    // for (auto id : identifiers) {
+    //     std::string paramName = id->getText();
+    //     if (!isReserved(paramName)) {
+    //         addVariable(paramName, true);
+    //     }
+    // }
     return visitChildren(ctx);
 }
 
-antlrcpp::Any JSVariableObfuscator::visitIdentifierExpression(JSParser::IdentifierExpressionContext* ctx) {
-    // 标识符使用时不需要特殊处理，在重建代码时会自动替换
-    return visitChildren(ctx);
-}
-
-antlrcpp::Any JSVariableObfuscator::visitBlock(JSParser::BlockContext* ctx) {
-    // 块级作用域
-    enterScope();
-    visitChildren(ctx);
-    exitScope();
-    return nullptr;
-}
+// TODO: 需要实现这些方法
+// antlrcpp::Any JSVariableObfuscator::visitIdentifierExpression(JavaScriptParser::IdentifierExpressionContext* ctx) {
+//     // 标识符使用时不需要特殊处理，在重建代码时会自动替换
+//     return visitChildren(ctx);
+// }
+//
+// antlrcpp::Any JSVariableObfuscator::visitBlock(JavaScriptParser::BlockContext* ctx) {
+//     // 块级作用域
+//     enterScope();
+//     visitChildren(ctx);
+//     exitScope();
+//     return nullptr;
+// }
 
 void JSVariableObfuscator::enterScope() {
     scopeStack.push_back(std::unordered_map<std::string, VariableScope>());

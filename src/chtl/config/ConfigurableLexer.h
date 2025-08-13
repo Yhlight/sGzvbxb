@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ConfigurationSystem.h"
-#include <antlr4-runtime/antlr4-runtime.h>
+#include "antlr4-runtime.h"
 #include <unordered_map>
 #include <string>
 #include <vector>

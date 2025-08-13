@@ -1,5 +1,5 @@
 #include "ConfigurableLexer.h"
-#include "../generated/CHTLLexer.h"  // 假设这是ANTLR生成的Lexer
+#include "../../generated/chtl/grammars/CHTLLexer.h"  // ANTLR生成的Lexer
 
 namespace chtl {
 namespace config {

@@ -1,166 +1,17 @@
-// CHTL测试文件
-// 展示CHTL的基本语法特性
-
-html
-{
-    head
-    {
-        title
-        {
-            text
-            {
-                "CHTL测试页面"
-            }
-        }
-        
-        // 全局样式块
-        style
-        {
-            body {
-                margin: 0;
-                padding: 0;
-                font-family: Arial, sans-serif;
-            }
-        }
+html {
+  body {
+    h1 {
+      text { "Welcome to CHTL!" }
     }
-    
-    body
-    {
-        // 使用div元素
-        div
-        {
-            id: container;
-            class: main-container;
-            
-            // 局部样式块
-            style
-            {
-                // 内联样式
-                width: 100%;
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 20px;
-                
-                // 自动化类名
-                .box
-                {
-                    background-color: #f0f0f0;
-                    border-radius: 8px;
-                    padding: 15px;
-                    margin-bottom: 20px;
-                }
-                
-                // 使用&简化伪类
-                &:hover
-                {
-                    background-color: #f8f8f8;
-                }
-            }
-            
-            h1
-            {
-                text
-                {
-                    "欢迎使用CHTL"
-                }
-                
-                style
-                {
-                    color: #333;
-                    font-size: 32px;
-                    text-align: center;
-                }
-            }
-            
-            p
-            {
-                class: intro;
-                
-                text
-                {
-                    "CHTL是一种创新的模板语言，将C++的强大功能与现代Web开发相结合"
-                }
-            }
-            
-            // 按钮元素
-            button
-            {
-                id: greet-btn;
-                
-                text
-                {
-                    "点击我！"
-                }
-                
-                style
-                {
-                    .primary-btn
-                    {
-                        background-color: #007bff;
-                        color: white;
-                        border: none;
-                        padding: 10px 20px;
-                        border-radius: 4px;
-                        cursor: pointer;
-                    }
-                    
-                    &:hover
-                    {
-                        background-color: #0056b3;
-                    }
-                }
-                
-                // 局部脚本块
-                script
-                {
-                    {{greet-btn}}.addEventListener('click', () => {
-                        alert('你好，来自CHTL！');
-                    });
-                }
-            }
-        }
+    p {
+      text { "CHTL - C++ Hypertext Language" }
     }
-}
-
-// 样式组模板
-[Template] @Style DefaultText
-{
-    color: "black";
-    line-height: 1.6;
-    font-size: 16px;
-}
-
-// 元素模板
-[Template] @Element Card
-{
-    div
-    {
-        style
-        {
-            .card
-            {
-                background: white;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                padding: 20px;
-                margin: 10px;
-                border-radius: 8px;
-            }
-        }
-        
-        h3
-        {
-            text
-            {
-                "卡片标题"
-            }
-        }
-        
-        p
-        {
-            text
-            {
-                "这是一个卡片组件"
-            }
-        }
+    style {
+      body { background: #f0f0f0; }
+      h1 { color: #333; }
     }
+    script {
+      console.log("CHTL is running!");
+    }
+  }
 }

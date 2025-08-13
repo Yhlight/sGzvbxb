@@ -13,6 +13,7 @@
 #include <numeric>
 #include <cmath>
 #include <atomic>
+#include <regex>
 
 namespace chtl {
 namespace utils {

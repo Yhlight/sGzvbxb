@@ -84,6 +84,7 @@ public:
     size_t getPosition() const { return position; }
     size_t getLine() const { return line; }
     size_t getColumn() const { return column; }
+    void setPosition(size_t pos) { position = pos; }
     
     // 扫描特定模式
     std::string scanIdentifier();

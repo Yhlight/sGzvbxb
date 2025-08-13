@@ -87,6 +87,12 @@ private:
     std::shared_ptr<JSScope> currentScope;
     std::vector<std::shared_ptr<JSScope>> scopeStack;
     
+public:
+    // 访问器方法
+    void setPreserveComments(bool value) { preserveComments = value; }
+    void setAddSourceMap(bool value) { addSourceMap = value; }
+    
+private:
     // 编译选项
     bool minify = false;
     bool preserveComments = false;
@@ -127,8 +133,8 @@ public:
     void enterVariableDeclaration(JavaScriptParser::VariableDeclarationContext* ctx) override;
     void exitVariableDeclaration(JavaScriptParser::VariableDeclarationContext* ctx) override;
     
-    void enterImportDeclaration(JavaScriptParser::ImportDeclarationContext* ctx) override;
-    void enterExportDeclaration(JavaScriptParser::ExportDeclarationContext* ctx) override;
+    void enterImportStatement(JavaScriptParser::ImportStatementContext* ctx) override;
+    void enterExportStatement(JavaScriptParser::ExportStatementContext* ctx) override;
     
     void enterBlockStatement(JavaScriptParser::BlockStatementContext* ctx) override;
     void exitBlockStatement(JavaScriptParser::BlockStatementContext* ctx) override;
@@ -223,13 +229,18 @@ private:
 class JSOptimizer {
 public:
     struct Options {
-        bool removeDeadCode = true;
-        bool inlineConstants = true;
-        bool simplifyExpressions = true;
-        bool mangleVariables = false;  // 变量名混淆
-        bool removeConsoleLog = false;
-        bool removeDebugger = false;
-        bool optimizeLoops = true;
+        bool removeDeadCode;
+        bool inlineConstants;
+        bool simplifyExpressions;
+        bool mangleVariables;  // 变量名混淆
+        bool removeConsoleLog;
+        bool removeDebugger;
+        bool optimizeLoops;
+        
+        Options() : removeDeadCode(true), inlineConstants(true),
+                   simplifyExpressions(true), mangleVariables(false),
+                   removeConsoleLog(false), removeDebugger(false),
+                   optimizeLoops(true) {}
     };
     
 private:

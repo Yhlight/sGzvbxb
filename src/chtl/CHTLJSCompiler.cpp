@@ -131,28 +131,15 @@ void JSCompilerListener::exitClassDeclaration(JavaScriptParser::ClassDeclaration
 }
 
 void JSCompilerListener::enterVariableDeclaration(JavaScriptParser::VariableDeclarationContext* ctx) {
-    // 获取变量声明类型
-    std::string declarationType = ctx->variableDeclarationKind()->getText();
-    bool isConst = (declarationType == "const");
-    bool isLet = (declarationType == "let");
-    
-    // 处理每个变量
-    for (auto* declarator : ctx->variableDeclaratorList()->variableDeclarator()) {
-        std::string varName = declarator->identifier()->getText();
-        registerSymbol(varName, "variable", isConst, isLet);
-    }
-    
-    // 输出变量声明
-    output << indent() << declarationType << " ";
-    output << extractText(ctx->variableDeclaratorList());
-    output << ";";
-    
+    // TODO: 需要根据新的JavaScript语法结构更新此方法
+    // 暂时直接输出原始文本
+    output << extractText(ctx);
     if (!minify) {
         output << "\n";
     }
 }
 
-void JSCompilerListener::enterImportDeclaration(JavaScriptParser::ImportDeclarationContext* ctx) {
+void JSCompilerListener::enterImportStatement(JavaScriptParser::ImportStatementContext* ctx) {
     std::string importText = extractText(ctx);
     imports.push_back(importText);
     
@@ -162,7 +149,7 @@ void JSCompilerListener::enterImportDeclaration(JavaScriptParser::ImportDeclarat
     }
 }
 
-void JSCompilerListener::enterExportDeclaration(JavaScriptParser::ExportDeclarationContext* ctx) {
+void JSCompilerListener::enterExportStatement(JavaScriptParser::ExportStatementContext* ctx) {
     std::string exportText = extractText(ctx);
     exports.push_back(exportText);
     
@@ -285,8 +272,8 @@ std::string JSCompiler::compile(const std::string& js) {
     
     // 编译
     JSCompilerListener listener(context, options.minify);
-    listener.preserveComments = options.preserveComments;
-    listener.addSourceMap = options.addSourceMap;
+    listener.setPreserveComments(options.preserveComments);
+    listener.setAddSourceMap(options.addSourceMap);
     
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
     
@@ -322,7 +309,7 @@ JSCompiler::CompileResult JSCompiler::compileWithAnalysis(const std::string& js)
     
     // 编译
     JSCompilerListener listener(context, options.minify);
-    listener.preserveComments = options.preserveComments;
+    listener.setPreserveComments(options.preserveComments);
     
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
     
@@ -395,7 +382,8 @@ std::string JSOptimizer::minify(const std::string& js) {
     
     // 移除注释
     result = std::regex_replace(result, std::regex("//.*$", std::regex::multiline), "");
-    result = std::regex_replace(result, std::regex("/\\*.*?\\*/", std::regex::dotall), "");
+    // 移除多行注释 (使用[\s\S]来匹配任何字符包括换行)
+    result = std::regex_replace(result, std::regex("/\\*[\\s\\S]*?\\*/"), "");
     
     // 移除多余空白
     result = std::regex_replace(result, std::regex("\\s+"), " ");

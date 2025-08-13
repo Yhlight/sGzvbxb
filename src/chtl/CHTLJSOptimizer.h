@@ -35,7 +35,7 @@ struct VariableScope {
 };
 
 // JS变量混淆器
-class JSVariableObfuscator : public JSParserBaseVisitor {
+class JSVariableObfuscator : public JavaScriptBaseVisitor {
 public:
     explicit JSVariableObfuscator(const JSOptimizationOptions& options);
     
@@ -43,12 +43,13 @@ public:
     std::string obfuscate(const std::string& jsCode);
     
     // ANTLR访问者方法
-    antlrcpp::Any visitProgram(JSParser::ProgramContext* ctx) override;
-    antlrcpp::Any visitVariableDeclaration(JSParser::VariableDeclarationContext* ctx) override;
-    antlrcpp::Any visitFunctionDeclaration(JSParser::FunctionDeclarationContext* ctx) override;
-    antlrcpp::Any visitFormalParameterList(JSParser::FormalParameterListContext* ctx) override;
-    antlrcpp::Any visitIdentifierExpression(JSParser::IdentifierExpressionContext* ctx) override;
-    antlrcpp::Any visitBlock(JSParser::BlockContext* ctx) override;
+    antlrcpp::Any visitProgram(JavaScriptParser::ProgramContext* ctx) override;
+    antlrcpp::Any visitVariableDeclaration(JavaScriptParser::VariableDeclarationContext* ctx) override;
+    antlrcpp::Any visitFunctionDeclaration(JavaScriptParser::FunctionDeclarationContext* ctx) override;
+    antlrcpp::Any visitFormalParameterList(JavaScriptParser::FormalParameterListContext* ctx) override;
+    // TODO: 需要根据新的JavaScript语法更新这些方法
+    // antlrcpp::Any visitIdentifierExpression(JavaScriptParser::IdentifierExpressionContext* ctx) override;
+    // antlrcpp::Any visitBlock(JavaScriptParser::BlockContext* ctx) override;
     
 private:
     JSOptimizationOptions options;

@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
         std::cout << "Scanned " << fragments.size() << " code fragments" << std::endl;
         
         // 创建HTML生成器
-        generator::HtmlGenerator htmlGen(context);
+        generator::HtmlGenerator htmlGen;
         
         // 简单的演示：输出扫描到的片段
         std::cout << "\nCode fragments:" << std::endl;

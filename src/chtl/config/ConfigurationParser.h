@@ -5,7 +5,7 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
-#include <antlr4-runtime/antlr4-runtime.h>
+#include "antlr4-runtime.h"
 #include "../../generated/config/grammars/CHConfigLexer.h"
 #include "../../generated/config/grammars/CHConfigParser.h"
 #include "../../generated/config/grammars/CHConfigBaseVisitor.h"
