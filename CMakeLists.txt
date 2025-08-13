@@ -108,6 +108,7 @@ file(GLOB_RECURSE CHTL_PARSER_SOURCES
     src/chtl/parser/standalone/CHTLParser.cpp
     src/chtl/parser/standalone/CHTLJSLexer.cpp
     src/chtl/parser/standalone/CHTLJSParser.cpp
+    src/chtl/parser/CHTLSimpleParser.cpp
 )
 
 # ===== 扫描器 - 独立实现 =====

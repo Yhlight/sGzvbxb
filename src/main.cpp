@@ -7,6 +7,7 @@
 #include "chtl/scanner/CHTLUnifiedScanner.h"
 #include "chtl/generator/HtmlGenerator.h"
 #include "chtl/error/ErrorInterface.h"
+#include "chtl/parser/CHTLSimpleParser.h"
 
 using namespace chtl;
 
@@ -48,53 +49,30 @@ int main(int argc, char* argv[]) {
         
         std::cout << "Compiling: " << inputFile << std::endl;
         
-        // 创建上下文
-        auto context = std::make_shared<CHTLContext>();
+        // 创建简单的CHTL解析器
+        parser::CHTLSimpleParser parser;
+        auto parseResult = parser.parse(source);
         
-        // 创建扫描器
-        scanner::CHTLUnifiedScanner scanner;
-        auto fragments = scanner.scan(source);
-        
-        if (scanner.hasErrors()) {
-            std::cerr << "Scanner errors:" << std::endl;
-            for (const auto& error : scanner.getErrors()) {
-                std::cerr << "  " << error << std::endl;
-            }
+        if (!parseResult.success) {
+            std::cerr << "Parse error at line " << parseResult.errorLine 
+                     << ", column " << parseResult.errorColumn 
+                     << ": " << parseResult.error << std::endl;
             return 1;
         }
         
-        std::cout << "Scanned " << fragments.size() << " code fragments" << std::endl;
+        std::cout << "Parsing successful!" << std::endl;
         
-        // 创建HTML生成器
-        generator::HtmlGenerator htmlGen;
+        // 生成HTML
+        std::string html = parser::CHTLSimpleParser::generateHTML(parseResult.root);
         
-        // 简单的演示：输出扫描到的片段
-        std::cout << "\nCode fragments:" << std::endl;
-        for (const auto& fragment : fragments) {
-            std::cout << "  Type: " << static_cast<int>(fragment.type) 
-                     << ", Lines: " << fragment.startLine << "-" << fragment.endLine
-                     << ", Content length: " << fragment.content.length() << std::endl;
-        }
-        
-        // 写入输出文件（目前只是简单的演示）
+        // 写入输出文件
         std::ofstream output(outputFile);
         if (!output.is_open()) {
             std::cerr << "Error: Cannot create output file: " << outputFile << std::endl;
             return 1;
         }
         
-        output << "<!DOCTYPE html>\n";
-        output << "<html>\n";
-        output << "<head>\n";
-        output << "  <meta charset=\"UTF-8\">\n";
-        output << "  <title>CHTL Generated Page</title>\n";
-        output << "</head>\n";
-        output << "<body>\n";
-        output << "  <h1>CHTL Compilation Result</h1>\n";
-        output << "  <p>Successfully processed " << fragments.size() << " fragments from " << inputFile << "</p>\n";
-        output << "</body>\n";
-        output << "</html>\n";
-        
+        output << "<!DOCTYPE html>\n" << html;
         output.close();
         
         std::cout << "\nOutput written to: " << outputFile << std::endl;
