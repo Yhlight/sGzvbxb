@@ -42,6 +42,21 @@ private:
         CHTL_TEXT,          // text块
         CHTL_VAR_REF,       // 变量引用 如 ThemeColor(name)
         
+        // 模板和自定义状态
+        TEMPLATE_BLOCK,     // [Template]块内部
+        CUSTOM_BLOCK,       // [Custom]块内部
+        
+        // 导入和命名空间状态
+        IMPORT_STATEMENT,   // [Import]语句
+        NAMESPACE_BLOCK,    // [Namespace]块
+        NAMESPACE_NESTED,   // 嵌套命名空间
+        
+        // 约束状态
+        EXCEPT_CONSTRAINT,  // except约束
+        
+        // 导出状态
+        EXPORT_BLOCK,       // [Export]块
+        
         // CHTL JS特征状态
         CHTLJS_INTERPOLATION, // {{}}
         CHTLJS_CHAIN,         // ->
@@ -88,6 +103,12 @@ private:
     void handleJSContent(std::vector<CodeFragment>& fragments);
     void handleCHTLFeature(std::vector<CodeFragment>& fragments);
     void handleCHTLJSFeature(std::vector<CodeFragment>& fragments);
+    void handleTemplateBlock(std::vector<CodeFragment>& fragments);
+    void handleCustomBlock(std::vector<CodeFragment>& fragments);
+    void handleImportStatement(std::vector<CodeFragment>& fragments);
+    void handleNamespaceBlock(std::vector<CodeFragment>& fragments);
+    void handleExceptConstraint(std::vector<CodeFragment>& fragments);
+    void handleExportBlock(std::vector<CodeFragment>& fragments);
     
     // 状态转换
     void transitionTo(ScanState newState);

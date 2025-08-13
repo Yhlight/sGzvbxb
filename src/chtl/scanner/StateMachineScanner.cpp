@@ -18,6 +18,12 @@ void StateMachineScanner::initializeStateMachine() {
     stateHandlers_[ScanState::SCRIPT_KEYWORD] = [this](auto& f) { handleScriptKeyword(f); };
     stateHandlers_[ScanState::SCRIPT_BLOCK] = [this](auto& f) { handleScriptBlock(f); };
     stateHandlers_[ScanState::JS_CONTENT] = [this](auto& f) { handleJSContent(f); };
+    stateHandlers_[ScanState::TEMPLATE_BLOCK] = [this](auto& f) { handleTemplateBlock(f); };
+    stateHandlers_[ScanState::CUSTOM_BLOCK] = [this](auto& f) { handleCustomBlock(f); };
+    stateHandlers_[ScanState::IMPORT_STATEMENT] = [this](auto& f) { handleImportStatement(f); };
+    stateHandlers_[ScanState::NAMESPACE_BLOCK] = [this](auto& f) { handleNamespaceBlock(f); };
+    stateHandlers_[ScanState::EXCEPT_CONSTRAINT] = [this](auto& f) { handleExceptConstraint(f); };
+    stateHandlers_[ScanState::EXPORT_BLOCK] = [this](auto& f) { handleExportBlock(f); };
 }
 
 std::vector<CodeFragment> StateMachineScanner::scan(const std::string& input) {
@@ -112,8 +118,32 @@ void StateMachineScanner::handleCHTLTop(std::vector<CodeFragment>& fragments) {
         size_t savePos = pos_;
         advance(); // '['
         
-        if (matchKeyword("Template]") || matchKeyword("Custom]") || 
-            matchKeyword("Import]") || matchKeyword("Configuration]")) {
+        if (matchKeyword("Template]")) {
+            pos_ = savePos;  // 回退
+            flushCurrentFragment(fragments);
+            transitionTo(ScanState::TEMPLATE_BLOCK);
+            return;
+        } else if (matchKeyword("Custom]")) {
+            pos_ = savePos;  // 回退
+            flushCurrentFragment(fragments);
+            transitionTo(ScanState::CUSTOM_BLOCK);
+            return;
+        } else if (matchKeyword("Import]")) {
+            pos_ = savePos;  // 回退
+            flushCurrentFragment(fragments);
+            transitionTo(ScanState::IMPORT_STATEMENT);
+            return;
+        } else if (matchKeyword("Namespace]")) {
+            pos_ = savePos;  // 回退
+            flushCurrentFragment(fragments);
+            transitionTo(ScanState::NAMESPACE_BLOCK);
+            return;
+        } else if (matchKeyword("Export]")) {
+            pos_ = savePos;  // 回退
+            flushCurrentFragment(fragments);
+            transitionTo(ScanState::EXPORT_BLOCK);
+            return;
+        } else if (matchKeyword("Configuration]")) {
             pos_ = savePos;  // 回退
             flushCurrentFragment(fragments);
             handleCHTLFeature(fragments);
@@ -121,6 +151,13 @@ void StateMachineScanner::handleCHTLTop(std::vector<CodeFragment>& fragments) {
         }
         
         pos_ = savePos;  // 回退
+    }
+    
+    // 检测 except 约束
+    if (c == 'e' && matchKeyword("except")) {
+        flushCurrentFragment(fragments);
+        transitionTo(ScanState::EXCEPT_CONSTRAINT);
+        return;
     }
     
     // 检测变量引用 Name(param)
@@ -590,6 +627,195 @@ void StateMachineScanner::handleStyleBlock(std::vector<CodeFragment>& fragments,
 char StateMachineScanner::peekAhead(size_t offset) const {
     size_t idx = pos_ + offset;
     return idx < input_.size() ? input_[idx] : '\0';
+}
+
+// 处理[Template]块
+void StateMachineScanner::handleTemplateBlock(std::vector<CodeFragment>& fragments) {
+    startFragment(FragmentType::CHTL);
+    
+    // [Template]
+    appendToFragment(advance()); // '['
+    while (pos_ < input_.size() && peek() != ']') {
+        appendToFragment(advance());
+    }
+    if (peek() == ']') {
+        appendToFragment(advance()); // ']'
+    }
+    
+    skipWhitespace();
+    
+    // @Element / @Style / @Var
+    if (peek() == '@') {
+        appendToFragment(advance()); // '@'
+        std::string directive = scanIdentifier();
+        appendToFragment(directive);
+    }
+    
+    skipWhitespace();
+    
+    // 模板名称
+    std::string name = scanIdentifier();
+    appendToFragment(name);
+    
+    skipWhitespace();
+    
+    // 扫描模板内容
+    if (peek() == '{') {
+        appendToFragment(scanBalanced('{', '}'));
+    }
+    
+    finishFragment(fragments);
+    popState();  // 回到上一个状态
+}
+
+// 处理[Custom]块
+void StateMachineScanner::handleCustomBlock(std::vector<CodeFragment>& fragments) {
+    startFragment(FragmentType::CHTL);
+    
+    // [Custom]
+    appendToFragment(advance()); // '['
+    while (pos_ < input_.size() && peek() != ']') {
+        appendToFragment(advance());
+    }
+    if (peek() == ']') {
+        appendToFragment(advance()); // ']'
+    }
+    
+    skipWhitespace();
+    
+    // @Element / @Style / @Var
+    if (peek() == '@') {
+        appendToFragment(advance()); // '@'
+        std::string directive = scanIdentifier();
+        appendToFragment(directive);
+    }
+    
+    skipWhitespace();
+    
+    // 自定义名称
+    std::string name = scanIdentifier();
+    appendToFragment(name);
+    
+    skipWhitespace();
+    
+    // 扫描自定义内容
+    if (peek() == '{') {
+        appendToFragment(scanBalanced('{', '}'));
+    }
+    
+    finishFragment(fragments);
+    popState();  // 回到上一个状态
+}
+
+// 处理[Import]语句
+void StateMachineScanner::handleImportStatement(std::vector<CodeFragment>& fragments) {
+    startFragment(FragmentType::CHTL);
+    
+    // 扫描整个import语句直到分号或换行
+    appendToFragment('[');
+    advance();
+    
+    while (pos_ < input_.size()) {
+        char c = peek();
+        if (c == ';' || c == '\n') {
+            if (c == ';') {
+                appendToFragment(advance()); // 包含分号
+            }
+            break;
+        }
+        appendToFragment(advance());
+    }
+    
+    finishFragment(fragments);
+    popState();
+}
+
+// 处理[Namespace]块
+void StateMachineScanner::handleNamespaceBlock(std::vector<CodeFragment>& fragments) {
+    startFragment(FragmentType::CHTL);
+    
+    // [Namespace]
+    appendToFragment(advance()); // '['
+    while (pos_ < input_.size() && peek() != ']') {
+        appendToFragment(advance());
+    }
+    if (peek() == ']') {
+        appendToFragment(advance()); // ']'
+    }
+    
+    skipWhitespace();
+    
+    // 命名空间名称
+    std::string name = scanIdentifier();
+    appendToFragment(name);
+    
+    skipWhitespace();
+    
+    // 可能有嵌套命名空间或内容块
+    if (peek() == '{') {
+        // 有花括号，扫描整个块
+        appendToFragment(scanBalanced('{', '}'));
+    } else {
+        // 可能是嵌套命名空间的简写形式
+        // 继续扫描到下一个有意义的内容
+        while (pos_ < input_.size() && std::isspace(peek())) {
+            advance();
+        }
+    }
+    
+    finishFragment(fragments);
+    popState();
+}
+
+// 处理except约束
+void StateMachineScanner::handleExceptConstraint(std::vector<CodeFragment>& fragments) {
+    startFragment(FragmentType::CHTL);
+    
+    // except关键字
+    appendToFragment("except");
+    pos_ += 6;
+    column_ += 6;
+    
+    skipWhitespace();
+    
+    // 扫描约束内容直到分号或下一个语句
+    while (pos_ < input_.size()) {
+        char c = peek();
+        if (c == ';' || c == '\n' || c == '{' || c == '}') {
+            if (c == ';') {
+                appendToFragment(advance()); // 包含分号
+            }
+            break;
+        }
+        appendToFragment(advance());
+    }
+    
+    finishFragment(fragments);
+    popState();
+}
+
+// 处理[Export]块
+void StateMachineScanner::handleExportBlock(std::vector<CodeFragment>& fragments) {
+    startFragment(FragmentType::CHTL);
+    
+    // [Export]
+    appendToFragment(advance()); // '['
+    while (pos_ < input_.size() && peek() != ']') {
+        appendToFragment(advance());
+    }
+    if (peek() == ']') {
+        appendToFragment(advance()); // ']'
+    }
+    
+    skipWhitespace();
+    
+    // 扫描export内容
+    if (peek() == '{') {
+        appendToFragment(scanBalanced('{', '}'));
+    }
+    
+    finishFragment(fragments);
+    popState();
 }
 
 } // namespace scanner

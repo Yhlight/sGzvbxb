@@ -132,6 +132,32 @@ set(SCANNER_SOURCES
     src/chtl/scanner/StateMachineScanner.cpp
 )
 
+# ===== 新增模块 =====
+# 缓存系统
+file(GLOB_RECURSE CACHE_SOURCES
+    src/chtl/cache/*.cpp
+)
+
+# 并行编译
+file(GLOB_RECURSE PARALLEL_SOURCES
+    src/chtl/parallel/*.cpp
+)
+
+# Source Map支持
+file(GLOB_RECURSE SOURCEMAP_SOURCES
+    src/chtl/sourcemap/*.cpp
+)
+
+# 模块系统
+file(GLOB_RECURSE MODULE_SOURCES
+    src/chtl/module/*.cpp
+)
+
+# 性能优化
+file(GLOB_RECURSE OPTIMIZATION_SOURCES
+    src/chtl/optimization/*.cpp
+)
+
 # ===== 配置系统 - 由CHTL独立处理 =====
 file(GLOB_RECURSE CONFIG_SOURCES
     # 使用不依赖ANTLR4的独立配置系统
@@ -183,6 +209,11 @@ add_library(chtl_core STATIC
     ${SCANNER_SOURCES}
     ${CONFIG_SOURCES}
     ${COMPILER_ARCH_SOURCES}
+    ${CACHE_SOURCES}
+    ${PARALLEL_SOURCES}
+    ${SOURCEMAP_SOURCES}
+    ${MODULE_SOURCES}
+    ${OPTIMIZATION_SOURCES}
 )
 
 # CSS/JS库（依赖ANTLR4）
