@@ -1,5 +1,47 @@
-div {
-    text {
-        "Hello CHTL"
+html {
+    head {
+        title { text { "CHTL最小测试" } }
+        style {
+            body {
+                font-family: Arial;
+                margin: 20px;
+            }
+            h1 {
+                color: #333;
+            }
+            .info {
+                background-color: #f0f0f0;
+                padding: 20px;
+                border-radius: 5px;
+            }
+        }
+    }
+    body {
+        h1 { text { "CHTL编译器测试" } }
+        
+        div {
+            text { "这是一个简单的段落。" }
+        }
+        
+        div {
+            h2 { text { "特性列表" } }
+            ul {
+                li { text { "简洁的语法" } }
+                li { text { "嵌套结构" } }
+                li { text { "样式集成" } }
+            }
+        }
+        
+        div {
+            p { text { "CHTL让Web开发更简单。" } }
+            p { text { "编译时优化提高性能。" } }
+        }
+        
+        script {
+            console.log("CHTL页面已加载");
+            document.addEventListener("DOMContentLoaded", function() {
+                console.log("DOM加载完成");
+            });
+        }
     }
 }

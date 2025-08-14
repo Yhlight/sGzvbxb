@@ -240,6 +240,7 @@ add_executable(chtl ${CHTL_MAIN_SOURCES})
 target_link_libraries(chtl
     chtl_core
     chtl_css_js
+    antlr4-runtime
     Threads::Threads
 )
 

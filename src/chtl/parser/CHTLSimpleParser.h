@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <map> // Added for attributes
 
 namespace chtl {
 namespace parser {
@@ -24,6 +25,11 @@ public:
         std::vector<std::shared_ptr<Node>> children;
         int line;
         int column;
+        
+        // 新增：属性支持
+        std::map<std::string, std::string> attributes;
+        std::vector<std::string> classes;  // CSS类
+        std::string id;  // CSS id
     };
     
     struct ParseResult {
@@ -40,7 +46,7 @@ public:
     ParseResult parse(const std::string& input);
     
     // 生成HTML
-    static std::string generateHTML(const std::shared_ptr<Node>& node);
+    static std::string generateHTML(std::shared_ptr<Node> node);
     
 private:
     std::string input_;

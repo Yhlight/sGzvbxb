@@ -43,6 +43,20 @@ std::shared_ptr<CHTLSimpleParser::Node> CHTLSimpleParser::parseElement() {
     // 解析标签名
     node->tag = parseIdentifier();
     
+    // 解析CSS选择器（类和ID）
+    while (pos_ < input_.size() && (peek() == '.' || peek() == '#')) {
+        if (peek() == '.') {
+            advance(); // 消费 '.'
+            std::string className = parseIdentifier();
+            if (!className.empty()) {
+                node->classes.push_back(className);
+            }
+        } else if (peek() == '#') {
+            advance(); // 消费 '#'
+            node->id = parseIdentifier();
+        }
+    }
+    
     skipWhitespace();
     
     // 期待 {
@@ -50,18 +64,67 @@ std::shared_ptr<CHTLSimpleParser::Node> CHTLSimpleParser::parseElement() {
         throw std::runtime_error("Expected '{' after element name");
     }
     
-    // 解析子元素
+    // 解析属性和子元素
     while (true) {
         skipWhitespace();
         
+        if (pos_ >= input_.size()) {
+            throw std::runtime_error("Unexpected end of input in element");
+        }
+        
+        // 检查是否结束
         if (peek() == '}') {
             advance();
             break;
         }
         
-        if (pos_ >= input_.size()) {
-            throw std::runtime_error("Unexpected end of input in element");
+        // 保存当前位置以便回退
+        size_t savePos = pos_;
+        size_t saveLine = line_;
+        size_t saveColumn = column_;
+        
+        // 尝试解析为属性（identifier: value;）
+        try {
+            std::string key = parseIdentifier();
+            skipWhitespace();
+            
+            if (peek() == ':' || peek() == '=') {
+                // 这是一个属性
+                advance(); // 消费 ':' 或 '='
+                skipWhitespace();
+                
+                std::string value;
+                if (peek() == '"') {
+                    value = parseStringLiteral();
+                } else {
+                    // 解析无引号的值直到分号
+                    std::stringstream val;
+                    while (pos_ < input_.size() && peek() != ';' && peek() != '}') {
+                        val << peek();
+                        advance();
+                    }
+                    value = val.str();
+                    // 去除尾部空白
+                    while (!value.empty() && std::isspace(value.back())) {
+                        value.pop_back();
+                    }
+                }
+                
+                if (consume(';')) {
+                    // 属性结束
+                }
+                
+                node->attributes[key] = value;
+                continue;
+            }
+        } catch (...) {
+            // 不是属性，回退
         }
+        
+        // 回退到保存的位置
+        pos_ = savePos;
+        line_ = saveLine;
+        column_ = saveColumn;
         
         // 检查是否是text块
         if (peekWord() == "text") {
@@ -296,54 +359,56 @@ bool CHTLSimpleParser::consume(char c) {
 }
 
 // HTML生成器
-std::string CHTLSimpleParser::generateHTML(const std::shared_ptr<Node>& node) {
+std::string CHTLSimpleParser::generateHTML(std::shared_ptr<Node> node) {
     if (!node) return "";
     
     std::stringstream html;
     
     switch (node->type) {
         case NodeType::ELEMENT: {
-            html << "<" << node->tag << ">";
+            html << "<" << node->tag;
             
-            // 特殊处理style和script子节点
-            bool hasInlineStyle = false;
-            bool hasInlineScript = false;
-            std::stringstream styleContent;
-            std::stringstream scriptContent;
+            // 输出ID
+            if (!node->id.empty()) {
+                html << " id=\"" << node->id << "\"";
+            }
             
-            for (const auto& child : node->children) {
-                if (child->type == NodeType::STYLE) {
-                    hasInlineStyle = true;
-                    styleContent << child->content << "\n";
-                } else if (child->type == NodeType::SCRIPT) {
-                    hasInlineScript = true;
-                    scriptContent << child->content << "\n";
-                } else {
-                    html << generateHTML(child);
+            // 输出类
+            if (!node->classes.empty()) {
+                html << " class=\"";
+                for (size_t i = 0; i < node->classes.size(); ++i) {
+                    if (i > 0) html << " ";
+                    html << node->classes[i];
                 }
+                html << "\"";
             }
             
-            // 如果是head标签，插入style
-            if (node->tag == "head" && hasInlineStyle) {
-                html << "<style>" << styleContent.str() << "</style>";
+            // 输出其他属性
+            for (const auto& [key, value] : node->attributes) {
+                html << " " << key << "=\"" << value << "\"";
             }
             
-            // 如果是body标签，在结尾插入script
-            if (node->tag == "body" && hasInlineScript) {
-                html << "<script>" << scriptContent.str() << "</script>";
+            html << ">";
+            
+            // 输出子元素
+            for (const auto& child : node->children) {
+                html << generateHTML(child);
             }
             
             html << "</" << node->tag << ">";
             break;
         }
-            
+        
         case NodeType::TEXT:
             html << node->content;
             break;
             
         case NodeType::STYLE:
+            html << "<style>" << node->content << "</style>";
+            break;
+            
         case NodeType::SCRIPT:
-            // 这些已经在父元素中处理
+            html << "<script>" << node->content << "</script>";
             break;
     }
     
