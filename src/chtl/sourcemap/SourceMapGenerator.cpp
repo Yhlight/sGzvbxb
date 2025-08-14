@@ -106,8 +106,8 @@ std::string SourceMapGenerator::generateInline() const {
     return "data:application/json;base64," + base64Encode(json);
 }
 
-std::string SourceMapGenerator::getComment(bool inline) const {
-    if (inline) {
+std::string SourceMapGenerator::getComment(bool inlineMap) const {
+    if (inlineMap) {
         return "//# sourceMappingURL=" + generateInline();
     } else {
         return "//# sourceMappingURL=" + file_ + ".map";

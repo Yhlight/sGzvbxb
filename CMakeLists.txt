@@ -354,21 +354,26 @@ if(CHTL_BUILD_UNIT_TESTS)
     FetchContent_MakeAvailable(googletest)
     
     # 统一架构的单元测试
-    add_executable(test_unified_scanner tests/unit/test_unified_scanner.cpp)
-    target_link_libraries(test_unified_scanner 
-        chtl_core 
-        gtest 
-        gtest_main
-        Threads::Threads
-    )
+    # 检查是否已存在目标
+    if(NOT TARGET test_unified_scanner)
+        add_executable(test_unified_scanner tests/unit/test_unified_scanner.cpp)
+        target_link_libraries(test_unified_scanner 
+            chtl_core 
+            gtest 
+            gtest_main
+            Threads::Threads
+        )
+    endif()
     
-    add_executable(test_compiler_dispatcher tests/unit/test_compiler_dispatcher.cpp)
-    target_link_libraries(test_compiler_dispatcher 
-        chtl_core 
-        gtest 
-        gtest_main
-        Threads::Threads
-    )
+    if(NOT TARGET test_compiler_dispatcher)
+        add_executable(test_compiler_dispatcher tests/unit/test_compiler_dispatcher.cpp)
+        target_link_libraries(test_compiler_dispatcher 
+            chtl_core 
+            gtest 
+            gtest_main
+            Threads::Threads
+        )
+    endif()
     
     # 设置测试输出目录
     set_target_properties(test_unified_scanner test_compiler_dispatcher

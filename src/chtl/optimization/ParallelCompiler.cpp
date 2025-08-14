@@ -199,16 +199,16 @@ ParallelCompileResult ParallelCompiler::compileFragment(const CompileTask& task)
         
         switch (task.type) {
             case scanner::FragmentType::CSS:
-                result.result.css = task.fragment.content;
+                result.result.output = task.fragment.content;
                 break;
             case scanner::FragmentType::JAVASCRIPT:
-                result.result.javascript = task.fragment.content;
+                result.result.output = task.fragment.content;
                 break;
             case scanner::FragmentType::CHTL:
-                result.result.html = "<div>Compiled CHTL</div>";
+                result.result.output = "<div>Compiled CHTL</div>";
                 break;
             case scanner::FragmentType::CHTL_JS:
-                result.result.javascript = "// Compiled CHTL JS\n" + task.fragment.content;
+                result.result.output = "// Compiled CHTL JS\n" + task.fragment.content;
                 break;
         }
         
@@ -235,14 +235,20 @@ compiler::CompilationResult ParallelCompiler::mergeResults(
             continue;
         }
         
-        if (!result.result.html.empty()) {
-            htmlStream << result.result.html;
-        }
-        if (!result.result.css.empty()) {
-            cssStream << result.result.css << "\n";
-        }
-        if (!result.result.javascript.empty()) {
-            jsStream << result.result.javascript << "\n";
+        if (!result.result.output.empty()) {
+            // 根据类型分发输出
+            switch (result.result.type) {
+                case scanner::FragmentType::CHTL:
+                    htmlStream << result.result.output;
+                    break;
+                case scanner::FragmentType::CSS:
+                    cssStream << result.result.output << "\n";
+                    break;
+                case scanner::FragmentType::JAVASCRIPT:
+                case scanner::FragmentType::CHTL_JS:
+                    jsStream << result.result.output << "\n";
+                    break;
+            }
         }
     }
     

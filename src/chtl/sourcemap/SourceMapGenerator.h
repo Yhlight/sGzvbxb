@@ -62,7 +62,7 @@ public:
     std::string generateInline() const;
     
     // 获取Source Map注释
-    std::string getComment(bool inline = false) const;
+    std::string getComment(bool inlineMap = false) const;
     
 private:
     // VLQ编码
@@ -135,7 +135,7 @@ public:
     
     // 设置Source Map选项
     struct Options {
-        bool inline = false;          // 内联Source Map
+        bool inlineMap = false;       // 内联Source Map
         bool includeContent = false;  // 包含源内容
         std::string sourceRoot;       // 源根目录
     };

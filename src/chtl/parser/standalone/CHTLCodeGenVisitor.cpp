@@ -105,6 +105,8 @@ std::string CHTLCodeGenVisitor::visit(std::shared_ptr<ParseContext> tree) {
 void CHTLCodeGenVisitor::visitCompilationUnit(std::shared_ptr<ParseContext> ctx) {
     if (!ctx) return;
     
+    std::cerr << "DEBUG: visitCompilationUnit called, children count: " << ctx->getChildren().size() << "\n";
+    
     // 第一遍：收集所有模板和自定义定义
     for (const auto& child : ctx->getChildren()) {
         if (!child) continue;
@@ -126,6 +128,7 @@ void CHTLCodeGenVisitor::visitCompilationUnit(std::shared_ptr<ParseContext> ctx)
         auto childCtx = std::dynamic_pointer_cast<ParseContext>(child);
         if (childCtx) {
             const std::string& name = childCtx->getName();
+            std::cerr << "DEBUG: Processing child with name: " << name << "\n";
             
             if (name == "htmlElement") {
                 visitHtmlElement(childCtx);
@@ -288,6 +291,8 @@ void CHTLCodeGenVisitor::visitCustomDefinition(std::shared_ptr<ParseContext> ctx
 void CHTLCodeGenVisitor::visitHtmlElement(std::shared_ptr<ParseContext> ctx) {
     if (!ctx || ctx->getChildren().empty()) return;
     
+    std::cerr << "DEBUG: visitHtmlElement called\n";
+    
     // 获取元素名
     std::string tagName;
     const auto& children = ctx->getChildren();
@@ -390,6 +395,8 @@ void CHTLCodeGenVisitor::visitHtmlElement(std::shared_ptr<ParseContext> ctx) {
                 visitHtmlElement(childCtx);
             } else if (name == "textBlock") {
                 visitText(childCtx);
+            } else if (name == "originDeclaration") {
+                visitOriginDeclaration(childCtx);
             } else if (name.find("Template") != std::string::npos) {
                 // 处理模板使用
                 if (child->isTerminal()) {
@@ -541,69 +548,146 @@ std::string CHTLCodeGenVisitor::transformCHTLJS(const std::string& code) {
 void CHTLCodeGenVisitor::visitOriginDeclaration(std::shared_ptr<ParseContext> ctx) {
     if (!ctx || ctx->getChildren().empty()) return;
     
+
+    
     // 第一个子节点应该是原始嵌入的类型
     auto typeCtx = std::dynamic_pointer_cast<ParseContext>(ctx->getChildren()[0]);
     if (!typeCtx) return;
     
     const std::string& originType = typeCtx->getName();
     
-    // 获取原始内容
-    std::string content;
-    if (typeCtx->getChildren().size() > 0) {
-        auto contentNode = typeCtx->getChildren()[0];
-        if (contentNode && contentNode->isTerminal()) {
-            content = contentNode->getText();
-        }
-    }
+    // 检查是否是命名引用（通过查看typeCtx的内容）
+    std::string typeCtxText = typeCtx->getText();
+    std::cerr << "DEBUG: typeCtx text: " << typeCtxText << "\n";
     
-    // 根据类型输出到相应的流
-    if (originType == "originHtml") {
-        html_ << content;
-    } else if (originType == "originStyle") {
-        css_ << content << "\n";
-    } else if (originType == "originJavaScript") {
-        js_ << content << "\n";
+    // 如果内容包含分号，说明是引用
+    bool isNamedReference = typeCtxText.find(";") != std::string::npos;
+    
+    if (isNamedReference) {
+        // 从typeCtx的文本中提取引用名称
+        // 格式是: "@Html helloContent ;"
+        std::string referenceName;
+        size_t atPos = typeCtxText.find("@");
+        if (atPos != std::string::npos) {
+            size_t spacePos = typeCtxText.find(" ", atPos);
+            if (spacePos != std::string::npos) {
+                size_t endPos = typeCtxText.find(" ", spacePos + 1);
+                if (endPos != std::string::npos) {
+                    referenceName = typeCtxText.substr(spacePos + 1, endPos - spacePos - 1);
+                } else {
+                    size_t semicolonPos = typeCtxText.find(";");
+                    if (semicolonPos != std::string::npos) {
+                        referenceName = typeCtxText.substr(spacePos + 1, semicolonPos - spacePos - 1);
+                    }
+                }
+            }
+        }
+        
+        std::cerr << "DEBUG: Looking for reference: " << referenceName << "\n";
+        
+        // 从namedOriginNodes_中查找内容
+        if (!referenceName.empty()) {
+            auto it = namedOriginNodes_.find(referenceName);
+            if (it != namedOriginNodes_.end()) {
+                const auto& [type, content] = it->second;
+                std::cerr << "DEBUG: Found named origin node, type: " << type << "\n";
+                if (type == "Html") {
+                    html_ << content;
+                } else if (type == "Style") {
+                    css_ << content << "\n";
+                } else if (type == "JavaScript") {
+                    js_ << content << "\n";
+                }
+            } else {
+                std::cerr << "Warning: Named origin node '" << referenceName << "' not found\n";
+            }
+        }
+    } else {
+        // 获取原始内容（原有逻辑）
+        std::string content;
+        if (typeCtx->getChildren().size() > 0) {
+            auto contentNode = typeCtx->getChildren()[0];
+            if (contentNode && contentNode->isTerminal()) {
+                content = contentNode->getText();
+            }
+        }
+        
+        // 根据类型输出到相应的流
+        if (originType == "originHtml") {
+            html_ << content;
+        } else if (originType == "originStyle") {
+            css_ << content << "\n";
+        } else if (originType == "originJavaScript") {
+            js_ << content << "\n";
+        }
     }
 }
 
 void CHTLCodeGenVisitor::visitImportStatement(std::shared_ptr<ParseContext> ctx) {
     if (!ctx) return;
     
-    // 解析导入语句
-    auto importCtx = std::dynamic_pointer_cast<ParseContext>(ctx->getChildren()[0]);
-    if (!importCtx) return;
+    std::cerr << "DEBUG: visitImportStatement called\n";
+    std::cerr << "DEBUG: import statement children count: " << ctx->getChildren().size() << "\n";
     
-    const std::string& importType = importCtx->getName();
-    
-    if (importType == "fileImport") {
-        // 处理文件导入
-        handleFileImport(importCtx);
-    } else if (importType == "specificImport") {
-        // 处理特定导入
-        handleSpecificImport(importCtx);
+    // 打印所有子节点信息
+    for (size_t i = 0; i < ctx->getChildren().size(); ++i) {
+        auto child = ctx->getChildren()[i];
+        if (child) {
+            std::cerr << "DEBUG: import child[" << i << "] name: " << child->getName() 
+                      << " isTerminal: " << child->isTerminal()
+                      << " text: " << child->getText() << "\n";
+        }
     }
+    
+    // 直接处理导入（不检查子节点类型）
+    handleFileImport(ctx);
 }
 
 void CHTLCodeGenVisitor::handleFileImport(std::shared_ptr<ParseContext> ctx) {
     if (!ctx || ctx->getChildren().size() < 2) return;
     
-    // 获取文件类型和路径
-    std::string fileType = ctx->getChildren()[0]->getText();
-    std::string filePath = ctx->getChildren()[1]->getText();
+    std::cerr << "DEBUG: handleFileImport called\n";
     
-    // 去除路径的引号
-    if (filePath.length() >= 2 && filePath.front() == '"' && filePath.back() == '"') {
-        filePath = filePath.substr(1, filePath.length() - 2);
-    }
+    // 第二个子节点应该是fileImport
+    auto fileImportCtx = std::dynamic_pointer_cast<ParseContext>(ctx->getChildren()[1]);
+    if (!fileImportCtx) return;
     
-    // 检查是否有 as 子句
-    std::string asName;
-    for (size_t i = 2; i < ctx->getChildren().size(); ++i) {
-        if (ctx->getChildren()[i]->getText() == "as" && i + 1 < ctx->getChildren().size()) {
-            asName = ctx->getChildren()[i + 1]->getText();
-            break;
+    std::cerr << "DEBUG: fileImport text: " << fileImportCtx->getText() << "\n";
+    
+    // 解析fileImport内容
+    // 文本格式看起来是: Html"hello.html"helloContent (没有空格)
+    std::string fileImportText = fileImportCtx->getText();
+    
+    // 提取文件类型 (从开头到第一个引号)
+    std::string fileType;
+    size_t firstQuote = fileImportText.find("\"");
+    if (firstQuote > 0) {
+        fileType = fileImportText.substr(0, firstQuote);
+        // 去掉@符号
+        if (fileType.find("@") == 0) {
+            fileType = fileType.substr(1);
         }
     }
+    
+    // 提取文件路径
+    std::string filePath;
+    if (firstQuote != std::string::npos) {
+        size_t secondQuote = fileImportText.find("\"", firstQuote + 1);
+        if (secondQuote != std::string::npos) {
+            filePath = fileImportText.substr(firstQuote + 1, secondQuote - firstQuote - 1);
+        }
+    }
+    
+    // 提取as名称 (第二个引号之后的部分)
+    std::string asName;
+    size_t secondQuote = fileImportText.find("\"", firstQuote + 1);
+    if (secondQuote != std::string::npos && secondQuote + 1 < fileImportText.length()) {
+        asName = fileImportText.substr(secondQuote + 1);
+        // 去除末尾空格和换行
+        asName.erase(asName.find_last_not_of(" \n\r\t") + 1);
+    }
+    
+    std::cerr << "DEBUG: fileType: " << fileType << ", filePath: " << filePath << ", asName: " << asName << "\n";
     
     // 如果有 as 子句，创建命名的原始嵌入节点
     if (!asName.empty()) {
@@ -625,10 +709,13 @@ void CHTLCodeGenVisitor::handleFileImport(std::shared_ptr<ParseContext> ctx) {
         if (fileType == "Html") {
             // 将导入的HTML内容存储为命名节点，供后续使用
             namedOriginNodes_[asName] = {fileType, fileContent};
+            std::cerr << "DEBUG: Stored named origin node: " << asName << " type: " << fileType << "\n";
         } else if (fileType == "Style") {
             namedOriginNodes_[asName] = {fileType, fileContent};
+            std::cerr << "DEBUG: Stored named origin node: " << asName << " type: " << fileType << "\n";
         } else if (fileType == "JavaScript") {
             namedOriginNodes_[asName] = {fileType, fileContent};
+            std::cerr << "DEBUG: Stored named origin node: " << asName << " type: " << fileType << "\n";
         }
     }
     

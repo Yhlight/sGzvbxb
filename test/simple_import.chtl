@@ -1,0 +1,6 @@
+// 简单导入测试
+[Import] @Html from "hello.html" as helloContent
+
+body {
+    [Origin] @Html helloContent;
+}
