@@ -1,206 +1,195 @@
-# CHTL (C++ Hypertext Language)
+# CHTL - C++ Hypertext Language
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/chtl/chtl/releases)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/chtl/chtl/actions)
-[![Documentation](https://img.shields.io/badge/docs-ready-orange.svg)](https://chtl.dev)
+## 简介
 
-CHTL是一种创新的模板语言，将C++的强大功能与现代Web开发相结合，提供高性能、类型安全的开发体验。
+CHTL（C++ Hypertext Language）是一种基于 C++ 的超文本语言，专为现代 Web 开发设计。它提供了编译时优化、语言级组件化和强大的模板系统，让 Web 开发更加高效和优雅。
 
-## 🚀 特性
+## 特性
 
-- **混合解析器架构** - 核心独立实现，CSS/JS完整支持
-- **精准代码切割** - 智能识别和分发不同语言片段
-- **模块化设计** - CMOD/CJMOD双模块系统
-- **高性能** - 编译速度快，内存占用低
-- **开发工具完善** - VSCode集成、调试支持、热重载
+### 核心特性
+- ✅ **完整的 HTML 支持**：支持所有 HTML 元素和属性
+- ✅ **模板系统**：样式组模板、元素模板、变量组模板
+- ✅ **自定义系统**：高度灵活的自定义组件支持
+- ✅ **局部样式**：自动作用域隔离，避免样式冲突
+- ✅ **CHTL JS**：增强的 JavaScript 语法，简化 DOM 操作
+- ✅ **模块化**：完整的导入/导出系统
+- ✅ **命名空间**：避免名称冲突
 
-## 📦 安装
+### 语法特性
+- 无引号字面量
+- 链式访问操作符 `->`
+- DOM 选择器 `{{selector}}`
+- 事件监听简化语法
+- 动画 API 集成
 
-### 从源码构建
+## 快速开始
 
-#### 快速构建
+### 安装
 
 ```bash
-# 克隆仓库
-git clone https://github.com/chtl/chtl.git
+git clone https://github.com/yourusername/chtl.git
 cd chtl
+mkdir build && cd build
+cmake ..
+make -j4
 ```
 
-**Linux/macOS:**
-```bash
-# 使用便捷脚本
-./build.sh --type Release
-
-# 或使用特定脚本
-./scripts/build/build_compiler.sh
-```
-
-**Windows:**
-```cmd
-# 首次使用请运行（需要管理员权限）
-scripts\platform\windows\setup-windows.bat
-
-# 使用便捷脚本构建
-build.bat --type Release
-```
-
-### 使用包管理器
-
-```bash
-# Ubuntu/Debian
-sudo apt install chtl
-
-# macOS
-brew install chtl
-
-# Windows (使用scoop)
-scoop install chtl
-```
-
-## 🎯 快速开始
-
-创建 `hello.chtl`：
+### 第一个 CHTL 程序
 
 ```chtl
-[Import] @Chtl "Chtl.Core"
-
-div class="container" {
-    h1 { "Hello, CHTL!" }
-    
-    p class="intro" {
-        "Welcome to the future of web development."
+// hello.chtl
+body {
+    h1 {
+        text "Hello, CHTL!"
+        style {
+            color: "blue";
+            text-align: "center";
+        }
     }
     
-    button id="greet-btn" {
-        "Click me!"
-        
+    button {
+        text "Click me"
         script {
-            var button = @Element greet-btn;
-            button.addEventListener('click', () => {
-                alert({{ "Hello from CHTL!" }});
+            {{button}}->listen({
+                click: () => {
+                    alert("Hello from CHTL!");
+                }
             });
         }
     }
 }
 ```
 
-编译并运行：
-
+编译：
 ```bash
 chtl hello.chtl -o hello.html
-# 在浏览器中打开 hello.html
 ```
 
-## 📚 文档
+## 语法示例
 
-- [语言参考](docs/language_reference.md)
-- [API文档](docs/api.md)
-- [模块开发指南](docs/modules.md)
-- [CJMOD开发指南](docs/CJMOD_Development_Guide.md)
-- [配置选项](docs/configuration.md)
+### 模板系统
 
-## 📦 从源码构建
+```chtl
+[Template] @Style PrimaryButton {
+    background-color: "#007bff";
+    color: "white";
+    padding: "10px 20px";
+    border-radius: "4px";
+}
 
-### 前置要求
+[Template] @Element Card {
+    div {
+        style {
+            border: "1px solid #ddd";
+            padding: "20px";
+        }
+        slot;  // 内容插槽
+    }
+}
 
-- CMake >= 3.16
-- C++17 编译器 (GCC 7+, Clang 5+, MSVC 2017+)
-- Java Runtime (可选，用于生成解析器)
-
-**注意**：CHTL已内置ANTLR4工具和运行时库，无需额外安装ANTLR4。
-
-### 构建步骤
-
-```bash
-# 1. 克隆仓库
-git clone https://github.com/Yhlight/C-H-T-L.git
-cd C-H-T-L
-
-# 2. 设置依赖（首次构建时运行）
-./setup_dependencies.sh  # Unix/Linux/macOS
-setup_dependencies.bat   # Windows
-
-# 3. 构建项目
-./build.sh              # Unix/Linux/macOS
-build.bat               # Windows
-
-# 4. 运行测试（可选）
-./build.sh --test       # Unix/Linux/macOS
-build.bat --test        # Windows
-
-# 5. 安装（可选）
-sudo ./build.sh --install  # Unix/Linux/macOS
-build.bat --install        # Windows (管理员权限)
+// 使用模板
+body {
+    @Element Card {
+        h2 { text "Card Title" }
+        p { text "Card content" }
+    }
+    
+    button {
+        style {
+            @Style PrimaryButton;
+        }
+        text "Submit"
+    }
+}
 ```
 
-## 🛠️ 开发
+### CHTL JS
 
-### 项目结构
+```chtl
+script {
+    // DOM 选择
+    {{#myButton}}->listen({
+        click: () => {
+            {{.result}}->textContent = "Clicked!";
+            {{.result}}->animate({
+                opacity: [0, 1],
+                duration: 300
+            });
+        }
+    });
+}
+```
+
+### 局部样式
+
+```chtl
+div {
+    style {
+        background: "white";
+        
+        .highlight {
+            color: "red";
+            font-weight: "bold";
+        }
+        
+        #title {
+            font-size: "24px";
+        }
+    }
+    
+    h1 {
+        id: "title";
+        text "Title"
+    }
+    
+    p {
+        class: "highlight";
+        text "Important text"
+    }
+}
+```
+
+## 编译器选项
+
+- `--enhanced`：使用增强解析器（支持完整 CHTL 语法）
+- `-o <file>`：指定输出文件
+- `--debug`：启用调试输出
+- `--optimize`：启用优化
+
+## 项目结构
 
 ```
 chtl/
-├── src/           # 源代码
-├── include/       # 头文件
-├── tests/         # 测试
-├── docs/          # 文档
-├── examples/      # 示例
-├── scripts/       # 构建脚本
-├── module/        # 标准模块
-└── grammars/      # 语法定义
+├── src/
+│   ├── chtl/           # 核心 CHTL 实现
+│   ├── parser/         # 解析器
+│   ├── compiler/       # 编译器
+│   └── optimizer/      # 优化器
+├── test/               # 测试文件
+├── docs/               # 文档
+└── examples/           # 示例代码
 ```
 
-### 运行测试
+## 贡献
 
-```bash
-cd build
-ctest --output-on-failure
-```
+欢迎贡献代码！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详情。
 
-### 贡献指南
-
-1. Fork 项目
-2. 创建特性分支 (`git checkout -b feature/amazing-feature`)
-3. 提交更改 (`git commit -m 'Add amazing feature'`)
-4. 推送到分支 (`git push origin feature/amazing-feature`)
-5. 创建 Pull Request
-
-## 🌟 示例
-
-查看 [examples](examples/) 目录获取更多示例：
-
-- [Web应用](examples/webapp/)
-- [组件库](examples/components/)
-- [CJMOD示例](examples/cjmod_example/)
-
-## 📈 性能
-
-基准测试结果（相对于传统模板引擎）：
-
-| 指标 | CHTL | 传统方案 | 提升 |
-|------|------|---------|------|
-| 编译速度 | 85ms | 250ms | 3x |
-| 内存使用 | 20MB | 80MB | 4x |
-| 运行时开销 | 0 | 15ms | ∞ |
-
-## 🤝 社区
-
-- [官方网站](https://chtl.dev)
-- [论坛](https://forum.chtl.dev)
-- [Discord](https://discord.gg/chtl)
-- [Twitter](https://twitter.com/chtlang)
-
-## 📄 许可证
+## 许可证
 
 本项目采用 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
 
-## 🙏 致谢
+## 相关链接
 
-感谢所有贡献者和支持者，特别感谢：
+- [CHTL 语法文档](docs/CHTL语法文档.md)
+- [API 文档](docs/api.md)
+- [示例项目](examples/)
 
-- ANTLR4项目 - 提供CSS/JS解析支持
-- 开源社区 - 持续的反馈和贡献
+## 路线图
 
----
-
-**CHTL** - 让Web开发更高效、更安全、更有趣！
+- [x] 核心解析器
+- [x] 代码生成器
+- [x] 模板系统
+- [x] CHTL JS
+- [ ] IDE 插件
+- [ ] 在线编译器
+- [ ] 包管理器

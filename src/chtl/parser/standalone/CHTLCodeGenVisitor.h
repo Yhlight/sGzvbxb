@@ -47,16 +47,25 @@ private:
     int localStyleCounter_ = 0;
     std::unordered_map<std::string, std::string> localStyleMapping_;
     
+    // 命名的原始嵌入节点
+    struct OriginNode {
+        std::string type;
+        std::string content;
+    };
+    std::unordered_map<std::string, OriginNode> namedOriginNodes_;
+    
     // 访问不同的节点类型
     void visitCompilationUnit(std::shared_ptr<ParseContext> ctx);
     void visitHtmlElement(std::shared_ptr<ParseContext> ctx);
     void visitTemplateDefinition(std::shared_ptr<ParseContext> ctx);
+    void visitCustomDefinition(std::shared_ptr<ParseContext> ctx);
     void visitImportStatement(std::shared_ptr<ParseContext> ctx);
     void visitText(std::shared_ptr<ParseContext> ctx);
     void visitStyleProperty(std::shared_ptr<ParseContext> ctx);
     void visitLocalStyleBlock(std::shared_ptr<ParseContext> ctx, const std::string& elementTag);
     void visitLocalScriptBlock(std::shared_ptr<ParseContext> ctx);
     void visitAttribute(std::shared_ptr<ParseContext> ctx);
+    void visitOriginDeclaration(std::shared_ptr<ParseContext> ctx);
     
     // 模板处理
     void visitStyleTemplate(std::shared_ptr<ParseContext> ctx);
@@ -78,6 +87,8 @@ private:
     void visitChildren(std::shared_ptr<ParseContext> ctx);
     std::string generateUniqueClassName();
     std::string transformCHTLJS(const std::string& code);
+    void handleFileImport(std::shared_ptr<ParseContext> ctx);
+    void handleSpecificImport(std::shared_ptr<ParseContext> ctx);
 };
 
 } // namespace parser

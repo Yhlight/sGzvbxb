@@ -102,13 +102,17 @@ std::string CHTLCodeGenVisitor::visit(std::shared_ptr<ParseContext> tree) {
 void CHTLCodeGenVisitor::visitCompilationUnit(std::shared_ptr<ParseContext> ctx) {
     if (!ctx) return;
     
-    // 第一遍：收集所有模板定义
+    // 第一遍：收集所有模板和自定义定义
     for (const auto& child : ctx->getChildren()) {
         if (!child) continue;
         
         auto childCtx = std::dynamic_pointer_cast<ParseContext>(child);
-        if (childCtx && childCtx->getName() == "templateDefinition") {
-            visitTemplateDefinition(childCtx);
+        if (childCtx) {
+            if (childCtx->getName() == "templateDefinition") {
+                visitTemplateDefinition(childCtx);
+            } else if (childCtx->getName() == "customDefinition") {
+                visitCustomDefinition(childCtx);
+            }
         }
     }
     
@@ -124,6 +128,8 @@ void CHTLCodeGenVisitor::visitCompilationUnit(std::shared_ptr<ParseContext> ctx)
                 visitHtmlElement(childCtx);
             } else if (name == "importStatement") {
                 visitImportStatement(childCtx);
+            } else if (name == "originDeclaration") {
+                visitOriginDeclaration(childCtx);
             }
         }
     }
@@ -253,6 +259,26 @@ void CHTLCodeGenVisitor::visitVarTemplate(std::shared_ptr<ParseContext> ctx) {
                 varTemplate.variables[varName] = varValue;
             }
         }
+    }
+}
+
+void CHTLCodeGenVisitor::visitCustomDefinition(std::shared_ptr<ParseContext> ctx) {
+    if (!ctx || ctx->getChildren().size() < 2) return;
+    
+    // 第二个子节点应该是具体的自定义类型
+    auto customTypeCtx = std::dynamic_pointer_cast<ParseContext>(ctx->getChildren()[1]);
+    if (!customTypeCtx) return;
+    
+    const std::string& customType = customTypeCtx->getName();
+    
+    // 自定义和模板共享相同的存储结构
+    // 但自定义支持特例化操作
+    if (customType == "customStyleGroup") {
+        visitStyleTemplate(customTypeCtx); // 复用模板处理逻辑
+    } else if (customType == "customElement") {
+        visitElementTemplate(customTypeCtx); // 复用模板处理逻辑
+    } else if (customType == "customVarGroup") {
+        visitVarTemplate(customTypeCtx); // 复用模板处理逻辑
     }
 }
 
@@ -509,10 +535,92 @@ std::string CHTLCodeGenVisitor::transformCHTLJS(const std::string& code) {
     return result;
 }
 
+void CHTLCodeGenVisitor::visitOriginDeclaration(std::shared_ptr<ParseContext> ctx) {
+    if (!ctx || ctx->getChildren().empty()) return;
+    
+    // 第一个子节点应该是原始嵌入的类型
+    auto typeCtx = std::dynamic_pointer_cast<ParseContext>(ctx->getChildren()[0]);
+    if (!typeCtx) return;
+    
+    const std::string& originType = typeCtx->getName();
+    
+    // 获取原始内容
+    std::string content;
+    if (typeCtx->getChildren().size() > 0) {
+        auto contentNode = typeCtx->getChildren()[0];
+        if (contentNode && contentNode->isTerminal()) {
+            content = contentNode->getText();
+        }
+    }
+    
+    // 根据类型输出到相应的流
+    if (originType == "originHtml") {
+        html_ << content;
+    } else if (originType == "originStyle") {
+        css_ << content << "\n";
+    } else if (originType == "originJavaScript") {
+        js_ << content << "\n";
+    }
+}
+
 void CHTLCodeGenVisitor::visitImportStatement(std::shared_ptr<ParseContext> ctx) {
-    (void)ctx; // 避免未使用参数警告
-    // TODO: 实现导入处理
-    // 这需要访问文件系统并解析导入的文件
+    if (!ctx) return;
+    
+    // 解析导入语句
+    auto importCtx = std::dynamic_pointer_cast<ParseContext>(ctx->getChildren()[0]);
+    if (!importCtx) return;
+    
+    const std::string& importType = importCtx->getName();
+    
+    if (importType == "fileImport") {
+        // 处理文件导入
+        handleFileImport(importCtx);
+    } else if (importType == "specificImport") {
+        // 处理特定导入
+        handleSpecificImport(importCtx);
+    }
+}
+
+void CHTLCodeGenVisitor::handleFileImport(std::shared_ptr<ParseContext> ctx) {
+    if (!ctx || ctx->getChildren().size() < 2) return;
+    
+    // 获取文件类型和路径
+    std::string fileType = ctx->getChildren()[0]->getText();
+    std::string filePath = ctx->getChildren()[1]->getText();
+    
+    // 去除路径的引号
+    if (filePath.length() >= 2 && filePath.front() == '"' && filePath.back() == '"') {
+        filePath = filePath.substr(1, filePath.length() - 2);
+    }
+    
+    // 检查是否有 as 子句
+    std::string asName;
+    for (size_t i = 2; i < ctx->getChildren().size(); ++i) {
+        if (ctx->getChildren()[i]->getText() == "as" && i + 1 < ctx->getChildren().size()) {
+            asName = ctx->getChildren()[i + 1]->getText();
+            break;
+        }
+    }
+    
+    // 如果有 as 子句，创建命名的原始嵌入节点
+    if (!asName.empty()) {
+        if (fileType == "Html") {
+            // 将导入的HTML内容存储为命名节点，供后续使用
+            // TODO: 实际读取文件内容
+            namedOriginNodes_[asName] = {fileType, "<!-- Content from " + filePath + " -->"};
+        } else if (fileType == "Style") {
+            namedOriginNodes_[asName] = {fileType, "/* Content from " + filePath + " */"};
+        } else if (fileType == "JavaScript") {
+            namedOriginNodes_[asName] = {fileType, "// Content from " + filePath};
+        }
+    }
+    
+    // 如果没有 as 子句，根据CHTL语法文档，直接跳过
+}
+
+void CHTLCodeGenVisitor::handleSpecificImport(std::shared_ptr<ParseContext> ctx) {
+    // TODO: 处理特定导入（模板、自定义等）
+    (void)ctx;
 }
 
 void CHTLCodeGenVisitor::applyStyleTemplate(const std::string& templateName) {
