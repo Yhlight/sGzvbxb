@@ -6,8 +6,270 @@
 #include <sstream>
 #include <algorithm>
 #include <set>
+#include <cctype>
+#include <unordered_map>
 
 namespace chtl {
+
+// 辅助函数：验证是否是有效的无修饰字面量
+static bool isValidUnquotedLiteral(const std::string& propertyName, 
+                                   const std::string& value,
+                                   const std::string& context,
+                                   size_t position) {
+    // 检查是否在字符串内部
+    size_t quoteCount = 0;
+    for (size_t i = 0; i < position && i < context.length(); ++i) {
+        if (context[i] == '\'' || context[i] == '"') {
+            if (i == 0 || context[i-1] != '\\') {
+                quoteCount++;
+            }
+        }
+    }
+    if (quoteCount % 2 != 0) {
+        return false; // 在字符串内部
+    }
+    
+    // 检查是否在注释内部
+    size_t lastCommentStart = context.rfind("/*", position);
+    size_t lastCommentEnd = context.rfind("*/", position);
+    if (lastCommentStart != std::string::npos && 
+        (lastCommentEnd == std::string::npos || lastCommentEnd < lastCommentStart)) {
+        return false; // 在块注释内部
+    }
+    
+    size_t lastLineComment = context.rfind("//", position);
+    if (lastLineComment != std::string::npos) {
+        size_t lastNewline = context.rfind('\n', position);
+        if (lastNewline == std::string::npos || lastNewline < lastLineComment) {
+            return false; // 在行注释内部
+        }
+    }
+    
+    // 特定属性允许无修饰字面量
+    static const std::set<std::string> allowedProperties = {
+        "color", "backgroundColor", "background", "borderColor",
+        "width", "height", "top", "left", "right", "bottom",
+        "margin", "padding", "fontSize", "lineHeight",
+        "display", "position", "overflow", "textAlign",
+        "fontFamily", "fontWeight", "textDecoration",
+        "easing", "duration", "delay"
+    };
+    
+    return allowedProperties.find(propertyName) != allowedProperties.end();
+}
+
+// 检查是否是CSS值（带单位）
+static bool isCSSValue(const std::string& value) {
+    static const std::regex cssValueRegex(R"(^\d+(\.\d+)?(px|em|rem|%|pt|vh|vw|ex|ch|cm|mm|in|pc)$)");
+    return std::regex_match(value, cssValueRegex);
+}
+
+// 检查是否是颜色名称
+static bool isColorName(const std::string& value) {
+    static const std::set<std::string> colorNames = {
+        "red", "green", "blue", "white", "black", "yellow", "cyan", "magenta",
+        "gray", "grey", "orange", "purple", "brown", "pink", "lime", "navy",
+        "teal", "silver", "gold", "indigo", "violet", "coral", "salmon",
+        "khaki", "crimson", "fuchsia", "aqua", "transparent"
+    };
+    return colorNames.find(value) != colorNames.end();
+}
+
+// 检查是否是有效的标识符
+static bool isValidIdentifier(const std::string& value) {
+    if (value.empty()) return false;
+    
+    // 首字符必须是字母或下划线
+    if (!std::isalpha(value[0]) && value[0] != '_') {
+        return false;
+    }
+    
+    // 其余字符可以是字母、数字、下划线或连字符
+    for (size_t i = 1; i < value.length(); ++i) {
+        if (!std::isalnum(value[i]) && value[i] != '_' && value[i] != '-') {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+// 检查是否是JavaScript关键字
+static bool isJavaScriptKeyword(const std::string& value) {
+    static const std::set<std::string> keywords = {
+        "break", "case", "catch", "class", "const", "continue", "debugger",
+        "default", "delete", "do", "else", "export", "extends", "finally",
+        "for", "function", "if", "import", "in", "instanceof", "let", "new",
+        "return", "super", "switch", "this", "throw", "try", "typeof", "var",
+        "void", "while", "with", "yield", "true", "false", "null", "undefined"
+    };
+    return keywords.find(value) != keywords.end();
+}
+
+// 检查是否是已定义的变量
+static bool isDefinedVariable(const std::string& value, const std::string& context, size_t position) {
+    // 简单检查：查找变量定义
+    std::regex varDefRegex("(?:var|let|const)\\s+" + value + "\\b");
+    std::string contextBefore = context.substr(0, position);
+    return std::regex_search(contextBefore, varDefRegex);
+}
+
+// 查找匹配的括号
+static size_t findMatchingParen(const std::string& str, size_t startPos) {
+    if (startPos >= str.length() || str[startPos] != '(') {
+        return std::string::npos;
+    }
+    
+    int parenCount = 1;
+    size_t pos = startPos + 1;
+    bool inString = false;
+    char stringChar = 0;
+    
+    while (pos < str.length() && parenCount > 0) {
+        char ch = str[pos];
+        
+        // 处理字符串
+        if (!inString && (ch == '\'' || ch == '"')) {
+            inString = true;
+            stringChar = ch;
+        } else if (inString && ch == stringChar && (pos == 0 || str[pos-1] != '\\')) {
+            inString = false;
+        } else if (!inString) {
+            if (ch == '(') {
+                parenCount++;
+            } else if (ch == ')') {
+                parenCount--;
+            }
+        }
+        pos++;
+    }
+    
+    return (parenCount == 0) ? (pos - 1) : std::string::npos;
+}
+
+// 查找匹配的大括号
+static size_t findMatchingBrace(const std::string& str, size_t startPos) {
+    if (startPos >= str.length() || str[startPos] != '{') {
+        return std::string::npos;
+    }
+    
+    int braceCount = 1;
+    size_t pos = startPos + 1;
+    bool inString = false;
+    char stringChar = 0;
+    
+    while (pos < str.length() && braceCount > 0) {
+        char ch = str[pos];
+        
+        if (!inString && (ch == '\'' || ch == '"')) {
+            inString = true;
+            stringChar = ch;
+        } else if (inString && ch == stringChar && (pos == 0 || str[pos-1] != '\\')) {
+            inString = false;
+        } else if (!inString) {
+            if (ch == '{') {
+                braceCount++;
+            } else if (ch == '}') {
+                braceCount--;
+            }
+        }
+        pos++;
+    }
+    
+    return (braceCount == 0) ? (pos - 1) : std::string::npos;
+}
+
+// 生成listen方法的标准代码
+static std::string generateListenCode(const std::string& selector, const std::string& listenArgs) {
+    std::stringstream code;
+    
+    // 生成元素选择代码
+    code << "(function() {\n";
+    code << "    const element = document.querySelector('" << selector << "');\n";
+    code << "    if (!element) return;\n";
+    
+    // 解析listen参数（应该是一个对象）
+    // 简化处理：假设是 { event: handler, ... } 格式
+    code << "    const listeners = " << listenArgs << ";\n";
+    code << "    for (const [event, handler] of Object.entries(listeners)) {\n";
+    code << "        element.addEventListener(event, handler);\n";
+    code << "    }\n";
+    code << "})()";
+    
+    return code.str();
+}
+
+// 生成delegate方法的标准代码
+static std::string generateDelegateCode(const std::string& parentSelector, const std::string& delegateArgs) {
+    std::stringstream code;
+    
+    code << "(function() {\n";
+    code << "    const parent = document.querySelector('" << parentSelector << "');\n";
+    code << "    if (!parent) return;\n";
+    code << "    const config = " << delegateArgs << ";\n";
+    code << "    const targets = Array.isArray(config.target) ? config.target : [config.target];\n";
+    code << "    \n";
+    code << "    // 为每个事件类型设置委托\n";
+    code << "    for (const [eventType, handler] of Object.entries(config)) {\n";
+    code << "        if (eventType === 'target') continue;\n";
+    code << "        parent.addEventListener(eventType, function(e) {\n";
+    code << "            for (const target of targets) {\n";
+    code << "                const matched = e.target.closest(target);\n";
+    code << "                if (matched && parent.contains(matched)) {\n";
+    code << "                    handler.call(matched, e);\n";
+    code << "                    break;\n";
+    code << "                }\n";
+    code << "            }\n";
+    code << "        });\n";
+    code << "    }\n";
+    code << "})()";
+    
+    return code.str();
+}
+
+// 生成animate方法的标准代码
+static std::string generateAnimateCode(const std::string& animateConfig) {
+    std::stringstream code;
+    
+    code << "(function() {\n";
+    code << "    const config = " << animateConfig << ";\n";
+    code << "    const duration = config.duration || 1000;\n";
+    code << "    const easing = config.easing || 'linear';\n";
+    code << "    const startTime = performance.now();\n";
+    code << "    \n";
+    code << "    function animate(currentTime) {\n";
+    code << "        const elapsed = currentTime - startTime;\n";
+    code << "        const progress = Math.min(elapsed / duration, 1);\n";
+    code << "        \n";
+    code << "        // 应用缓动函数\n";
+    code << "        const easedProgress = applyEasing(progress, easing);\n";
+    code << "        \n";
+    code << "        // 执行动画逻辑\n";
+    code << "        if (config.onProgress) {\n";
+    code << "            config.onProgress(easedProgress);\n";
+    code << "        }\n";
+    code << "        \n";
+    code << "        if (progress < 1) {\n";
+    code << "            requestAnimationFrame(animate);\n";
+    code << "        } else if (config.onComplete) {\n";
+    code << "            config.onComplete();\n";
+    code << "        }\n";
+    code << "    }\n";
+    code << "    \n";
+    code << "    function applyEasing(t, type) {\n";
+    code << "        switch(type) {\n";
+    code << "            case 'ease-in': return t * t;\n";
+    code << "            case 'ease-out': return t * (2 - t);\n";
+    code << "            case 'ease-in-out': return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;\n";
+    code << "            default: return t;\n";
+    code << "        }\n";
+    code << "    }\n";
+    code << "    \n";
+    code << "    requestAnimationFrame(animate);\n";
+    code << "})()";
+    
+    return code.str();
+}
 
 // ScriptManager::Impl 定义
 class ScriptManager::Impl {
@@ -567,15 +829,176 @@ std::string ScriptProcessor::processEnhancedSelectors(const std::string& script,
 }
 
 std::string ScriptProcessor::processUnquotedLiterals(const std::string& content) {
-    // TODO: 实现无修饰字面量的处理
-    // 暂时直接返回原内容
-    return content;
+    // 实现无修饰字面量的处理
+    // 在CHTL JS中，无修饰字面量主要出现在：
+    // 1. 对象字面量的属性值中（如 color: red）
+    // 2. animate配置中的CSS值（如 width: 100px）
+    // 3. 事件处理器配置中
+    
+    std::string result = content;
+    
+    // 创建用于跟踪无修饰字面量的映射
+    std::unordered_map<std::string, std::string> unquotedLiterals;
+    
+    // 正则表达式匹配对象字面量中的属性值
+    // 匹配模式：propertyName: value（其中value可能是无修饰字面量）
+    std::regex objectPropertyRegex(R"((\w+)\s*:\s*([a-zA-Z][\w\-]*(?:px|em|%|pt|vh|vw)?)\b)");
+    
+    // 用于存储需要替换的位置和内容
+    std::vector<std::pair<size_t, std::pair<std::string, std::string>>> replacements;
+    
+    // 查找所有匹配
+    std::string::const_iterator searchStart = result.cbegin();
+    std::smatch match;
+    
+    while (std::regex_search(searchStart, result.cend(), match, objectPropertyRegex)) {
+        std::string propertyName = match[1];
+        std::string unquotedValue = match[2];
+        
+        // 检查是否在合适的上下文中
+        size_t position = std::distance(result.cbegin(), searchStart) + match.position();
+        
+        // 验证这是否是一个需要处理的无修饰字面量
+        if (isValidUnquotedLiteral(propertyName, unquotedValue, result, position)) {
+            // 处理特殊的CSS单位值
+            if (isCSSValue(unquotedValue)) {
+                // CSS值保持原样，但记录它
+                unquotedLiterals[unquotedValue] = "'" + unquotedValue + "'";
+            }
+            // 处理颜色名称
+            else if (isColorName(unquotedValue)) {
+                // 颜色名称也保持原样，但记录
+                unquotedLiterals[unquotedValue] = "'" + unquotedValue + "'";
+            }
+            // 处理其他标识符
+            else if (isValidIdentifier(unquotedValue)) {
+                // 检查是否是JavaScript关键字或已定义的变量
+                if (!isJavaScriptKeyword(unquotedValue) && !isDefinedVariable(unquotedValue, result, position)) {
+                    // 将无修饰字面量转换为字符串
+                    std::string quotedValue = "'" + unquotedValue + "'";
+                    replacements.push_back({
+                        position + match.position(2),
+                        {unquotedValue, quotedValue}
+                    });
+                    unquotedLiterals[unquotedValue] = quotedValue;
+                }
+            }
+        }
+        
+        searchStart = match.suffix().first;
+    }
+    
+    // 应用替换（从后往前，避免位置偏移）
+    for (auto it = replacements.rbegin(); it != replacements.rend(); ++it) {
+        size_t pos = it->first;
+        const auto& [oldValue, newValue] = it->second;
+        result.replace(pos, oldValue.length(), newValue);
+    }
+    
+    return result;
 }
 
 std::string ScriptProcessor::detectAndProcessMethods(const std::string& content) {
-    // TODO: 实现方法检测和处理
-    // 暂时直接返回原内容
-    return content;
+    // 实现方法检测和处理
+    // CHTL JS提供的特殊方法：
+    // 1. listen() - 事件监听器
+    // 2. delegate() - 事件委托
+    // 3. animate() - 动画API
+    
+    std::string result = content;
+    
+    // 检测并处理listen方法
+    // 模式：{{selector}}.listen({...}) 或 {{selector}}->listen({...})
+    std::regex listenRegex(R"(\{\{([^}]+)\}\}(?:\.|->)listen\s*\()");
+    std::smatch listenMatch;
+    std::string::const_iterator searchStart = result.cbegin();
+    
+    std::vector<std::pair<size_t, std::pair<std::string, std::string>>> replacements;
+    
+    while (std::regex_search(searchStart, result.cend(), listenMatch, listenRegex)) {
+        std::string selector = listenMatch[1];
+        size_t matchPos = std::distance(result.cbegin(), searchStart) + listenMatch.position();
+        
+        // 找到listen调用的结束位置
+        size_t openParen = matchPos + listenMatch[0].length() - 1;
+        size_t closeParen = findMatchingParen(result, openParen);
+        
+        if (closeParen != std::string::npos) {
+            // 提取listen的参数
+            std::string listenArgs = result.substr(openParen + 1, closeParen - openParen - 1);
+            
+            // 生成标准的addEventListener代码
+            std::string replacement = generateListenCode(selector, listenArgs);
+            
+            replacements.push_back({
+                matchPos,
+                {result.substr(matchPos, closeParen - matchPos + 1), replacement}
+            });
+        }
+        
+        searchStart = listenMatch.suffix().first;
+    }
+    
+    // 检测并处理delegate方法
+    std::regex delegateRegex(R"(\{\{([^}]+)\}\}(?:\.|->)delegate\s*\()");
+    searchStart = result.cbegin();
+    
+    while (std::regex_search(searchStart, result.cend(), listenMatch, delegateRegex)) {
+        std::string parentSelector = listenMatch[1];
+        size_t matchPos = std::distance(result.cbegin(), searchStart) + listenMatch.position();
+        
+        size_t openParen = matchPos + listenMatch[0].length() - 1;
+        size_t closeParen = findMatchingParen(result, openParen);
+        
+        if (closeParen != std::string::npos) {
+            std::string delegateArgs = result.substr(openParen + 1, closeParen - openParen - 1);
+            std::string replacement = generateDelegateCode(parentSelector, delegateArgs);
+            
+            replacements.push_back({
+                matchPos,
+                {result.substr(matchPos, closeParen - matchPos + 1), replacement}
+            });
+        }
+        
+        searchStart = listenMatch.suffix().first;
+    }
+    
+    // 检测并处理全局animate方法
+    std::regex animateGlobalRegex(R"(\banimate\s*\(\s*\{)");
+    searchStart = result.cbegin();
+    
+    while (std::regex_search(searchStart, result.cend(), listenMatch, animateGlobalRegex)) {
+        size_t matchPos = std::distance(result.cbegin(), searchStart) + listenMatch.position();
+        
+        // 找到animate配置对象的结束位置
+        size_t openBrace = matchPos + listenMatch[0].length() - 1;
+        size_t closeBrace = findMatchingBrace(result, openBrace);
+        
+        if (closeBrace != std::string::npos) {
+            // 找到整个animate调用的结束括号
+            size_t closeParen = result.find(')', closeBrace);
+            if (closeParen != std::string::npos) {
+                std::string animateConfig = result.substr(openBrace, closeBrace - openBrace + 1);
+                std::string replacement = generateAnimateCode(animateConfig);
+                
+                replacements.push_back({
+                    matchPos,
+                    {result.substr(matchPos, closeParen - matchPos + 1), replacement}
+                });
+            }
+        }
+        
+        searchStart = listenMatch.suffix().first;
+    }
+    
+    // 应用所有替换（从后往前）
+    for (auto it = replacements.rbegin(); it != replacements.rend(); ++it) {
+        size_t pos = it->first;
+        const auto& [oldCode, newCode] = it->second;
+        result.replace(pos, oldCode.length(), newCode);
+    }
+    
+    return result;
 }
 
 ScriptType ScriptProcessor::detectScriptType(const std::string& content) {

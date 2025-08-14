@@ -1,0 +1,55 @@
+// 测试无修饰字面量
+body {
+    div id="color-test" {
+        text "颜色测试"
+    }
+    
+    div id="animation-test" {
+        text "动画测试"
+    }
+}
+
+[LocalScript] {
+    // 使用无修饰字面量设置样式
+    {{#color-test}}->style = {
+        color: red,                    // 颜色名称
+        backgroundColor: lightblue,    // 复合颜色名称
+        width: 200px,                  // CSS单位值
+        height: 100px,                 // CSS单位值
+        padding: 10px,                 // 单位值
+        margin: 20px                   // 单位值
+    };
+    
+    // 在动画配置中使用无修饰字面量
+    {{#animation-test}}.animate({
+        width: 300px,
+        height: 150px,
+        backgroundColor: yellow,
+        
+        // 动画配置
+        duration: 1000,
+        easing: ease-in-out,          // 缓动函数名
+        delay: 200
+    });
+    
+    // 配置对象中的无修饰字面量
+    const config = {
+        primaryColor: blue,
+        secondaryColor: green,
+        fontSize: 16px,
+        fontFamily: Arial,            // 字体名称
+        display: block,               // CSS属性值
+        position: relative            // CSS属性值
+    };
+    
+    // 应该被保留的JavaScript标识符
+    const red = "#FF0000";  // 这个red是变量名，不应该被转换
+    const myColor = red;    // 这个red是变量引用，不应该被转换
+    
+    // 在字符串中的内容不应该被处理
+    const message = "The color is red and the width is 100px";
+    
+    // 在注释中的内容不应该被处理
+    // color: red, width: 100px
+    /* backgroundColor: blue, height: 200px */
+}

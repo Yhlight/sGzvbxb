@@ -1,0 +1,108 @@
+// 测试CHTL JS方法检测和处理
+body {
+    div id="app" {
+        button id="test-btn" class="btn" {
+            text "点击测试"
+        }
+        
+        div id="delegate-container" {
+            button class="dynamic-btn" {
+                text "动态按钮 1"
+            }
+            button class="dynamic-btn" {
+                text "动态按钮 2"
+            }
+        }
+        
+        div id="animation-box" {
+            style {
+                width: 100px;
+                height: 100px;
+                background-color: red;
+                position: relative;
+            }
+        }
+    }
+}
+
+[LocalScript] {
+    // 测试listen方法
+    {{#test-btn}}.listen({
+        click: () => {
+            console.log("Button clicked!");
+            alert("测试成功！");
+        },
+        
+        mouseenter: function() {
+            this.style.backgroundColor = "lightblue";
+        },
+        
+        mouseleave: function() {
+            this.style.backgroundColor = "";
+        }
+    });
+    
+    // 测试delegate方法（事件委托）
+    {{#delegate-container}}->delegate({
+        target: ".dynamic-btn",
+        click: function(e) {
+            console.log("Delegated click:", this.textContent);
+            
+            // 动态添加新按钮
+            const newBtn = document.createElement("button");
+            newBtn.className = "dynamic-btn";
+            newBtn.textContent = "新按钮 " + (this.parentElement.children.length + 1);
+            this.parentElement.appendChild(newBtn);
+        }
+    });
+    
+    // 测试选择器数组的delegate
+    {{body}}->delegate({
+        target: [".btn", ".dynamic-btn"],
+        click: function(e) {
+            console.log("Global delegate:", this.className);
+        }
+    });
+    
+    // 测试animate方法
+    {{#animation-box}}.listen({
+        click: function() {
+            const box = this;
+            const startLeft = parseInt(box.style.left) || 0;
+            
+            animate({
+                duration: 1000,
+                easing: ease-in-out,
+                
+                onProgress: function(progress) {
+                    box.style.left = startLeft + (200 * progress) + "px";
+                    box.style.opacity = 1 - progress * 0.5;
+                },
+                
+                onComplete: function() {
+                    console.log("Animation complete!");
+                    box.style.left = "0px";
+                    box.style.opacity = "1";
+                }
+            });
+        }
+    });
+    
+    // 测试链式调用和混合使用
+    {{#test-btn}}
+        ->style.color = "white"
+        ->style.backgroundColor = "blue";
+    
+    // 测试更复杂的动画
+    function complexAnimation() {
+        animate({
+            duration: 2000,
+            easing: ease-in,
+            
+            onProgress: (progress) => {
+                const rotation = progress * 360;
+                {{#animation-box}}.style.transform = `rotate(${rotation}deg)`;
+            }
+        });
+    }
+}

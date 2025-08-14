@@ -173,6 +173,7 @@ file(GLOB_RECURSE OPTIMIZATION_SOURCES
 # 增强错误处理
 set(ENHANCED_ERROR_SOURCES
     src/chtl/error/EnhancedError.cpp
+    src/chtl/error/CHTLJSErrorReporter.cpp
 )
 
 # ===== 配置系统 - 由CHTL独立处理 =====

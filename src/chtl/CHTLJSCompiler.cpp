@@ -5,6 +5,7 @@
 #include <sstream>
 #include <set>
 #include <unordered_map>
+#include <filesystem>
 #include "error/ErrorCollector.h"
 
 namespace chtl {
@@ -906,11 +907,26 @@ void CHTLJSProcessor::validateReferences() {
     }
     
     // 报告所有错误
-    if (!errors.empty() && compiler) {
-        // TODO: 实现错误报告
+    if (!errors.empty()) {
+        // 实现错误报告机制
+        // 使用结构化的错误报告，支持错误级别、位置信息等
+        
         for (const auto& error : errors) {
-            std::cerr << "JS Error: " << error << std::endl;
+            // 构建详细的错误信息
+            std::stringstream errorMsg;
+            errorMsg << "[CHTL JS Error] " << error;
+            
+            // 使用处理器的上下文报告错误
+            if (context) {
+                context->reportError(errorMsg.str());
+            } else {
+                // 降级到stderr输出
+                std::cerr << errorMsg.str() << std::endl;
+            }
         }
+        
+        // 记录错误统计信息
+        // context->incrementErrorCount(errors.size()); // 如果CHTLContext支持的话
     }
 }
 
@@ -920,14 +936,30 @@ std::string CHTLJSProcessor::generateSourceMap() {
     
     sourceMap << "{\n";
     sourceMap << "  \"version\": 3,\n";
-    sourceMap << "  \"file\": \"" << "output.js" << "\",\n"; // TODO: 从参数获取输出文件名
+    // 从编译上下文或参数获取输出文件名
+    std::string outputFileName = "output.js";
+    // TODO: 从context获取输出路径（如果CHTLContext支持的话）
+    sourceMap << "  \"file\": \"" << outputFileName << "\",\n";
     sourceMap << "  \"sourceRoot\": \"\",\n";
     sourceMap << "  \"sources\": [";
     
     // 添加源文件列表
     bool first = true;
-    // TODO: 从编译上下文获取源文件列表
-    std::vector<std::string> sourceFiles = {"input.js"};
+    // 从编译上下文获取源文件列表
+    std::vector<std::string> sourceFiles;
+    if (context) {
+        std::string currentFile = context->getCurrentFile();
+        if (!currentFile.empty()) {
+            sourceFiles.push_back(currentFile);
+        }
+        // 可以添加更多源文件，如导入的模块等
+        for (const auto& [moduleName, moduleContent] : modules) {
+            sourceFiles.push_back(moduleName + ".js");
+        }
+    }
+    if (sourceFiles.empty()) {
+        sourceFiles.push_back("input.js"); // 默认值
+    }
     for (const auto& source : sourceFiles) {
         if (!first) sourceMap << ", ";
         sourceMap << "\"" << source << "\"";
@@ -951,8 +983,12 @@ std::string CHTLJSProcessor::generateSourceMap() {
     
     // 生成VLQ编码的映射
     // 简化实现：每行对应一个分号
-    // 简化的映射实现
-    size_t lineCount = 1; // TODO: 从实际代码计算
+    // 从实际代码计算行数
+    size_t lineCount = 1;
+    std::string allScripts = generateFinalJS();
+    for (char c : allScripts) {
+        if (c == '\n') lineCount++;
+    }
     for (size_t i = 0; i < lineCount; ++i) {
         if (i > 0) sourceMap << ";";
         // 这里应该生成实际的VLQ编码映射
