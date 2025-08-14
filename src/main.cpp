@@ -4,7 +4,8 @@
 #include <sstream>
 #include <memory>
 #include "chtl/CHTLContext.h"
-#include "chtl/CHTLMainCompiler.h"
+#include "chtl/scanner/CHTLUnifiedScanner.h"
+#include "chtl/compiler/CompilerDispatcher.h"
 #include "chtl/error/ErrorInterface.h"
 #include "chtl/parser/CHTLSimpleParser.h"
 #include "chtl/parser/standalone/CHTLParserEnhanced.h"
@@ -24,13 +25,15 @@ int main(int argc, char* argv[]) {
         std::string outputFile = "output.html";
         bool useFullCompiler = false;
         bool useEnhancedParser = false;
+        bool useUnifiedArchitecture = false;
         
         if (argc < 2) {
-            std::cerr << "Usage: " << argv[0] << " <input.chtl> [-o output.html] [--full] [--enhanced]\n";
+            std::cerr << "Usage: " << argv[0] << " <input.chtl> [-o output.html] [--full] [--enhanced] [--unified]\n";
             std::cerr << "Options:\n";
             std::cerr << "  -o <file>    Specify output file (default: output.html)\n";
             std::cerr << "  --full       Use full compiler with advanced features\n";
             std::cerr << "  --enhanced   Use enhanced parser with complete CHTL syntax support\n";
+            std::cerr << "  --unified    Use unified architecture with precise code splitting\n";
             return 1;
         }
         
@@ -46,6 +49,9 @@ int main(int argc, char* argv[]) {
             } else if (std::string(argv[i]) == "--enhanced") {
                 useEnhancedParser = true;
                 std::cerr << "Note: Using enhanced parser with complete CHTL syntax support.\n";
+            } else if (std::string(argv[i]) == "--unified") {
+                useUnifiedArchitecture = true;
+                std::cerr << "Note: Using unified architecture with precise code splitting.\n";
             }
         }
         
@@ -63,11 +69,51 @@ int main(int argc, char* argv[]) {
         
         std::cout << "Compiling: " << inputFile << std::endl;
         
-        if (useFullCompiler) {
+        if (useUnifiedArchitecture) {
+            std::cout << "Using unified architecture with precise code splitting...\n";
+            
+            // 创建编译器调度器
+            compiler::CompilerDispatcher dispatcher;
+            
+            // 启用调试模式（可选）
+            bool debug = false;
+            for (int i = 2; i < argc; i++) {
+                if (std::string(argv[i]) == "--debug") {
+                    debug = true;
+                    break;
+                }
+            }
+            dispatcher.setDebugMode(debug);
+            
+            // 编译源代码
+            auto result = dispatcher.compile(source);
+            
+            if (!result.success) {
+                std::cerr << "Compilation failed:\n";
+                for (const auto& error : result.errors) {
+                    std::cerr << "  Error: " << error << std::endl;
+                }
+                return 1;
+            }
+            
+            // 写入输出文件
+            std::ofstream output(outputFile);
+            if (!output.is_open()) {
+                std::cerr << "Error: Cannot open output file: " << outputFile << std::endl;
+                return 1;
+            }
+            
+            output << result.html;
+            output.close();
+            
+            std::cout << "\nOutput written to: " << outputFile << std::endl;
+            std::cout << "Compilation completed successfully!\n";
+            
+        } else if (useFullCompiler) {
             std::cout << "Using full compiler with advanced features...\n";
             
             // 使用完整的CHTL编译器
-            chtl::CHTLMainCompiler compiler;
+            // chtl::CHTLMainCompiler compiler;
             
             // 设置编译选项
             compiler.setStrictMode(false);

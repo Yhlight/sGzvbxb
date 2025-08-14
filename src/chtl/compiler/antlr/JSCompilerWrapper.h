@@ -21,7 +21,7 @@ public:
     CompileResult compile(const scanner::CodeFragment& fragment) override;
     void setErrorReporter(std::shared_ptr<error::IErrorReporter> reporter) override;
     scanner::FragmentType getSupportedType() const override { 
-        return scanner::FragmentType::JS; 
+        return scanner::FragmentType::JAVASCRIPT; 
     }
     
     // JS特定的编译选项

@@ -114,7 +114,7 @@ void CHTLMainCompiler::setMinifyCSS(bool minify) {
 
 void CHTLMainCompiler::setMinifyJS(bool minify) {
     // 获取JS编译器并设置选项
-    auto jsCompiler = dispatcher_->getCompiler(scanner::FragmentType::JS);
+    auto jsCompiler = dispatcher_->getCompiler(scanner::FragmentType::JAVASCRIPT);
     if (jsCompiler) {
         // 使用dynamic_cast安全地向下转型到JSCompilerWrapper
         auto jsWrapper = dynamic_cast<compiler::antlr::JSCompilerWrapper*>(jsCompiler.get());

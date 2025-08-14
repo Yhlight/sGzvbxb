@@ -73,7 +73,7 @@ file(GLOB_RECURSE CHTL_CORE_SOURCES
     src/chtl/error/*.cpp
     src/chtl/utils/*.cpp
     src/chtl/CHTLContext.cpp  # 添加CHTLContext实现
-    src/chtl/CHTLMainCompiler.cpp  # 添加主编译器
+    # src/chtl/CHTLMainCompiler.cpp  # 添加主编译器 - 暂时禁用，使用新架构
     src/chtl/CHTLTemplate.cpp  # 模板系统实现
     src/chtl/CHTLCustom.cpp  # 自定义系统实现
     src/chtl/CHTLCSSPreprocessor.cpp  # CSS预处理器（需要Template和Custom）
@@ -87,6 +87,8 @@ file(GLOB_RECURSE CHTL_CORE_SOURCES
     src/chtl/CHTLOrigin.cpp  # Origin管理器实现 - 已修复
     src/chtl/CHTLImportVisitorStandalone.cpp  # 独立导入访问器实现
     src/chtl/ImportEnhanced.cpp  # 增强的导入系统实现
+    src/chtl/scanner/CHTLUnifiedScanner.cpp  # 统一扫描器
+    src/chtl/compiler/CompilerDispatcher.cpp  # 编译器调度器
     src/chtl/AutoClassIdProcessor.cpp  # 自动化类/ID处理器
     src/chtl/stubs/ManagerStubs.cpp  # 临时管理器实现桩
 )
@@ -125,8 +127,8 @@ file(GLOB_RECURSE SCANNER_SOURCES
 # 添加精准扫描器和状态机扫描器
 set(SCANNER_SOURCES 
     ${SCANNER_SOURCES}
-    src/chtl/scanner/PrecisionScanner.cpp
-    src/chtl/scanner/StateMachineScanner.cpp
+    # src/chtl/scanner/PrecisionScanner.cpp  # 暂时禁用
+    # src/chtl/scanner/StateMachineScanner.cpp  # 暂时禁用
 )
 
 # ===== 新增模块 =====
@@ -238,12 +240,21 @@ target_link_libraries(chtl_css_js PUBLIC ${ANTLR4_STATIC_LIB})
 # 主可执行文件
 add_executable(chtl ${CHTL_MAIN_SOURCES})
 
+# 创建统一架构可执行文件
+add_executable(chtl_unified src/main_unified.cpp)
+
 # 链接（使用循环链接解决相互依赖）
 target_link_libraries(chtl
     chtl_core
     chtl_css_js
     chtl_core  # 再次链接以解决循环依赖
     ${ANTLR4_STATIC_LIB}
+    Threads::Threads
+)
+
+# 链接统一架构可执行文件
+target_link_libraries(chtl_unified
+    chtl_core
     Threads::Threads
 )
 

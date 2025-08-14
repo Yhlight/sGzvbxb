@@ -1,85 +1,69 @@
-#ifndef CHTL_COMPILER_DISPATCHER_H
-#define CHTL_COMPILER_DISPATCHER_H
+#pragma once
 
-#include "CompilerInterface.h"
-#include "../scanner/CHTLUnifiedScanner.h"
-#include <unordered_map>
 #include <memory>
+#include <unordered_map>
 #include <vector>
+#include <string>
+#include "../scanner/CHTLUnifiedScanner.h"
+#include "../parser/standalone/CHTLParserEnhanced.h"
+#include "../parser/standalone/CHTLCodeGenVisitor.h"
 
 namespace chtl {
-
-// 前向声明
-class CHTLContext;
-
 namespace compiler {
 
-/**
- * 编译器调度器
- * 负责将扫描器切割的代码片段分发到对应的编译器
- * 
- * 架构设计：
- * - CHTL编译器：手写实现
- * - CHTL JS编译器：手写实现
- * - CSS编译器：ANTLR生成
- * - JavaScript编译器：ANTLR生成
- */
+// 编译结果
+struct CompilationResult {
+    std::string html;
+    std::string css;
+    std::string javascript;
+    std::vector<std::string> errors;
+    bool success;
+};
+
+// 片段编译结果
+struct FragmentResult {
+    scanner::FragmentType type;
+    std::string output;
+    std::vector<std::string> errors;
+};
+
+// 编译器调度器 - 协调各个编译器
 class CompilerDispatcher {
 public:
     CompilerDispatcher();
-    ~CompilerDispatcher() = default;
+    ~CompilerDispatcher();
     
-    /**
-     * 注册编译器工厂
-     */
-    void registerCompilerFactory(
-        scanner::FragmentType type, 
-        std::unique_ptr<ICompilerFactory> factory
-    );
+    // 编译源代码
+    CompilationResult compile(const std::string& source);
     
-    /**
-     * 编译单个片段
-     */
-    CompileResult compileFragment(const scanner::CodeFragment& fragment);
-    
-    /**
-     * 编译所有片段并合并结果
-     */
-    CompileResult compileFragments(const std::vector<scanner::CodeFragment>& fragments);
-    
-    /**
-     * 设置全局错误报告器
-     */
-    void setErrorReporter(std::shared_ptr<error::IErrorReporter> reporter);
-    
-    /**
-     * 获取特定类型的编译器
-     */
-    std::unique_ptr<ICompiler> getCompiler(scanner::FragmentType type);
+    // 配置选项
+    void setDebugMode(bool debug) { debugMode_ = debug; }
+    void setOptimizationLevel(int level) { optimizationLevel_ = level; }
     
 private:
-    // 编译器工厂映射
-    std::unordered_map<scanner::FragmentType, std::unique_ptr<ICompilerFactory>> factories_;
+    // 成员变量
+    std::unique_ptr<scanner::CHTLUnifiedScanner> scanner_;
+    std::unique_ptr<parser::CHTLParserEnhanced> chtlParser_;
+    std::unique_ptr<parser::CHTLCodeGenVisitor> codeGenerator_;
     
-    // 编译器缓存（可选）
-    std::unordered_map<scanner::FragmentType, std::unique_ptr<ICompiler>> compilers_;
+    bool debugMode_;
+    int optimizationLevel_;
     
-    // 全局错误报告器
-    std::shared_ptr<error::IErrorReporter> errorReporter_;
+    // 编译方法
+    FragmentResult compileCHTLFragment(const scanner::CodeFragment& fragment);
+    FragmentResult compileCHTLJSFragment(const scanner::CodeFragment& fragment);
+    FragmentResult compileCSSFragment(const scanner::CodeFragment& fragment);
+    FragmentResult compileJavaScriptFragment(const scanner::CodeFragment& fragment);
     
-    // 合并多个编译结果
-    CompileResult mergeResults(const std::vector<CompileResult>& results);
+    // 结果合并
+    CompilationResult mergeResults(const std::vector<FragmentResult>& results);
+    
+    // 辅助方法
+    std::string processTemplate(const std::string& content);
+    std::string processCHTLJS(const std::string& content);
+    std::string optimizeCSS(const std::string& css);
+    std::string optimizeJS(const std::string& js);
 };
-
-/**
- * 创建预配置的编译器调度器
- * 自动注册所有标准编译器
- */
-std::unique_ptr<CompilerDispatcher> createStandardDispatcher(
-    std::shared_ptr<CHTLContext> context
-);
 
 } // namespace compiler
 } // namespace chtl
-
-#endif // CHTL_COMPILER_DISPATCHER_H

@@ -1,24 +1,18 @@
-#ifndef CHTL_UNIFIED_SCANNER_H
-#define CHTL_UNIFIED_SCANNER_H
+#pragma once
 
 #include <string>
 #include <vector>
 #include <memory>
-#include <stack>
-#include <functional>
-#include <unordered_map> // Added for handlers_
 
 namespace chtl {
 namespace scanner {
 
 // 代码片段类型
 enum class FragmentType {
-    CHTL,       // CHTL标记和结构
-    CHTL_JS,    // CHTL增强的JavaScript
-    CSS,        // 原生CSS
-    JS,         // 原生JavaScript
-    TEXT,       // 文本内容
-    COMMENT     // 注释
+    CHTL,       // 纯 CHTL 代码
+    CHTL_JS,    // CHTL JS 代码（包含 {{}} 和 -> 等特性）
+    CSS,        // 纯 CSS 代码
+    JAVASCRIPT  // 纯 JavaScript 代码
 };
 
 // 代码片段
@@ -30,150 +24,88 @@ struct CodeFragment {
     size_t endLine;
     size_t endColumn;
     
-    // 默认构造函数
-    CodeFragment() : type(FragmentType::CHTL), content(""), 
-                     startLine(0), startColumn(0),
-                     endLine(0), endColumn(0) {}
-    
-    CodeFragment(FragmentType t, const std::string& c, 
-                 size_t sl, size_t sc, size_t el, size_t ec)
-        : type(t), content(c), startLine(sl), startColumn(sc),
-          endLine(el), endColumn(ec) {}
+    // 用于调试
+    std::string toString() const;
 };
 
-// 扫描器上下文
-enum class ScannerContext {
-    TOP_LEVEL,      // 顶层CHTL
-    HTML_ELEMENT,   // HTML元素内部
-    STYLE_BLOCK,    // style块内部
-    SCRIPT_BLOCK,   // script块内部
-    TEMPLATE,       // 模板定义内部
-    CUSTOM,         // 自定义定义内部
-    ORIGIN,         // 原始嵌入内部
-    STRING,         // 字符串字面量内部
-    COMMENT         // 注释内部
+// 扫描器状态
+enum class ScannerState {
+    CHTL,           // 默认状态，处理 CHTL
+    IN_STYLE,       // 在 style 块中
+    IN_SCRIPT,      // 在 script 块中
+    IN_STRING,      // 在字符串中
+    IN_COMMENT,     // 在注释中
+    IN_ORIGIN,      // 在原始嵌入块中
 };
 
-// 统一扫描器 - 负责识别和切分不同类型的代码片段
+// 统一扫描器 - 精准代码切割
 class CHTLUnifiedScanner {
 public:
     CHTLUnifiedScanner();
-    ~CHTLUnifiedScanner();
     
-    // 扫描输入并返回代码片段列表
-    std::vector<CodeFragment> scan(const std::string& input);
+    // 扫描源代码，返回代码片段
+    std::vector<CodeFragment> scan(const std::string& source);
     
-    // 设置回调函数以处理不同类型的片段
-    void setFragmentHandler(FragmentType type, 
-                           std::function<void(const CodeFragment&)> handler);
+    // 配置选项
+    void setDebugMode(bool debug) { debugMode_ = debug; }
     
-    // 获取错误信息
-    bool hasErrors() const { return !errors_.empty(); }
-    const std::vector<std::string>& getErrors() const { return errors_; }
+private:
+    // 状态管理
+    ScannerState currentState_;
+    std::vector<ScannerState> stateStack_;
     
-protected:
-    // 当前位置 - 改为protected以便派生类访问
-    size_t pos_;
-    size_t line_;
-    size_t column_;
-    std::string input_;
+    // 位置跟踪
+    size_t currentLine_;
+    size_t currentColumn_;
+    size_t currentPos_;
     
-    // 上下文栈
-    std::stack<ScannerContext> contextStack_;
+    // 源代码
+    std::string source_;
     
-    // 错误列表
-    std::vector<std::string> errors_;
+    // 结果
+    std::vector<CodeFragment> fragments_;
     
-    // 辅助方法 - 改为protected以便派生类使用
-    char peek() const;
-    char peekNext() const;
-    char peekAhead(size_t n) const;
+    // 临时缓冲区
+    std::string currentBuffer_;
+    size_t fragmentStartLine_;
+    size_t fragmentStartColumn_;
+    
+    // 配置
+    bool debugMode_;
+    
+    // 状态管理方法
+    void pushState(ScannerState state);
+    void popState();
+    
+    // 片段管理方法
+    void startFragment(FragmentType type);
+    void endFragment();
+    void appendToFragment(char ch);
+    void appendToFragment(const std::string& str);
+    
+    // 扫描方法
+    void scanCHTL();
+    void scanStyle();
+    void scanScript();
+    void scanString(char quote);
+    void scanComment();
+    void scanOrigin();
+    
+    // 辅助方法
+    bool matchKeyword(const std::string& keyword);
+    bool matchSequence(const std::string& seq);
+    bool isAtEnd() const;
+    char peek(int offset = 0) const;
     char advance();
     void skipWhitespace();
-    bool match(const std::string& text);
-    bool matchKeyword(const std::string& keyword);
-    bool matchAt(size_t position, const std::string& text) const;  // 添加缺失的声明
-    std::string readUntil(const std::string& delimiter);
-    std::string readUntilAny(const std::vector<std::string>& delimiters);
-    std::string readIdentifier();
-    std::string readString();
-    std::string readComment();
     
-    // 上下文管理
-    void pushContext(ScannerContext ctx);
-    void popContext();
-    ScannerContext currentContext() const;
+    // 特殊检测方法
+    bool isCHTLJSFeature(); // 检测 {{}} 或 ->
+    bool isInCHTLJSContext(); // 判断是否在 CHTL JS 上下文中
     
-    // 片段创建 - 改为protected以便派生类使用
-    void addFragment(std::vector<CodeFragment>& fragments, 
-                    FragmentType type, 
-                    const std::string& content,
-                    size_t startLine, size_t startColumn,
-                    size_t endLine, size_t endColumn);
-    
-private:
-    // 片段处理器
-    std::unordered_map<FragmentType, std::function<void(const CodeFragment&)>> handlers_;
-                    
-private:
-    // 扫描方法
-    void scanTopLevel(std::vector<CodeFragment>& fragments);
-    void scanHTMLElement(std::vector<CodeFragment>& fragments);
-    void scanStyleBlock(std::vector<CodeFragment>& fragments);
-    void scanScriptBlock(std::vector<CodeFragment>& fragments);
-    void scanCHTLJavaScript(std::vector<CodeFragment>& fragments);
-    void scanTemplate(std::vector<CodeFragment>& fragments);
-    void scanCustom(std::vector<CodeFragment>& fragments);
-    void scanOrigin(std::vector<CodeFragment>& fragments, const std::string& originType);
-    
-    // 错误处理
-    void reportError(const std::string& message);
-    
-    // CHTL特定检测
-    bool isCHTLKeyword(const std::string& word) const;
-    bool isCHTLDirective(const std::string& word) const;
-    bool isAtStartOfCHTLStructure() const;
-    bool isInCHTLJSContext() const;
-};
-
-// 扫描器集成器 - 协调不同解析器的工作
-class ScannerIntegrator {
-public:
-    ScannerIntegrator();
-    ~ScannerIntegrator();
-    
-    // 处理完整的CHTL文件
-    void processFile(const std::string& filename, const std::string& content);
-    
-    // 获取处理结果
-    std::string getGeneratedHTML() const { return generatedHTML_; }
-    std::string getGeneratedCSS() const { return generatedCSS_; }
-    std::string getGeneratedJS() const { return generatedJS_; }
-    
-    // 错误处理
-    bool hasErrors() const;
-    std::vector<std::string> getAllErrors() const;
-    
-private:
-    std::unique_ptr<CHTLUnifiedScanner> scanner_;
-    std::string generatedHTML_;
-    std::string generatedCSS_;
-    std::string generatedJS_;
-    std::vector<std::string> errors_;
-    
-    // 片段处理器
-    void handleCHTLFragment(const CodeFragment& fragment);
-    void handleCHTLJSFragment(const CodeFragment& fragment);
-    void handleCSSFragment(const CodeFragment& fragment);
-    void handleJSFragment(const CodeFragment& fragment);
-    void handleTextFragment(const CodeFragment& fragment);
-    void handleCommentFragment(const CodeFragment& fragment);
-    
-    // 扫描混合脚本内容
-    void scanMixedScriptContent(std::vector<CodeFragment>& fragments);
+    // 位置更新
+    void updatePosition(char ch);
 };
 
 } // namespace scanner
 } // namespace chtl
-
-#endif // CHTL_UNIFIED_SCANNER_H
