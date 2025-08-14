@@ -20,46 +20,26 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 find_package(Threads REQUIRED)
 find_package(Java QUIET COMPONENTS Runtime)
 
-# ANTLR4运行时 - 使用内置版本
-if(EXISTS "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/src")
-    # 使用简化的CMakeLists.txt从源码构建
-    if(EXISTS "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/CMakeLists.txt.simple")
-        # 复制简化版作为主CMakeLists.txt
-        configure_file(
-            "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/CMakeLists.txt.simple"
-            "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/CMakeLists.txt"
-            COPYONLY
-        )
-    endif()
-    
-    # 设置标志以避免复杂的安装配置
-    set(CHTL_INTERNAL_BUILD ON)
-    add_subdirectory(third_party/antlr4-runtime)
-    set(ANTLR4_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/src")
-elseif(EXISTS "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/lib")
-    # 使用预构建的ANTLR4运行时
-    set(ANTLR4_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/include")
-    
-    # 查找库文件
-    find_library(ANTLR4_RUNTIME_LIB 
-        NAMES antlr4-runtime 
-        PATHS "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/lib"
-        NO_DEFAULT_PATH
-    )
-    
-    if(NOT ANTLR4_RUNTIME_LIB)
-        message(FATAL_ERROR "ANTLR4 runtime library not found.")
-    endif()
-    
-    # 创建导入目标
-    add_library(antlr4-runtime STATIC IMPORTED)
-    set_target_properties(antlr4-runtime PROPERTIES
-        IMPORTED_LOCATION "${ANTLR4_RUNTIME_LIB}"
-        INTERFACE_INCLUDE_DIRECTORIES "${ANTLR4_INCLUDE_DIR}"
-    )
-else()
-    message(FATAL_ERROR "ANTLR4 runtime not found. Please run setup_dependencies script first.")
+# ANTLR4运行时 - 使用已安装的版本
+
+# Find ANTLR4 Runtime
+set(ANTLR4_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/third_party/antlr4-runtime-install")
+set(ANTLR4_INCLUDE_DIR "${ANTLR4_ROOT}/include/antlr4-runtime")
+set(ANTLR4_LIB_DIR "${ANTLR4_ROOT}/lib")
+
+# Find the static library (explicitly look for .a file)
+find_library(ANTLR4_STATIC_LIB
+    NAMES libantlr4-runtime.a antlr4-runtime
+    PATHS ${ANTLR4_LIB_DIR}
+    NO_DEFAULT_PATH
+)
+
+if(NOT ANTLR4_STATIC_LIB)
+    message(FATAL_ERROR "ANTLR4 runtime library not found. Please install ANTLR4 runtime first.")
 endif()
+
+message(STATUS "Found ANTLR4 runtime: ${ANTLR4_STATIC_LIB}")
+message(STATUS "ANTLR4 include dir: ${ANTLR4_INCLUDE_DIR}")
 
 # 检查ANTLR工具（用于生成解析器）
 find_program(ANTLR_EXECUTABLE
@@ -94,6 +74,8 @@ file(GLOB_RECURSE CHTL_CORE_SOURCES
     src/chtl/utils/*.cpp
     src/chtl/CHTLContext.cpp  # 添加CHTLContext实现
     src/chtl/CHTLMainCompiler.cpp  # 添加主编译器
+    src/chtl/CHTLTemplate.cpp  # 模板系统实现
+    src/chtl/CHTLCustom.cpp    # 自定义系统实现
 )
 
 # ===== 编译器架构 - 新增 =====
@@ -196,7 +178,8 @@ else()
 endif()
 
 file(GLOB JS_COMPILER_SOURCES
-    src/chtl/CHTLJSCompiler.cpp
+    # src/chtl/CHTLJSCompiler.cpp  # 暂时禁用，等待JS解析器生成
+    src/chtl/CHTLJSCompilerStub.cpp  # 使用存根实现
     src/chtl/CHTLJSOptimizer.cpp
     src/chtl/optimizer/*.cpp
 )
@@ -231,7 +214,7 @@ add_library(chtl_css_js STATIC
 )
 
 # 链接ANTLR4仅到CSS/JS库
-target_link_libraries(chtl_css_js PUBLIC antlr4-runtime)
+target_link_libraries(chtl_css_js PUBLIC ${ANTLR4_STATIC_LIB})
 
 # 主可执行文件
 add_executable(chtl ${CHTL_MAIN_SOURCES})
@@ -240,7 +223,7 @@ add_executable(chtl ${CHTL_MAIN_SOURCES})
 target_link_libraries(chtl
     chtl_core
     chtl_css_js
-    antlr4-runtime
+    ${ANTLR4_STATIC_LIB}
     Threads::Threads
 )
 

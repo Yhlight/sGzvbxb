@@ -35,9 +35,8 @@ int main(int argc, char* argv[]) {
             if (std::string(argv[i]) == "-o" && i + 1 < argc) {
                 outputFile = argv[++i];
             } else if (std::string(argv[i]) == "--full") {
-                // useFullCompiler = true;
-                std::cerr << "Note: Full compiler mode is temporarily disabled.\n";
-                std::cerr << "Using enhanced simple parser instead.\n";
+                useFullCompiler = true;
+                std::cerr << "Note: Using full compiler mode with ANTLR support.\n";
             }
         }
         
