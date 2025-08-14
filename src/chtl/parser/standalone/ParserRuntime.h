@@ -298,7 +298,11 @@ protected:
     }
     
     void error(const std::string& msg, std::shared_ptr<Token> token) {
-        errorListener_->syntaxError(msg, token->getLine(), token->getColumn());
+        if (token) {
+            errorListener_->syntaxError(msg, token->getLine(), token->getColumn());
+        } else {
+            errorListener_->syntaxError(msg, 0, 0);
+        }
     }
     
     std::string tokenTypeName(TokenType type) {

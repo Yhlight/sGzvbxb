@@ -4,6 +4,7 @@
 #include "CHTLLexer.h"
 #include <memory>
 #include <vector>
+#include <iostream>
 
 namespace chtl {
 namespace parser {
@@ -32,35 +33,37 @@ public:
             }
             
             // 根据 CHTL 语法文档，顶级可以有以下元素
-            if (tokens_->LT(1)->getType() == TokenType::LBRACKET) {
-                // 处理方括号语法
-                tokens_->consume(); // consume '['
-                if (match(TokenType::KEYWORD_TEMPLATE)) {
-                    consume(TokenType::RBRACKET, "Expected ]");
-                    ctx->addChild(templateDefinition());
-                } else if (match(TokenType::KEYWORD_CUSTOM)) {
-                    consume(TokenType::RBRACKET, "Expected ]");
-                    ctx->addChild(customDefinition());
-                } else if (match(TokenType::KEYWORD_IMPORT)) {
-                    consume(TokenType::RBRACKET, "Expected ]");
-                    ctx->addChild(importStatement());
-                } else if (match(TokenType::KEYWORD_NAMESPACE)) {
-                    consume(TokenType::RBRACKET, "Expected ]");
-                    ctx->addChild(namespaceDeclaration());
-                } else if (match(TokenType::KEYWORD_ORIGIN)) {
-                    consume(TokenType::RBRACKET, "Expected ]");
-                    ctx->addChild(originDeclaration());
-                } else {
-                    error("Expected Template, Custom, Import, Namespace, or Origin after [", tokens_->LT(1));
-                    // 尝试恢复
-                    while (tokens_->LT(1) && tokens_->LT(1)->getType() != TokenType::RBRACKET && 
-                           tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
-                        tokens_->consume();
-                    }
-                    if (tokens_->LT(1) && tokens_->LT(1)->getType() == TokenType::RBRACKET) {
-                        tokens_->consume();
-                    }
+            auto currentToken = tokens_->LT(1);
+            if (!currentToken) {
+                error("Unexpected null token", nullptr);
+                break;
+            }
+            
+
+            
+            // 检查是否是带方括号的关键字（词法分析器已经将 [Template] 作为整体识别）
+            if (currentToken->getType() == TokenType::KEYWORD_TEMPLATE) {
+                tokens_->consume(); // consume [Template]
+                auto templateDef = templateDefinition();
+                if (templateDef) {
+                    ctx->addChild(templateDef);
                 }
+            } else if (currentToken->getType() == TokenType::KEYWORD_CUSTOM) {
+                tokens_->consume(); // consume [Custom]
+                ctx->addChild(customDefinition());
+            } else if (currentToken->getType() == TokenType::KEYWORD_IMPORT) {
+                tokens_->consume(); // consume [Import]
+                ctx->addChild(importStatement());
+            } else if (currentToken->getType() == TokenType::KEYWORD_NAMESPACE) {
+                tokens_->consume(); // consume [Namespace]
+                ctx->addChild(namespaceDeclaration());
+            } else if (currentToken->getType() == TokenType::KEYWORD_ORIGIN) {
+                tokens_->consume(); // consume [Origin]
+                ctx->addChild(originDeclaration());
+            } else if (currentToken->getType() == TokenType::LBRACKET) {
+                // 处理单独的方括号（如果有的话）
+                error("Unexpected '[' at top level", currentToken);
+                tokens_->consume();
             } else {
                 // HTML 元素
                 auto element = htmlElement();
@@ -105,16 +108,22 @@ public:
         skipComments();
         
         // @Style, @Element, @Var
-        consume(TokenType::AT, "Expected @");
-        
+        // 注意: 词法分析器将 @Style 作为一个整体 token 返回
         if (match(TokenType::KEYWORD_STYLE_GROUP)) {
             ctx->addChild(templateStyleGroup());
         } else if (match(TokenType::KEYWORD_ELEMENT)) {
             ctx->addChild(templateElement());
         } else if (match(TokenType::KEYWORD_VAR_GROUP)) {
             ctx->addChild(templateVarGroup());
+        } else if (match(TokenType::AT)) {
+            // 如果 @ 是单独的 token，则需要检查下一个 token
+            if (match(TokenType::IDENTIFIER)) {
+                error("Unknown template type after @", tokens_->LT(0));
+            } else {
+                error("Expected identifier after @", tokens_->LT(1));
+            }
         } else {
-            error("Expected Style, Element, or Var after @", tokens_->LT(1));
+            error("Expected @Style, @Element, or @Var after [Template]", tokens_->LT(1));
         }
         
         return ctx;
@@ -245,17 +254,28 @@ public:
         skipComments();
         
         // 判断导入类型
-        if (tokens_->LT(1) && tokens_->LT(1)->getType() == TokenType::LBRACKET) {
+        if (tokens_->LT(1) && 
+            (tokens_->LT(1)->getType() == TokenType::KEYWORD_TEMPLATE || 
+             tokens_->LT(1)->getType() == TokenType::KEYWORD_CUSTOM)) {
             // 特定导入：[Import] [Template/Custom] @Type name from "path"
-            tokens_->consume(); // consume '['
-            if (match(TokenType::KEYWORD_TEMPLATE) || match(TokenType::KEYWORD_CUSTOM)) {
-                consume(TokenType::RBRACKET, "Expected ]");
+            // 注意：词法分析器已经将 [Template] 和 [Custom] 作为整体识别
+            if (match(TokenType::KEYWORD_TEMPLATE)) {
                 ctx->addChild(specificImport());
-            } else {
-                error("Expected Template or Custom after [", tokens_->LT(1));
+            } else if (match(TokenType::KEYWORD_CUSTOM)) {
+                ctx->addChild(specificImport());
             }
-        } else if (match(TokenType::AT)) {
+        } else if (tokens_->LT(1) && 
+                   (tokens_->LT(1)->getType() == TokenType::AT ||
+                    tokens_->LT(1)->getType() == TokenType::KEYWORD_HTML ||
+                    tokens_->LT(1)->getType() == TokenType::KEYWORD_STYLE_GROUP ||
+                    tokens_->LT(1)->getType() == TokenType::KEYWORD_JAVASCRIPT ||
+                    tokens_->LT(1)->getType() == TokenType::KEYWORD_CHTL ||
+                    tokens_->LT(1)->getType() == TokenType::KEYWORD_CJMOD)) {
             // 文件导入：[Import] @Html/Style/JavaScript/Chtl/CJmod from "path"
+            // 注意：词法分析器可能将 @Html 等作为整体识别
+            if (tokens_->LT(1)->getType() == TokenType::AT) {
+                tokens_->consume(); // consume @
+            }
             ctx->addChild(fileImport());
         } else {
             error("Invalid import syntax", tokens_->LT(1));
@@ -329,8 +349,16 @@ public:
         consume(TokenType::LBRACE, "Expected {");
         
         // 元素内容
-        while (!match(TokenType::RBRACE) && tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
+        while (tokens_->LT(1) && tokens_->LT(1)->getType() != TokenType::RBRACE && 
+               tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
+            skipComments();
+            
+            if (!tokens_->LT(1) || tokens_->LT(1)->getType() == TokenType::RBRACE) {
+                break;
+            }
+            
             if (tokens_->LT(1)->getType() == TokenType::IDENTIFIER && 
+                tokens_->LT(2) &&
                 (tokens_->LT(2)->getType() == TokenType::COLON || 
                  tokens_->LT(2)->getType() == TokenType::EQUALS)) {
                 // 属性
@@ -402,8 +430,16 @@ public:
                 }
             } else {
                 // 嵌套元素
-                ctx->addChild(htmlElement());
+                auto element = htmlElement();
+                if (element) {
+                    ctx->addChild(element);
+                }
             }
+        }
+        
+        // 消费右花括号
+        if (tokens_->LT(1) && tokens_->LT(1)->getType() == TokenType::RBRACE) {
+            tokens_->consume();
         }
         
         return ctx;

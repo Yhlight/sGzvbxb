@@ -49,9 +49,10 @@ std::shared_ptr<ParseContext> CHTLParserEnhanced::styleProperty() {
         // 可选的特例化: varName = value
         if (match(TokenType::EQUALS)) {
             // 特例化值
-            if (tokens_->LT(1)->getType() == TokenType::STRING_LITERAL ||
-                tokens_->LT(1)->getType() == TokenType::NUMBER_LITERAL ||
-                tokens_->LT(1)->getType() == TokenType::IDENTIFIER) {
+            if (tokens_->LT(1) && 
+                (tokens_->LT(1)->getType() == TokenType::STRING_LITERAL ||
+                 tokens_->LT(1)->getType() == TokenType::NUMBER_LITERAL ||
+                 tokens_->LT(1)->getType() == TokenType::IDENTIFIER)) {
                 ctx->addChild(std::make_shared<TerminalNode>(tokens_->consume()));
             } else {
                 error("Expected value after =", tokens_->LT(1));
@@ -457,15 +458,19 @@ std::shared_ptr<ParseContext> CHTLParserEnhanced::textBlock() {
     consume(TokenType::LBRACE, "Expected {");
     
     // 文本内容 - 支持无引号字面量
-    if (tokens_->LT(1)->getType() == TokenType::STRING_LITERAL) {
+    if (tokens_->LT(1) && tokens_->LT(1)->getType() == TokenType::STRING_LITERAL) {
         // 引号字符串
         ctx->addChild(std::make_shared<TerminalNode>(tokens_->consume()));
     } else {
         // 无引号字面量 - 读取到 }
         std::string content;
-        while (tokens_->LT(1)->getType() != TokenType::RBRACE && 
+        while (tokens_->LT(1) && 
+               tokens_->LT(1)->getType() != TokenType::RBRACE && 
                tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
-            content += tokens_->consume()->getText() + " ";
+            auto token = tokens_->consume();
+            if (token) {
+                content += token->getText() + " ";
+            }
         }
         ctx->addChild(std::make_shared<TerminalNode>(
             std::make_shared<Token>(TokenType::TEXT_LITERAL, content, 0, 0)));
