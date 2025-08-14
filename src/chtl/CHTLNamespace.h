@@ -96,6 +96,18 @@ public:
     }
 };
 
+// 创建一个适配器，将 CHTLNamespaceDefinition 包装为 NamespaceDefinition
+class NamespaceDefinitionAdapter : public NamespaceDefinition {
+private:
+    std::shared_ptr<CHTLNamespaceDefinition> impl;
+    
+public:
+    NamespaceDefinitionAdapter(std::shared_ptr<CHTLNamespaceDefinition> impl_)
+        : NamespaceDefinition(impl_->getName()), impl(impl_) {}
+        
+    std::shared_ptr<CHTLNamespaceDefinition> getImplementation() const { return impl; }
+};
+
 // 命名空间管理器
 class NamespaceManager {
     friend class NamespaceResolver;

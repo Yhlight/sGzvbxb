@@ -97,6 +97,7 @@ public:
     // 获取上下文
     std::shared_ptr<CHTLContext> getContext() const;
     std::shared_ptr<CHTLJSContext> getJSContext() const;
+    void setJSContext(std::shared_ptr<CHTLJSContext> ctx);
     
     // 添加局部脚本
     void addLocalScript(const std::string& elementPath, std::shared_ptr<ScriptBlock> script);
@@ -170,6 +171,12 @@ public:
     // 检测脚本类型
     ScriptType detectScriptType(const std::string& script);
     
+    // 处理无修饰字面量
+    std::string processUnquotedLiterals(const std::string& content);
+    
+    // 检测并处理特殊方法
+    std::string detectAndProcessMethods(const std::string& content);
+    
     // 注册自定义函数（供CJMOD使用）
     void registerFunction(const std::string& name, 
                          std::function<std::string(const std::vector<std::string>&)> func);
@@ -199,8 +206,7 @@ private:
     std::string processLineForUnquotedLiterals(const std::string& line,
                                              std::shared_ptr<CHTLJSContext> jsContext);
     
-    // 检测并处理方法调用
-    std::string detectAndProcessMethods(const std::string& script);
+
 };
 
 // CHTL JS转换器

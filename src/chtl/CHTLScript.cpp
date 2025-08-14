@@ -1,7 +1,7 @@
 #include "CHTLScript.h"
 #include "CHTLGenerator.h"
 #include "CHTLCJMOD.h"
-// #include "CHTLJSContext.h" // TODO: Fix include path or create this file
+#include "CHTLJSContext.h"
 #include <regex>
 #include <sstream>
 #include <algorithm>
@@ -26,7 +26,7 @@ public:
     std::shared_ptr<CJMODManager> cjmodManager;
     
     // 关联的JS上下文
-    // std::shared_ptr<JSContext> jsContext; // TODO: Enable when JSContext is available
+    std::shared_ptr<JSContext> jsContext;
     
     Impl(std::shared_ptr<CHTLContext> ctx) : context(ctx) {}
 };
@@ -39,6 +39,14 @@ ScriptManager::~ScriptManager() = default;
 
 std::shared_ptr<CHTLContext> ScriptManager::getContext() const {
     return pImpl->context;
+}
+
+std::shared_ptr<JSContext> ScriptManager::getJSContext() const {
+    return pImpl->jsContext;
+}
+
+void ScriptManager::setJSContext(std::shared_ptr<JSContext> ctx) {
+    pImpl->jsContext = ctx;
 }
 
 // ScriptManager 实现
@@ -398,14 +406,16 @@ std::shared_ptr<CHTLContext> ScriptProcessor::getContext() const {
 
 std::shared_ptr<ScriptBlock> ScriptProcessor::processScriptBlock(const std::string& content,
                                                                 const std::string& scope) {
-    auto block = std::make_shared<ScriptBlock>(ScriptType::JAVASCRIPT, scope);
+    auto block = std::make_shared<ScriptBlock>("", ScriptType::JAVASCRIPT);
+    block->setScope(scope);
     
     // 获取JS上下文
-    // TODO: Enable when JSContext is available
-    // auto jsContext = manager.getJSContext();
-    // if (!jsContext) {
-    //     return block;
-    // }
+    auto jsContext = manager.getJSContext();
+    if (!jsContext) {
+        // 如果没有JS上下文，创建一个
+        jsContext = std::make_shared<JSContext>();
+        const_cast<ScriptManager&>(manager).setJSContext(jsContext);
+    }
     
     // 进入脚本状态
     // TODO: Enable when CHTLJSContext is available
@@ -426,8 +436,7 @@ std::shared_ptr<ScriptBlock> ScriptProcessor::processScriptBlock(const std::stri
         // }
         
         // 处理无修饰字面量
-        // TODO: Enable when jsContext is available
-        // processedContent = processUnquotedLiterals(processedContent, jsContext);
+        processedContent = processUnquotedLiterals(processedContent);
         
         // 处理箭头语法
         if (ScriptHelper::hasArrowSyntax(processedContent)) {
@@ -483,7 +492,8 @@ std::string ScriptProcessor::processEnhancedSelectors(const std::string& script,
         // 解析选择器
         std::string selectorStr = match[1];
         EnhancedSelector selector = selectorProcessor.parseSelector(selectorStr);
-        selectors.push_back(selector);
+        // 注意：selectors 参数是 const，不能修改
+        // selectors.push_back(selector);
         
         // 生成JavaScript代码
         std::string jsCode = selectorProcessor.toJavaScript(selector, "");
@@ -556,6 +566,18 @@ std::string ScriptProcessor::processEnhancedSelectors(const std::string& script,
     return result.str();
 }
 
+std::string ScriptProcessor::processUnquotedLiterals(const std::string& content) {
+    // TODO: 实现无修饰字面量的处理
+    // 暂时直接返回原内容
+    return content;
+}
+
+std::string ScriptProcessor::detectAndProcessMethods(const std::string& content) {
+    // TODO: 实现方法检测和处理
+    // 暂时直接返回原内容
+    return content;
+}
+
 ScriptType ScriptProcessor::detectScriptType(const std::string& content) {
     // 如果包含增强选择器，则是CHTL JS
     if (ScriptHelper::hasEnhancedSelector(content)) {
@@ -574,12 +596,13 @@ ScriptType ScriptProcessor::detectScriptType(const std::string& content) {
     }
     
     // 检查CJMOD注册的语法模式
-    for (const auto& [pattern, transformer] : syntaxTransformers) {
-        std::regex patternRegex(pattern);
-        if (std::regex_search(content, patternRegex)) {
-            return ScriptType::CHTL_JS;
-        }
-    }
+    // TODO: 当 syntaxTransformers 可用时启用
+    // for (const auto& [pattern, transformer] : syntaxTransformers) {
+    //     std::regex patternRegex(pattern);
+    //     if (std::regex_search(content, patternRegex)) {
+    //         return ScriptType::CHTL_JS;
+    //     }
+    // }
     
     // 默认为普通JavaScript
     return ScriptType::JAVASCRIPT;
@@ -707,17 +730,29 @@ std::string CHTLJSTransformer::transform(const std::string& chtljs) {
     
     // 转换 on 语法（事件委托）
     std::regex onRegex(R"(on\s+(\w+)\s+from\s+(.+?)\s*\{)");
-    transformed = std::regex_replace(transformed, onRegex,
-        [this](const std::smatch& match) {
-            return transformEventDelegation(match[1], match[2]);
-        });
+    result.clear();
+    begin = std::sregex_iterator(transformed.begin(), transformed.end(), onRegex);
+    lastPos = 0;
+    for (auto it = begin; it != end; ++it) {
+        result += transformed.substr(lastPos, it->position() - lastPos);
+        result += transformEventDelegation((*it)[1], (*it)[2]);
+        lastPos = it->position() + it->length();
+    }
+    result += transformed.substr(lastPos);
+    transformed = result;
     
     // 转换 animate 方法
     std::regex animateRegex(R"(\.animate\s*\(\s*\{([^}]+)\}\s*(?:,\s*\{([^}]+)\})?\s*\))");
-    transformed = std::regex_replace(transformed, animateRegex,
-        [this](const std::smatch& match) {
-            return transformAnimate(match[1], match[2]);
-        });
+    result.clear();
+    begin = std::sregex_iterator(transformed.begin(), transformed.end(), animateRegex);
+    lastPos = 0;
+    for (auto it = begin; it != end; ++it) {
+        result += transformed.substr(lastPos, it->position() - lastPos);
+        result += transformAnimate((*it)[1], (*it)[2]);
+        lastPos = it->position() + it->length();
+    }
+    result += transformed.substr(lastPos);
+    transformed = result;
     
     return transformed;
 }
@@ -1056,9 +1091,7 @@ AnimationConfig AnimationProcessor::parseAnimationConfig(const std::string& conf
     
     // 解析begin, end, when等复杂配置
     
-    // 解析loop配置
-    std::regex loopRegex(R"(loop\s*:\s*(-?\d+))");
-    std::smatch loopMatch;
+    // 解析loop配置（使用上面已定义的 loopRegex 和 loopMatch）
     if (std::regex_search(config, loopMatch, loopRegex)) {
         animConfig.loop = std::stoi(loopMatch[1]);
     }
@@ -1426,6 +1459,20 @@ std::string RuntimeCodeGenerator::generateFullRuntime() {
     runtime << "})(window);\n";
     
     return runtime.str();
+}
+
+// AnimationProcessor 静态方法实现
+std::string AnimationProcessor::mapToJsObject(const std::map<std::string, std::string>& map) {
+    std::stringstream result;
+    result << "{";
+    bool first = true;
+    for (const auto& [key, value] : map) {
+        if (!first) result << ", ";
+        result << "\"" << key << "\": " << value;
+        first = false;
+    }
+    result << "}";
+    return result.str();
 }
 
 } // namespace CHTLJSExtensions

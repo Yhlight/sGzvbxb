@@ -136,18 +136,41 @@ void NamespaceManager::endNamespace() {
 }
 
 std::shared_ptr<NamespaceDefinition> NamespaceManager::getCurrentNamespace() const {
-    // TODO: Create adapter from CHTLNamespaceDefinition to NamespaceDefinition
-    // For now, return nullptr since the types don't match
+    auto current = getCurrentCHTLNamespace();
+    if (current) {
+        return std::make_shared<NamespaceDefinitionAdapter>(current);
+    }
     return nullptr;
 }
 
 std::shared_ptr<NamespaceDefinition> NamespaceManager::getOrCreateNamespace(const std::string& path) {
-    // TODO: Implement adapter from CHTLNamespaceDefinition to NamespaceDefinition
-    return nullptr;
+    if (path.empty()) {
+        return std::make_shared<NamespaceDefinitionAdapter>(globalNamespace);
+    }
+    
+    // 检查缓存
+    auto it = namespaceIndex.find(path);
+    if (it != namespaceIndex.end()) {
+        return std::make_shared<NamespaceDefinitionAdapter>(it->second);
+    }
+    
+    // 分割路径并逐级创建
+    auto components = NamespaceHelper::splitPath(path);
+    auto current = globalNamespace;
+    
+    for (const auto& component : components) {
+        current = current->addChildNamespace(component);
+        namespaceIndex[current->getFullPath()] = current;
+    }
+    
+    return std::make_shared<NamespaceDefinitionAdapter>(current);
 }
 
 std::shared_ptr<NamespaceDefinition> NamespaceManager::findNamespace(const std::string& path) const {
-    // TODO: Implement adapter from CHTLNamespaceDefinition to NamespaceDefinition
+    auto it = namespaceIndex.find(path);
+    if (it != namespaceIndex.end()) {
+        return std::make_shared<NamespaceDefinitionAdapter>(it->second);
+    }
     return nullptr;
 }
 
@@ -436,8 +459,21 @@ bool NamespaceMerger::merge(NamespaceDefinition& target,
                            const NamespaceDefinition& source,
                            const MergeOptions& options,
                            std::vector<std::string>& conflicts) {
-    // 实现已在NamespaceDefinition::merge中
-    return target.merge(source, conflicts);
+    // 尝试转换为适配器以获取实现
+    auto* targetAdapter = dynamic_cast<NamespaceDefinitionAdapter*>(&target);
+    auto* sourceAdapter = dynamic_cast<const NamespaceDefinitionAdapter*>(&source);
+    
+    if (targetAdapter && sourceAdapter) {
+        auto targetImpl = targetAdapter->getImplementation();
+        auto sourceImpl = sourceAdapter->getImplementation();
+        if (targetImpl && sourceImpl) {
+            return targetImpl->merge(*sourceImpl, conflicts);
+        }
+    }
+    
+    // 如果不是适配器类型，无法合并
+    conflicts.push_back("Cannot merge: incompatible namespace types");
+    return false;
 }
 
 std::vector<std::string> NamespaceMerger::detectPotentialConflicts(
@@ -445,16 +481,43 @@ std::vector<std::string> NamespaceMerger::detectPotentialConflicts(
     const NamespaceDefinition& ns2) {
     std::vector<std::string> conflicts;
     
-    // 检查项目冲突
-    for (const auto& [itemName, items1] : ns1.items) {
-        auto items2 = ns2.getItems(itemName);
+    // 尝试转换为适配器以获取实现
+    auto* adapter1 = dynamic_cast<const NamespaceDefinitionAdapter*>(&ns1);
+    auto* adapter2 = dynamic_cast<const NamespaceDefinitionAdapter*>(&ns2);
+    
+    if (adapter1 && adapter2) {
+        auto impl1 = adapter1->getImplementation();
+        auto impl2 = adapter2->getImplementation();
         
-        for (const auto& item1 : items1) {
-            for (const auto& item2 : items2) {
-                if (item1.type == item2.type) {
-                    conflicts.push_back("Potential conflict: " + 
-                                      NamespaceHelper::itemTypeToString(item1.type) + 
-                                      " '" + itemName + "' exists in both namespaces");
+        if (impl1 && impl2) {
+            // 使用 getAllItems() 方法获取所有项目
+            auto items1 = impl1->getAllItems();
+            auto items2 = impl2->getAllItems();
+            
+            // 构建名称到项目的映射
+            std::unordered_map<std::string, std::vector<NamespaceItem>> itemMap1;
+            std::unordered_map<std::string, std::vector<NamespaceItem>> itemMap2;
+            
+            for (const auto& item : items1) {
+                itemMap1[item.name].push_back(item);
+            }
+            for (const auto& item : items2) {
+                itemMap2[item.name].push_back(item);
+            }
+            
+            // 检查冲突
+            for (const auto& [name, items] : itemMap1) {
+                auto it = itemMap2.find(name);
+                if (it != itemMap2.end()) {
+                    for (const auto& item1 : items) {
+                        for (const auto& item2 : it->second) {
+                            if (item1.type == item2.type) {
+                                conflicts.push_back("Potential conflict: " + 
+                                                  NamespaceHelper::itemTypeToString(item1.type) + 
+                                                  " '" + name + "' exists in both namespaces");
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -81,8 +81,8 @@ file(GLOB_RECURSE CHTL_CORE_SOURCES
     # Temporarily commented out due to compilation errors
     src/chtl/CHTLConstraint.cpp  # 约束管理器实现 - 已修复
     # src/chtl/CHTLImport.cpp  # 导入管理器实现 - 需要ANTLR生成的CHTL解析器
-    # src/chtl/CHTLNamespace.cpp  # 命名空间管理器实现 - 需要更多工作
-    # src/chtl/CHTLScript.cpp  # 脚本管理器实现 - 需要更多工作（lambda和私有成员问题）
+    src/chtl/CHTLNamespace.cpp  # 命名空间管理器实现 - 已修复（使用适配器模式）
+    src/chtl/CHTLScript.cpp  # 脚本管理器实现 - 已修复
     src/chtl/CHTLCMOD.cpp  # CMOD管理器实现 - 已修复
     src/chtl/CHTLOrigin.cpp  # Origin管理器实现 - 已修复
     src/chtl/stubs/ManagerStubs.cpp  # 临时管理器实现桩

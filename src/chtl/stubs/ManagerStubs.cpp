@@ -12,59 +12,28 @@ namespace chtl {
 
 // ConstraintManager、ConstraintHelper、ConstraintProcessor 和 ConstraintRule 已移至 CHTLConstraint.cpp
 
-// ImportManager 已移至 CHTLImport.cpp
+// ========== ImportManager ==========
+// 临时实现，直到 CHTLImport.cpp 能够编译（需要ANTLR生成的CHTL解析器）
+ImportManager::ImportManager(std::shared_ptr<CHTLContext> ctx) : context(ctx) {}
 
-// ImportProcessor 已移至 CHTLImport.cpp
-
-// ========== NamespaceManager ==========
-// 临时实现，直到 CHTLNamespace.cpp 完全修复
-NamespaceManager::NamespaceManager(std::shared_ptr<CHTLContext> ctx) : context(ctx) {}
-
-void NamespaceManager::beginNamespace(const std::string&) {}
-void NamespaceManager::endNamespace() {}
-
-std::shared_ptr<NamespaceDefinition> NamespaceManager::getCurrentNamespace() const {
-    return nullptr;
+bool ImportManager::processImport(const ImportDeclaration&, CHTLGenerator&) {
+    return true;
 }
 
-// ========== NamespaceProcessor ==========
-void NamespaceProcessor::processNamespaceDeclaration(const std::string&) {}
-
-// ========== NamespaceResolver ==========
-std::shared_ptr<void> NamespaceResolver::resolveItem(const std::string&, NamespaceItemType, const std::string&) {
-    return nullptr;
+bool ImportManager::processImports(const std::vector<ImportDeclaration>&, CHTLGenerator&) {
+    return true;
 }
 
-// ========== ScriptManager ==========
-// ScriptManager uses Impl pattern, so we need to define the Impl class
-class ScriptManager::Impl {
-public:
-    Impl(std::shared_ptr<CHTLContext>) {}
-    ~Impl() = default;
-};
+void ImportManager::configurePaths(const ImportPathConfig&) {}
 
-ScriptManager::ScriptManager(std::shared_ptr<CHTLContext> ctx) 
-    : pImpl(std::make_unique<Impl>(ctx)) {}
-
-ScriptManager::~ScriptManager() = default;
-
-std::vector<std::shared_ptr<ScriptBlock>> ScriptManager::getScriptsForElement(const std::string&) const {
-    return {};
+// ========== ImportProcessor ==========
+ImportDeclaration ImportProcessor::parseImportStatement(const std::string&) {
+    return ImportDeclaration();
 }
 
-std::string ScriptManager::generateScopeId(const std::string& scope) {
-    return "scope_" + std::to_string(std::hash<std::string>{}(scope));
-}
+// NamespaceManager、NamespaceProcessor 和 NamespaceResolver 已移至 CHTLNamespace.cpp
 
-std::string ScriptManager::generateJavaScript() const {
-    return "// JavaScript generation not implemented yet\n";
-}
-
-// ========== ScriptProcessor ==========
-std::shared_ptr<ScriptBlock> ScriptProcessor::processScriptBlock(const std::string&, 
-                                                                const std::string&) {
-    return std::make_shared<ScriptBlock>();
-}
+// ScriptManager 和 ScriptProcessor 已移至 CHTLScript.cpp
 
 // CMODManager 已移至 CHTLCMOD.cpp
 

@@ -259,12 +259,16 @@ private:
     
 public:
     NamespaceDefinition(const std::string& n) : name(n) {}
+    virtual ~NamespaceDefinition() = default;  // 使类成为多态的
     
     void addNestedNamespace(const std::string& ns);
     void addConstraint(const std::string& constraint);
     bool isAllowed(const std::string& feature) const;
     void setScope(std::shared_ptr<Scope> s) { scope = s; }
     std::shared_ptr<Scope> getScope() const { return scope; }
+    
+    // 添加一个方法以获取名称
+    const std::string& getName() const { return name; }
 };
 
 } // namespace chtl
