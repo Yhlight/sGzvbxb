@@ -36,8 +36,8 @@ int main(int argc, char* argv[]) {
                 outputFile = argv[++i];
             } else if (std::string(argv[i]) == "--full") {
                 // useFullCompiler = true;
-                std::cerr << "Note: Full compiler mode is temporarily disabled due to ANTLR linking issues.\n";
-                std::cerr << "Using simple parser instead.\n";
+                std::cerr << "Note: Full compiler mode is temporarily disabled.\n";
+                std::cerr << "Using enhanced simple parser instead.\n";
             }
         }
         
