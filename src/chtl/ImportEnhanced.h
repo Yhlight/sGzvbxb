@@ -30,6 +30,12 @@ public:
     
     // 解析通配符模式
     static std::vector<std::string> parseWildcardPattern(const std::string& pattern);
+    
+    // 检查是否是官方模块引用（chtl::前缀）
+    static bool isOfficialModuleReference(const std::string& path);
+    
+    // 提取官方模块名（去除chtl::前缀）
+    static std::string extractOfficialModuleName(const std::string& path);
 };
 
 // 增强的文件搜索器
@@ -50,6 +56,9 @@ public:
     
     // 搜索 CHTL/CMOD 文件
     std::filesystem::path searchModuleFile(const std::string& name, bool preferCMOD);
+    
+    // 搜索官方模块（只在官方目录搜索）
+    std::filesystem::path searchOfficialModule(const std::string& name, bool preferCMOD);
     
     // 搜索 CJMOD 文件
     std::filesystem::path searchCJMODFile(const std::string& name);

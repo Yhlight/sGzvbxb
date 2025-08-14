@@ -89,6 +89,18 @@ std::vector<std::string> PathNormalizer::parseWildcardPattern(const std::string&
     return parts;
 }
 
+bool PathNormalizer::isOfficialModuleReference(const std::string& path) {
+    // 检查是否以 "chtl::" 开头
+    return path.length() > 6 && path.substr(0, 6) == "chtl::";
+}
+
+std::string PathNormalizer::extractOfficialModuleName(const std::string& path) {
+    if (isOfficialModuleReference(path)) {
+        return path.substr(6);  // 去除 "chtl::" 前缀
+    }
+    return path;
+}
+
 // FileSearcherEnhanced 实现
 std::filesystem::path FileSearcherEnhanced::searchFile(const std::string& name, ImportType type) {
     switch (type) {
@@ -129,6 +141,12 @@ std::filesystem::path FileSearcherEnhanced::searchResourceFile(const std::string
 }
 
 std::filesystem::path FileSearcherEnhanced::searchModuleFile(const std::string& name, bool preferCMOD) {
+    // 检查是否是官方模块引用
+    if (PathNormalizer::isOfficialModuleReference(name)) {
+        std::string moduleName = PathNormalizer::extractOfficialModuleName(name);
+        return searchOfficialModule(moduleName, preferCMOD);
+    }
+    
     std::vector<std::filesystem::path> searchPaths;
     
     // 构建搜索路径列表
@@ -174,7 +192,55 @@ std::filesystem::path FileSearcherEnhanced::searchModuleFile(const std::string& 
     return {};
 }
 
+std::filesystem::path FileSearcherEnhanced::searchOfficialModule(const std::string& name, bool preferCMOD) {
+    // 只在官方模块目录搜索
+    std::vector<std::string> extensions;
+    if (preferCMOD) {
+        extensions = {".cmod", ".chtl"};
+    } else {
+        extensions = {".chtl", ".cmod"};
+    }
+    
+    // 如果名称已有扩展名
+    if (PathNormalizer::hasExtension(name)) {
+        auto fullPath = config.officialModulePath / name;
+        if (std::filesystem::exists(fullPath)) {
+            return fullPath;
+        }
+        return {};
+    }
+    
+    // 尝试不同的扩展名
+    for (const auto& ext : extensions) {
+        auto fullPath = config.officialModulePath / (name + ext);
+        if (std::filesystem::exists(fullPath)) {
+            return fullPath;
+        }
+    }
+    
+    return {};
+}
+
 std::filesystem::path FileSearcherEnhanced::searchCJMODFile(const std::string& name) {
+    // 检查是否是官方模块引用
+    if (PathNormalizer::isOfficialModuleReference(name)) {
+        std::string moduleName = PathNormalizer::extractOfficialModuleName(name);
+        
+        // 只在官方目录搜索
+        if (PathNormalizer::hasExtension(moduleName)) {
+            auto fullPath = config.officialModulePath / moduleName;
+            if (std::filesystem::exists(fullPath)) {
+                return fullPath;
+            }
+        } else {
+            auto fullPath = config.officialModulePath / (moduleName + ".cjmod");
+            if (std::filesystem::exists(fullPath)) {
+                return fullPath;
+            }
+        }
+        return {};
+    }
+    
     std::vector<std::filesystem::path> searchPaths = {
         config.officialModulePath,
         config.moduleDirectory,
@@ -474,9 +540,19 @@ bool ImportManagerEnhanced::processCJMODImport(const ImportDeclaration& decl,
 
 bool ImportManagerEnhanced::processWildcardImport(const ImportDeclaration& decl,
                                                   std::shared_ptr<CHTLGenerator> generator) {
+    // 检查是否是官方模块通配符
+    std::string sourcePath = decl.sourcePath;
+    std::filesystem::path basePath = pathConfig.currentDirectory;
+    
+    if (PathNormalizer::isOfficialModuleReference(sourcePath)) {
+        // 提取模块名并设置基础路径为官方目录
+        sourcePath = PathNormalizer::extractOfficialModuleName(sourcePath);
+        basePath = pathConfig.officialModulePath;
+    }
+    
     // 解析基础路径和通配符模式
-    auto normalizedPath = PathNormalizer::convertDotsToSlashes(decl.sourcePath);
-    auto files = fileSearcher->searchWildcard(normalizedPath, pathConfig.currentDirectory);
+    auto normalizedPath = PathNormalizer::convertDotsToSlashes(sourcePath);
+    auto files = fileSearcher->searchWildcard(normalizedPath, basePath);
     
     if (files.empty()) {
         context->reportWarning("No files match pattern: " + decl.sourcePath);

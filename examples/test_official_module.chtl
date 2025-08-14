@@ -1,0 +1,47 @@
+// 测试官方模块导入功能
+
+// 1. 使用 chtl:: 前缀明确导入官方模块
+[Import] @Chtl from "chtl::Chtholly"              // 只在官方目录搜索
+[Import] @Chtl from "chtl::UI.Components"         // 官方UI组件库
+[Import] @CJmod from "chtl::animations"           // 官方动画库
+
+// 2. 普通导入（按照优先级搜索）
+[Import] @Chtl from "Chtholly"                    // 可能是官方或用户模块
+[Import] @Chtl from "MyCustomModule"              // 用户自定义模块
+
+// 3. 官方模块通配符导入
+[Import] @Chtl from "chtl::UI.*"                  // 导入所有官方UI模块
+[Import] @Chtl from "chtl::Components/*.cmod"     // 只导入官方组件的cmod文件
+
+// 4. 子模块导入
+[Import] @Chtl from "chtl::Chtholly.Space"        // 官方模块的子模块
+[Import] @Chtl from "UserModule.SubModule"        // 用户模块的子模块
+
+// 5. 避免冲突的使用场景
+[Import] @Chtl from "Router"                      // 可能找到用户的 Router 模块
+[Import] @Chtl from "chtl::Router"                // 明确使用官方 Router 模块
+
+body {
+    h1 {
+        text {
+            "Official Module Import Test"
+        }
+    }
+    
+    // 使用官方UI组件
+    @Element Button from UI.Components {
+        text {
+            "Click Me"
+        }
+    }
+    
+    // 使用动画
+    script {
+        // 官方动画库的功能
+        animate({
+            target: "button",
+            duration: 300,
+            easing: "ease-out"
+        });
+    }
+}
