@@ -1,0 +1,87 @@
+// 测试模块 - Chtholly UI Framework
+[Configuration] {
+    name = "Chtholly";
+    version = "1.0.0";
+    author = "CHTL Team";
+}
+
+// 导出的组件
+[Export] {
+    @Style ChthollyStyle, ChthollyButton, ChthollyCard;
+    @Element ChthollyPage, ChthollyNav, ChthollyModal;
+    @Var ChthollyColors, ChthollyFonts;
+}
+
+// 样式定义
+[Custom] @Style ChthollyStyle {
+    font-family: "Arial", sans-serif;
+    color: #333;
+    background-color: #f5f5f5;
+}
+
+[Custom] @Style ChthollyButton {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+[Custom] @Style ChthollyCard {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+// 元素定义
+[Custom] @Element ChthollyPage {
+    div class="chtholly-page" {
+        @Style ChthollyStyle;
+    }
+}
+
+[Custom] @Element ChthollyNav {
+    nav class="chtholly-nav" {
+        ul {
+            li {
+                a href="#" {
+                    text "Navigation Item"
+                }
+            }
+        }
+    }
+}
+
+[Custom] @Element ChthollyModal {
+    div class="chtholly-modal" {
+        div class="modal-content" {
+            @Style ChthollyCard;
+            h2 {
+                text "Modal Title"
+            }
+            p {
+                text "Modal content goes here"
+            }
+        }
+    }
+}
+
+// 变量定义
+[Custom] @Var ChthollyColors {
+    primary: #007bff;
+    secondary: #6c757d;
+    success: #28a745;
+    danger: #dc3545;
+    warning: #ffc107;
+    info: #17a2b8;
+}
+
+[Custom] @Var ChthollyFonts {
+    base: "Arial", sans-serif;
+    heading: "Georgia", serif;
+    monospace: "Courier New", monospace;
+}

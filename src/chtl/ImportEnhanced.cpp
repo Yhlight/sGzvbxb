@@ -520,8 +520,71 @@ bool ImportManagerEnhanced::processModuleImport(const ImportDeclaration& decl,
     }
     
     // 处理模块文件
-    // TODO: 实际的模块处理逻辑
-    return true;
+    try {
+        // 1. 读取模块文件内容
+        std::ifstream file(filePath);
+        if (!file.is_open()) {
+            context->reportError("Cannot open module file: " + filePath.string());
+            return false;
+        }
+        
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        std::string moduleContent = buffer.str();
+        file.close();
+        
+        // 2. 检查是否是CMOD压缩包格式
+        if (filePath.extension() == ".cmod") {
+            // 处理CMOD压缩包
+            return processCMODFile(filePath, generator);
+        }
+        
+        // 3. 解析CHTL模块文件
+        // 创建新的解析器来处理模块内容
+        auto moduleContext = std::make_shared<CHTLContext>();
+        moduleContext->setCurrentFile(filePath.string());
+        
+        // 4. 检查循环依赖
+        // TODO: 实现循环依赖检测
+        // if (circularDetector) {
+        //     if (!circularDetector->checkCircularDependency(
+        //         context->getCurrentFile(), filePath.string())) {
+        //         context->reportError("Circular dependency detected: " + filePath.string());
+        //         return false;
+        //     }
+        // }
+        
+        // 5. 解析模块
+        // 如果是源文件，需要编译
+        if (filePath.extension() == ".chtl") {
+            // 创建解析器处理模块
+            // 这里需要递归调用解析器
+            ImportProcessorEnhanced processor(
+                std::static_pointer_cast<ImportManagerEnhanced>(shared_from_this()), 
+                moduleContext
+            );
+            
+            // 处理模块中的所有导出
+            return processor.processModuleContent(moduleContent, generator);
+        }
+        
+        // 6. 如果指定了别名，将模块内容存储为命名空间
+        if (!decl.asName.empty()) {
+            generator->beginNamespace(decl.asName);
+            // 暂时使用注释表示模块内容
+            generator->processSingleLineComment("Module content: " + filePath.string());
+            generator->endNamespace();
+        } else {
+            // 直接添加模块内容作为注释
+            generator->processSingleLineComment("Module content from: " + filePath.string());
+        }
+        
+        return true;
+        
+    } catch (const std::exception& e) {
+        context->reportError("Error processing module: " + std::string(e.what()));
+        return false;
+    }
 }
 
 bool ImportManagerEnhanced::processCJMODImport(const ImportDeclaration& decl,
@@ -722,6 +785,205 @@ bool ImportProcessorEnhanced::processSubmoduleImport(const std::string& moduleNa
     // 3. 导入指定的子模块
     
     return true;
+}
+
+bool ImportProcessorEnhanced::processModuleContent(const std::string& content,
+                                                  std::shared_ptr<CHTLGenerator> generator) {
+    try {
+        // 1. 扫描模块内容，查找所有导出的定义
+        std::vector<std::string> exportedElements;
+        std::vector<std::string> exportedStyles;
+        std::vector<std::string> exportedVars;
+        
+        // 简单的文本扫描来查找[Export]块
+        size_t exportPos = content.find("[Export]");
+        if (exportPos != std::string::npos) {
+            // 找到导出块的结束位置
+            size_t blockStart = content.find("{", exportPos);
+            size_t blockEnd = content.find("}", blockStart);
+            
+            if (blockStart != std::string::npos && blockEnd != std::string::npos) {
+                std::string exportBlock = content.substr(blockStart + 1, blockEnd - blockStart - 1);
+                
+                // 解析导出的项目
+                // 查找 @Element
+                size_t elemPos = exportBlock.find("@Element");
+                if (elemPos != std::string::npos) {
+                    size_t lineEnd = exportBlock.find(";", elemPos);
+                    if (lineEnd != std::string::npos) {
+                        std::string elements = exportBlock.substr(elemPos + 8, lineEnd - elemPos - 8);
+                        // 分割元素名称
+                        std::istringstream iss(elements);
+                        std::string elem;
+                        while (std::getline(iss, elem, ',')) {
+                            elem.erase(0, elem.find_first_not_of(" \t\n\r"));
+                            elem.erase(elem.find_last_not_of(" \t\n\r") + 1);
+                            if (!elem.empty()) {
+                                exportedElements.push_back(elem);
+                            }
+                        }
+                    }
+                }
+                
+                // 查找 @Style
+                size_t stylePos = exportBlock.find("@Style");
+                if (stylePos != std::string::npos) {
+                    size_t lineEnd = exportBlock.find(";", stylePos);
+                    if (lineEnd != std::string::npos) {
+                        std::string styles = exportBlock.substr(stylePos + 6, lineEnd - stylePos - 6);
+                        std::istringstream iss(styles);
+                        std::string style;
+                        while (std::getline(iss, style, ',')) {
+                            style.erase(0, style.find_first_not_of(" \t\n\r"));
+                            style.erase(style.find_last_not_of(" \t\n\r") + 1);
+                            if (!style.empty()) {
+                                exportedStyles.push_back(style);
+                            }
+                        }
+                    }
+                }
+                
+                // 查找 @Var
+                size_t varPos = exportBlock.find("@Var");
+                if (varPos != std::string::npos) {
+                    size_t lineEnd = exportBlock.find(";", varPos);
+                    if (lineEnd != std::string::npos) {
+                        std::string vars = exportBlock.substr(varPos + 4, lineEnd - varPos - 4);
+                        std::istringstream iss(vars);
+                        std::string var;
+                        while (std::getline(iss, var, ',')) {
+                            var.erase(0, var.find_first_not_of(" \t\n\r"));
+                            var.erase(var.find_last_not_of(" \t\n\r") + 1);
+                            if (!var.empty()) {
+                                exportedVars.push_back(var);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 2. 处理模块内容
+        // 移除[Export]块，因为它只是元数据
+        std::string processedContent = content;
+        if (exportPos != std::string::npos) {
+            size_t blockStart = content.find("{", exportPos);
+            size_t blockEnd = content.find("}", blockStart);
+            if (blockStart != std::string::npos && blockEnd != std::string::npos) {
+                // 找到[Export]的开始位置（包括前面的空白）
+                size_t exportStart = exportPos;
+                while (exportStart > 0 && (content[exportStart - 1] == ' ' || 
+                       content[exportStart - 1] == '\t' || 
+                       content[exportStart - 1] == '\n' || 
+                       content[exportStart - 1] == '\r')) {
+                    exportStart--;
+                }
+                processedContent = content.substr(0, exportStart) + 
+                                  content.substr(blockEnd + 1);
+            }
+        }
+        
+        // 3. 将处理后的内容添加到生成器
+        // 暂时使用注释表示处理后的内容
+        generator->processSingleLineComment("Processed module content with exports");
+        
+        // 4. 记录导出的符号（供其他模块引用）
+        // 这里可以将导出的符号存储在上下文中
+        if (!exportedElements.empty() || !exportedStyles.empty() || !exportedVars.empty()) {
+            std::cerr << "Module exports:\n";
+            for (const auto& elem : exportedElements) {
+                std::cerr << "  Element: " << elem << "\n";
+            }
+            for (const auto& style : exportedStyles) {
+                std::cerr << "  Style: " << style << "\n";
+            }
+            for (const auto& var : exportedVars) {
+                std::cerr << "  Var: " << var << "\n";
+            }
+        }
+        
+        return true;
+        
+    } catch (const std::exception& e) {
+        context->reportError("Error processing module content: " + std::string(e.what()));
+        return false;
+    }
+}
+
+bool ImportManagerEnhanced::processCMODFile(const std::filesystem::path& cmodPath,
+                                           std::shared_ptr<CHTLGenerator> generator) {
+    try {
+        // CMOD文件是一个包含模块结构的压缩包
+        // 根据语法文档，CMOD结构包含：
+        // - src/ 目录：包含源代码
+        // - info/ 目录：包含模块信息
+        
+        // 暂时简化处理：将CMOD文件作为普通文本文件读取
+        std::ifstream file(cmodPath, std::ios::binary);
+        if (!file.is_open()) {
+            context->reportError("Cannot open CMOD file: " + cmodPath.string());
+            return false;
+        }
+        
+        // 检查文件魔数或标识
+        char magic[4];
+        file.read(magic, 4);
+        file.seekg(0);
+        
+        // 如果是ZIP格式（CMOD可能是ZIP压缩包）
+        if (magic[0] == 'P' && magic[1] == 'K' && magic[2] == 0x03 && magic[3] == 0x04) {
+            // 处理ZIP格式的CMOD
+            // 这里需要ZIP解压库的支持
+            context->reportError("ZIP format CMOD files are not yet supported");
+            return false;
+        }
+        
+        // 否则作为文本文件处理
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        std::string content = buffer.str();
+        file.close();
+        
+        // 查找模块信息
+        size_t configPos = content.find("[Configuration]");
+        if (configPos != std::string::npos) {
+            // 解析配置信息
+            size_t blockStart = content.find("{", configPos);
+            size_t blockEnd = content.find("}", blockStart);
+            if (blockStart != std::string::npos && blockEnd != std::string::npos) {
+                std::string configBlock = content.substr(blockStart + 1, blockEnd - blockStart - 1);
+                
+                // 查找模块名和版本
+                size_t namePos = configBlock.find("name");
+                size_t versionPos = configBlock.find("version");
+                
+                if (namePos != std::string::npos) {
+                    size_t equalPos = configBlock.find("=", namePos);
+                    size_t lineEnd = configBlock.find(";", equalPos);
+                    if (equalPos != std::string::npos && lineEnd != std::string::npos) {
+                        std::string moduleName = configBlock.substr(equalPos + 1, lineEnd - equalPos - 1);
+                        // 去除引号和空白
+                        moduleName.erase(0, moduleName.find_first_not_of(" \t\n\r\""));
+                        moduleName.erase(moduleName.find_last_not_of(" \t\n\r\"") + 1);
+                        
+                        std::cerr << "Loading CMOD module: " << moduleName << "\n";
+                    }
+                }
+            }
+        }
+        
+        // 使用ImportProcessorEnhanced处理模块内容
+        ImportProcessorEnhanced processor(
+            std::static_pointer_cast<ImportManagerEnhanced>(shared_from_this()),
+            context
+        );
+        
+        return processor.processModuleContent(content, generator);
+        
+    } catch (const std::exception& e) {
+        context->reportError("Error processing CMOD file: " + std::string(e.what()));
+        return false;
+    }
 }
 
 } // namespace chtl

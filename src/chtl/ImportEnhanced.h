@@ -145,6 +145,10 @@ public:
     bool processCJMODImport(const ImportDeclaration& decl,
                            std::shared_ptr<CHTLGenerator> generator);
     
+    // 处理CMOD压缩包文件
+    bool processCMODFile(const std::filesystem::path& cmodPath,
+                        std::shared_ptr<CHTLGenerator> generator);
+    
     // 处理通配符导入
     bool processWildcardImport(const ImportDeclaration& decl,
                               std::shared_ptr<CHTLGenerator> generator);
@@ -188,6 +192,10 @@ public:
     // 处理子模块导入
     bool processSubmoduleImport(const std::string& moduleName, 
                                const std::string& submodulePath);
+    
+    // 处理模块内容
+    bool processModuleContent(const std::string& content,
+                             std::shared_ptr<CHTLGenerator> generator);
 };
 
 } // namespace chtl
