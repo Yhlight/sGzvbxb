@@ -1,0 +1,19 @@
+body {
+    button {
+        id: "myButton";
+        text "Click Me"
+    }
+    
+    div {
+        id: "output";
+        text "Result will appear here"
+    }
+    
+    script {
+        {{#myButton}}->listen({
+            click: () => {
+                {{#output}}->textContent = "Button was clicked!";
+            }
+        });
+    }
+}

@@ -1,0 +1,14 @@
+[Template] @Style MyButton {
+    background-color: "blue";
+    color: "white";
+    padding: "10px";
+}
+
+body {
+    button {
+        style {
+            @Style MyButton;
+        }
+        text "Click me"
+    }
+}

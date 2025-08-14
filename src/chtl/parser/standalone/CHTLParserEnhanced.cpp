@@ -202,7 +202,7 @@ std::shared_ptr<ParseContext> CHTLParserEnhanced::specificImport() {
     auto ctx = std::make_shared<ParseContext>("specificImport");
     
     // [Template] 或 [Custom] 已被消费
-    bool isTemplate = tokens_->LT(0)->getType() == TokenType::KEYWORD_TEMPLATE;
+    // bool isTemplate = tokens_->LT(0)->getType() == TokenType::KEYWORD_TEMPLATE;
     
     // @Style, @Element, @Var
     consume(TokenType::AT, "Expected @");

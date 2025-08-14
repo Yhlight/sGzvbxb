@@ -1,0 +1,20 @@
+body {
+    div {
+        style {
+            background-color: "lightblue";
+            padding: "20px";
+            
+            .special {
+                color: "red";
+                font-weight: "bold";
+            }
+        }
+        
+        text "This is a div with local styles"
+        
+        p {
+            class: "special";
+            text "This paragraph should be red and bold"
+        }
+    }
+}
