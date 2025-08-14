@@ -118,6 +118,9 @@ private:
     void increaseIndent() { indentLevel++; }
     void decreaseIndent() { if (indentLevel > 0) indentLevel--; }
     
+    // 获取当前元素路径（用于约束检查）
+    std::string getCurrentElementPath() const;
+    
     // 样式处理
     std::string generateAutoClassName(const std::string& hint = "");
     std::string generateAutoId(const std::string& hint = "");

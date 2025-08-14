@@ -71,6 +71,7 @@ private:
     void visitLocalScriptBlock(std::shared_ptr<ParseContext> ctx);
     void visitAttribute(std::shared_ptr<ParseContext> ctx);
     void visitOriginDeclaration(std::shared_ptr<ParseContext> ctx);
+    void visitExceptConstraint(std::shared_ptr<ParseContext> ctx);
     
     // 模板处理
     void visitStyleTemplate(std::shared_ptr<ParseContext> ctx);

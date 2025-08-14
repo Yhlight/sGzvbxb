@@ -1,0 +1,78 @@
+// 测试CHTL约束系统
+
+// 精确约束测试
+div id="container" {
+    except span, a;  // 禁止使用span和a标签
+    
+    h1 {
+        text "标题"
+    }
+    
+    p {
+        text "这是允许的段落"
+    }
+    
+    // span { text "这会违反约束" }  // 错误：span被禁止
+}
+
+// 类型约束测试
+[Custom] @Element Box {
+    div class="box" {
+        text "自定义盒子"
+    }
+}
+
+section id="custom-section" {
+    except [Custom];  // 禁止所有自定义元素
+    
+    div {
+        text "普通HTML元素是允许的"
+    }
+    
+    // @Element Box;  // 错误：自定义元素被禁止
+}
+
+// 模板约束测试
+[Template] @Style BaseStyle {
+    color: blue;
+    font-size: 16px;
+}
+
+article {
+    except [Template] @Style;  // 禁止使用样式模板
+    
+    h2 {
+        text "文章标题"
+    }
+    
+    // @Style BaseStyle;  // 错误：样式模板被禁止
+}
+
+// 全局约束（命名空间级别）
+[Namespace] restricted {
+    except [Template];  // 禁止在此命名空间定义任何模板
+    
+    [Custom] @Element Card {  // 自定义元素是允许的
+        div class="card" {
+            text "卡片内容"
+        }
+    }
+    
+    // [Template] @Element Item {}  // 错误：模板被禁止
+}
+
+// 混合约束测试
+main {
+    except @Html, [Custom] @Element;  // 禁止HTML元素和自定义元素
+    
+    [Custom] @Style MainStyle {  // 自定义样式是允许的
+        background: white;
+    }
+    
+    [Template] @Var Colors {  // 模板变量是允许的
+        primary: #007bff;
+    }
+    
+    // div { }  // 错误：HTML元素被禁止
+    // @Element Box;  // 错误：自定义元素被禁止
+}

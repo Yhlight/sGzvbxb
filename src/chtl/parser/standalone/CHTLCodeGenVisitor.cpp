@@ -397,6 +397,8 @@ void CHTLCodeGenVisitor::visitHtmlElement(std::shared_ptr<ParseContext> ctx) {
                 visitText(childCtx);
             } else if (name == "originDeclaration") {
                 visitOriginDeclaration(childCtx);
+            } else if (name == "exceptConstraint") {
+                visitExceptConstraint(childCtx);
             } else if (name.find("Template") != std::string::npos) {
                 // 处理模板使用
                 if (child->isTerminal()) {
@@ -543,6 +545,50 @@ std::string CHTLCodeGenVisitor::transformCHTLJS(const std::string& code) {
     }
     
     return result;
+}
+
+void CHTLCodeGenVisitor::visitExceptConstraint(std::shared_ptr<ParseContext> ctx) {
+    if (!ctx || ctx->getChildren().empty()) return;
+    
+    // except关键字已经被解析器消费
+    // 我们需要收集约束目标并生成相应的注释或约束代码
+    
+    std::stringstream exceptStatement;
+    exceptStatement << "except ";
+    
+    bool first = true;
+    for (size_t i = 1; i < ctx->getChildren().size(); ++i) {
+        auto child = ctx->getChildren()[i];
+        if (!child) continue;
+        
+        if (!first) {
+            exceptStatement << ", ";
+        }
+        
+        // 获取约束目标的文本
+        if (child->isTerminal()) {
+            exceptStatement << child->getText();
+        } else {
+            auto childCtx = std::dynamic_pointer_cast<ParseContext>(child);
+            if (childCtx) {
+                // 递归构建约束文本
+                for (auto grandChild : childCtx->getChildren()) {
+                    if (grandChild && grandChild->isTerminal()) {
+                        exceptStatement << grandChild->getText() << " ";
+                    }
+                }
+            }
+        }
+        
+        first = false;
+    }
+    
+    // 生成HTML注释来标记约束
+    html_ << "<!-- CHTL Constraint: " << exceptStatement.str() << " -->\n";
+    
+    // TODO: 与CHTLGenerator的约束管理器集成
+    // 这里应该调用generator的processExceptStatement方法
+    // 但由于这是独立的代码生成器，我们暂时只生成注释
 }
 
 void CHTLCodeGenVisitor::visitOriginDeclaration(std::shared_ptr<ParseContext> ctx) {

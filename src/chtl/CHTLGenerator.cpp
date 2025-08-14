@@ -44,6 +44,34 @@ std::string CHTLGenerator::escapeAttribute(const std::string& attr) const {
     return result;
 }
 
+std::string CHTLGenerator::getCurrentElementPath() const {
+    // 构建元素路径，用于约束检查
+    std::string path;
+    for (const auto& element : elementStack) {
+        if (!path.empty()) {
+            path += "/";
+        }
+        path += element;
+    }
+    
+    // 如果在命名空间中，添加命名空间前缀
+    if (namespaceManager) {
+        auto currentNamespace = namespaceManager->getCurrentNamespace();
+        if (currentNamespace) {
+            std::string namespacePath = currentNamespace->getName();
+            if (!namespacePath.empty()) {
+                if (!path.empty()) {
+                    path = namespacePath + "/" + path;
+                } else {
+                    path = namespacePath;
+                }
+            }
+        }
+    }
+    
+    return path;
+}
+
 std::string CHTLGenerator::indent() const {
     std::string result;
     for (int i = 0; i < indentLevel; ++i) {
@@ -57,12 +85,21 @@ void CHTLGenerator::generateElement(const std::string& tagName,
                                    const std::unordered_map<std::string, std::string>& attributes) {
     // 检查约束
     if (constraintManager) {
-        std::string error;
-        // TODO: Implement constraint checking
-        // if (!constraintManager->checkConstraint("canUseHtmlElement", tagName, error)) {
-        //     context->reportError(error);
-        //     return;
-        // }
+        // 创建HTML元素的约束目标
+        ConstraintTarget target(ConstraintTargetType::HTML_ELEMENT, tagName);
+        
+        // 获取当前作用域路径
+        std::string currentScope = getCurrentElementPath();
+        
+        // 检查是否违反约束
+        auto violations = constraintManager->getViolations(target, currentScope);
+        if (!violations.empty()) {
+            // 报告所有违反的约束
+            for (const auto& violation : violations) {
+                context->reportError(violation);
+            }
+            return;
+        }
     }
     
     // 检查是否进入head元素
