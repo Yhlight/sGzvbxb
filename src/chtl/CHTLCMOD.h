@@ -233,6 +233,10 @@ public:
     
     // 提取信息
     bool extractInfo(const std::filesystem::path& cmodFile, CMODInfo& info);
+    
+private:
+    // 解析info文件内容
+    bool parseInfoContent(const std::string& content, CMODInfo& info);
 };
 
 // CMOD工具函数

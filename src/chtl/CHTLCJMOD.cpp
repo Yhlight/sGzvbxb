@@ -589,7 +589,74 @@ bool CJMODBuilder::package(const fs::path& moduleDir, const fs::path& outputFile
     out << "CJMOD\n";
     out << "1.0\n";
     
-    // TODO: 实现完整的文件打包逻辑
+    // 实现完整的文件打包逻辑
+    // 写入模块数量
+    out << modules.size() << "\n";
+    
+    // 写入每个模块的信息
+    for (const auto& mod : modules) {
+        // 模块元信息
+        out << "MODULE_BEGIN\n";
+        out << "NAME:" << mod->getName() << "\n";
+        out << "VERSION:" << mod->getVersion() << "\n";
+        out << "ENTRY:" << mod->getEntryPoint() << "\n";
+        
+        // 导出的函数
+        out << "EXPORTS:" << mod->getExportedFunctions().size() << "\n";
+        for (const auto& func : mod->getExportedFunctions()) {
+            out << func.name << ":" << func.signature << "\n";
+        }
+        
+        // 源文件
+        out << "SOURCES:" << mod->getSourceFiles().size() << "\n";
+        for (const auto& src : mod->getSourceFiles()) {
+            // 读取源文件内容
+            std::ifstream srcFile(src);
+            if (!srcFile) {
+                std::cerr << "Warning: Cannot read source file: " << src << std::endl;
+                continue;
+            }
+            
+            // 获取文件大小
+            srcFile.seekg(0, std::ios::end);
+            size_t fileSize = srcFile.tellg();
+            srcFile.seekg(0, std::ios::beg);
+            
+            // 写入文件信息
+            out << src.filename().string() << ":" << fileSize << "\n";
+            
+            // 写入文件内容
+            std::string content((std::istreambuf_iterator<char>(srcFile)),
+                              std::istreambuf_iterator<char>());
+            out << content;
+            
+            srcFile.close();
+        }
+        
+        // 头文件
+        out << "HEADERS:" << mod->getHeaderFiles().size() << "\n";
+        for (const auto& hdr : mod->getHeaderFiles()) {
+            std::ifstream hdrFile(hdr);
+            if (!hdrFile) {
+                std::cerr << "Warning: Cannot read header file: " << hdr << std::endl;
+                continue;
+            }
+            
+            hdrFile.seekg(0, std::ios::end);
+            size_t fileSize = hdrFile.tellg();
+            hdrFile.seekg(0, std::ios::beg);
+            
+            out << hdr.filename().string() << ":" << fileSize << "\n";
+            
+            std::string content((std::istreambuf_iterator<char>(hdrFile)),
+                              std::istreambuf_iterator<char>());
+            out << content;
+            
+            hdrFile.close();
+        }
+        
+        out << "MODULE_END\n";
+    }
     
     out.close();
     return true;

@@ -1263,9 +1263,130 @@ bool CMODUnpacker::validateCMODFile(const fs::path& cmodFile) const {
 }
 
 bool CMODUnpacker::extractInfo(const fs::path& cmodFile, CMODInfo& info) {
-    // 临时解包到内存或临时目录来读取info
-    // TODO: 实现更高效的方式直接从.cmod文件读取info
-    return false;
+    // 实现更高效的方式直接从.cmod文件读取info
+    if (!fs::exists(cmodFile)) {
+        return false;
+    }
+    
+    // 打开zip文件
+    int err;
+    zip* archive = zip_open(cmodFile.string().c_str(), ZIP_RDONLY, &err);
+    if (!archive) {
+        return false;
+    }
+    
+    // 查找info文件
+    std::string infoPath = "info/" + cmodFile.stem().string() + ".chtl";
+    zip_stat_t stat;
+    if (zip_stat(archive, infoPath.c_str(), 0, &stat) != 0) {
+        // 尝试其他可能的路径
+        infoPath = "info/info.chtl";
+        if (zip_stat(archive, infoPath.c_str(), 0, &stat) != 0) {
+            zip_close(archive);
+            return false;
+        }
+    }
+    
+    // 读取info文件内容
+    zip_file* file = zip_fopen(archive, infoPath.c_str(), 0);
+    if (!file) {
+        zip_close(archive);
+        return false;
+    }
+    
+    // 读取内容到内存
+    std::vector<char> buffer(stat.size);
+    if (zip_fread(file, buffer.data(), stat.size) != static_cast<zip_int64_t>(stat.size)) {
+        zip_fclose(file);
+        zip_close(archive);
+        return false;
+    }
+    
+    zip_fclose(file);
+    zip_close(archive);
+    
+    // 解析info内容
+    std::string content(buffer.begin(), buffer.end());
+    return parseInfoContent(content, info);
+}
+
+bool CMODUnpacker::parseInfoContent(const std::string& content, CMODInfo& info) {
+    // 使用正则表达式解析[Info]块
+    std::regex infoRegex(R"(\[Info\]\s*\{([^}]+)\})");
+    std::smatch match;
+    
+    if (!std::regex_search(content, match, infoRegex)) {
+        return false;
+    }
+    
+    std::string infoBlock = match[1];
+    
+    // 解析各个字段
+    std::regex fieldRegex(R"((\w+)\s*=\s*"([^"]*)")");
+    std::sregex_iterator it(infoBlock.begin(), infoBlock.end(), fieldRegex);
+    std::sregex_iterator end;
+    
+    for (; it != end; ++it) {
+        std::string key = (*it)[1];
+        std::string value = (*it)[2];
+        
+        if (key == "name") {
+            info.name = value;
+        } else if (key == "version") {
+            info.version = value;
+        } else if (key == "description") {
+            info.description = value;
+        } else if (key == "author") {
+            info.author = value;
+        } else if (key == "license") {
+            info.license = value;
+        } else if (key == "dependencies") {
+            // 简单处理，实际应该解析依赖列表
+            info.dependencies = value;
+        } else if (key == "category") {
+            info.category = value;
+        } else if (key == "minCHTLVersion") {
+            info.minCHTLVersion = value;
+        } else if (key == "maxCHTLVersion") {
+            info.maxCHTLVersion = value;
+        }
+    }
+    
+    // 解析[Export]块（如果存在）
+    std::regex exportRegex(R"(\[Export\]\s*\{([^}]+)\})");
+    if (std::regex_search(content, match, exportRegex)) {
+        std::string exportBlock = match[1];
+        
+        // 解析导出的元素
+        std::regex exportItemRegex(R"(@(\w+)\s+([^,;]+)(?:,|;))");
+        std::sregex_iterator expIt(exportBlock.begin(), exportBlock.end(), exportItemRegex);
+        
+        for (; expIt != end; ++expIt) {
+            std::string type = (*expIt)[1];
+            std::string items = (*expIt)[2];
+            
+            // 分割多个项目
+            std::regex itemRegex(R"(\w+)");
+            std::sregex_iterator itemIt(items.begin(), items.end(), itemRegex);
+            
+            for (; itemIt != end; ++itemIt) {
+                CMODExport exp;
+                exp.name = (*itemIt)[0];
+                
+                if (type == "Style") {
+                    exp.type = "style";
+                } else if (type == "Element") {
+                    exp.type = "element";
+                } else if (type == "Var") {
+                    exp.type = "var";
+                }
+                
+                info.exports.push_back(exp);
+            }
+        }
+    }
+    
+    return !info.name.empty();
 }
 
 } // namespace chtl
