@@ -902,9 +902,10 @@ void CHTLJSProcessor::validateReferences() {
     }
     
     // 报告所有错误
-    if (!errors.empty() && compiler && compiler->getErrorReporter()) {
+    if (!errors.empty() && compiler) {
+        // TODO: 实现错误报告
         for (const auto& error : errors) {
-            compiler->getErrorReporter()->error(error, {});
+            std::cerr << "JS Error: " << error << std::endl;
         }
     }
 }
@@ -915,12 +916,14 @@ std::string CHTLJSProcessor::generateSourceMap() {
     
     sourceMap << "{\n";
     sourceMap << "  \"version\": 3,\n";
-    sourceMap << "  \"file\": \"" << outputFileName << "\",\n";
+    sourceMap << "  \"file\": \"" << "output.js" << "\",\n"; // TODO: 从参数获取输出文件名
     sourceMap << "  \"sourceRoot\": \"\",\n";
     sourceMap << "  \"sources\": [";
     
     // 添加源文件列表
     bool first = true;
+    // TODO: 从编译上下文获取源文件列表
+    std::vector<std::string> sourceFiles = {"input.js"};
     for (const auto& source : sourceFiles) {
         if (!first) sourceMap << ", ";
         sourceMap << "\"" << source << "\"";
@@ -944,6 +947,8 @@ std::string CHTLJSProcessor::generateSourceMap() {
     
     // 生成VLQ编码的映射
     // 简化实现：每行对应一个分号
+    // 简化的映射实现
+    size_t lineCount = 1; // TODO: 从实际代码计算
     for (size_t i = 0; i < lineCount; ++i) {
         if (i > 0) sourceMap << ";";
         // 这里应该生成实际的VLQ编码映射

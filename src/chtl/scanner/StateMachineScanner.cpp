@@ -375,7 +375,7 @@ void StateMachineScanner::popState() {
     }
 }
 
-ScanState StateMachineScanner::currentState() const {
+StateMachineScanner::ScanState StateMachineScanner::currentState() const {
     return stateStack_.empty() ? ScanState::CHTL_TOP : stateStack_.top().state;
 }
 

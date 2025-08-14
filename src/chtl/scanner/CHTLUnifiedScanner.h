@@ -30,6 +30,11 @@ struct CodeFragment {
     size_t endLine;
     size_t endColumn;
     
+    // 默认构造函数
+    CodeFragment() : type(FragmentType::CHTL), content(""), 
+                     startLine(0), startColumn(0),
+                     endLine(0), endColumn(0) {}
+    
     CodeFragment(FragmentType t, const std::string& c, 
                  size_t sl, size_t sc, size_t el, size_t ec)
         : type(t), content(c), startLine(sl), startColumn(sc),

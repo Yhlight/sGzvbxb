@@ -8,6 +8,10 @@
 #include <vector>
 
 namespace chtl {
+
+// 前向声明
+class CHTLContext;
+
 namespace compiler {
 
 /**

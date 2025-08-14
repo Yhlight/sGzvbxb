@@ -14,7 +14,7 @@ class StateMachineScanner : public CHTLUnifiedScanner {
 public:
     StateMachineScanner();
     
-    std::vector<CodeFragment> scan(const std::string& input) override;
+    std::vector<CodeFragment> scan(const std::string& input);
     
 private:
     // 扫描器状态

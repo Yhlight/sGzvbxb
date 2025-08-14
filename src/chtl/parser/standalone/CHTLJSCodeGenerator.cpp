@@ -88,7 +88,7 @@ std::string CHTLJSCodeGenerator::generate(std::shared_ptr<ParseContext> parseTre
     writeLine("/* Generated CHTL JS Code */");
     
     // 生成主代码
-    for (auto child : parseTree->children_) {
+    for (auto child : parseTree->getChildren()) {
         auto ctx = std::dynamic_pointer_cast<ParseContext>(child);
         if (ctx) {
             generateNode(ctx);
@@ -101,19 +101,19 @@ std::string CHTLJSCodeGenerator::generate(std::shared_ptr<ParseContext> parseTre
 void CHTLJSCodeGenerator::generateNode(std::shared_ptr<ParseContext> node) {
     if (!node) return;
     
-    if (node->name_ == "chtlInterpolation") {
+    if (node->getName() == "chtlInterpolation") {
         generateInterpolation(node);
-    } else if (node->name_ == "chainAccess") {
+    } else if (node->getName() == "chainAccess") {
         generateChainAccess(node);
-    } else if (node->name_ == "listenCall") {
+    } else if (node->getName() == "listenCall") {
         generateListen(node);
-    } else if (node->name_ == "animateCall") {
+    } else if (node->getName() == "animateCall") {
         generateAnimate(node);
-    } else if (node->name_ == "rawJavaScript") {
+    } else if (node->getName() == "rawJavaScript") {
         generateRawJS(node);
     } else {
         // 递归处理子节点
-        for (auto child : node->children_) {
+        for (auto child : node->getChildren()) {
             auto ctx = std::dynamic_pointer_cast<ParseContext>(child);
             if (ctx) {
                 generateNode(ctx);
@@ -125,9 +125,9 @@ void CHTLJSCodeGenerator::generateNode(std::shared_ptr<ParseContext> node) {
 void CHTLJSCodeGenerator::generateInterpolation(std::shared_ptr<ParseContext> node) {
     // {{selector}} -> _chtl.select('selector')
     std::string selector;
-    for (auto child : node->children_) {
+    for (auto child : node->getChildren()) {
         if (auto terminal = std::dynamic_pointer_cast<TerminalNode>(child)) {
-            std::string text = terminal->token_->getText();
+            std::string text = terminal->getToken()->getText();
             if (text != "{{" && text != "}}") {
                 selector += text;
             }
@@ -146,15 +146,18 @@ void CHTLJSCodeGenerator::generateInterpolation(std::shared_ptr<ParseContext> no
 
 void CHTLJSCodeGenerator::generateChainAccess(std::shared_ptr<ParseContext> node) {
     // 将 -> 转换为 .
-    for (auto child : node->children_) {
+    for (auto child : node->getChildren()) {
         if (auto terminal = std::dynamic_pointer_cast<TerminalNode>(child)) {
-            if (terminal->token_->getText() == "->") {
+            if (terminal->getToken()->getText() == "->") {
                 write(".");
             } else {
-                write(terminal->token_->getText());
+                write(terminal->getToken()->getText());
             }
         } else {
-            generateNode(child);
+            auto ctx = std::dynamic_pointer_cast<ParseContext>(child);
+            if (ctx) {
+                generateNode(ctx);
+            }
         }
     }
 }
@@ -164,35 +167,40 @@ void CHTLJSCodeGenerator::generateListen(std::shared_ptr<ParseContext> node) {
     write("_chtl.listen(");
     
     bool first = true;
-    for (auto child : node->children) {
-        if (!first && child->name != "listenEvents") {
+    for (auto child : node->getChildren()) {
+        auto childCtx = std::dynamic_pointer_cast<ParseContext>(child);
+        if (!first && childCtx && childCtx->getName() != "listenEvents") {
             write(", ");
         }
-        if (child->name == "listenTarget") {
-            generateNode(child);
+        if (childCtx && childCtx->getName() == "listenTarget") {
+            generateNode(childCtx);
             first = false;
-        } else if (child->name == "listenEvents") {
+        } else if (childCtx && childCtx->getName() == "listenEvents") {
             // 生成事件对象
             write("{");
             indent();
             
             bool firstEvent = true;
-            for (auto eventChild : child->children) {
-                if (eventChild->name == "listenEvent") {
+            for (auto eventChild : childCtx->getChildren()) {
+                auto eventCtx = std::dynamic_pointer_cast<ParseContext>(eventChild);
+                if (eventCtx && eventCtx->getName() == "listenEvent") {
                     if (!firstEvent) write(",");
                     writeLine("");
                     writeIndent();
                     
                     // 获取事件名和处理器
                     std::string eventName;
-                    for (auto part : eventChild->children) {
-                        if (part->name == "eventName") {
-                            if (auto terminal = std::dynamic_pointer_cast<TerminalNode>(part->children[0])) {
-                                eventName = terminal->token->getText();
+                    for (auto part : eventCtx->getChildren()) {
+                        auto partCtx = std::dynamic_pointer_cast<ParseContext>(part);
+                        if (partCtx && partCtx->getName() == "eventName") {
+                            if (!partCtx->getChildren().empty()) {
+                                if (auto terminal = std::dynamic_pointer_cast<TerminalNode>(partCtx->getChildren()[0])) {
+                                    eventName = terminal->getToken()->getText();
                                 write(eventName + ": ");
+                                }
                             }
-                        } else if (part->name == "eventHandler") {
-                            generateNode(part);
+                        } else if (partCtx && partCtx->getName() == "eventHandler") {
+                            generateNode(partCtx);
                         }
                     }
                     firstEvent = false;
@@ -214,9 +222,10 @@ void CHTLJSCodeGenerator::generateAnimate(std::shared_ptr<ParseContext> node) {
     write("_chtl.animate(");
     
     // 直接生成animate的参数对象
-    for (auto child : node->children) {
-        if (child->name == "animateOptions") {
-            generateNode(child);
+    for (auto child : node->getChildren()) {
+        auto childCtx = std::dynamic_pointer_cast<ParseContext>(child);
+        if (childCtx && childCtx->getName() == "animateOptions") {
+            generateNode(childCtx);
         }
     }
     
@@ -225,9 +234,9 @@ void CHTLJSCodeGenerator::generateAnimate(std::shared_ptr<ParseContext> node) {
 
 void CHTLJSCodeGenerator::generateRawJS(std::shared_ptr<ParseContext> node) {
     // 原始JavaScript代码
-    for (auto child : node->children) {
+    for (auto child : node->getChildren()) {
         if (auto terminal = std::dynamic_pointer_cast<TerminalNode>(child)) {
-            write(terminal->token->getText());
+            write(terminal->getToken()->getText());
         }
     }
 }

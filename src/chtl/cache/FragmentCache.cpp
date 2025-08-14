@@ -109,7 +109,7 @@ size_t FragmentCache::estimateMemorySize(const std::vector<scanner::CodeFragment
     for (const auto& fragment : fragments) {
         size += sizeof(scanner::CodeFragment);
         size += fragment.content.capacity();
-        size += fragment.filename.capacity();
+        // CodeFragment没有filename成员
     }
     return size;
 }

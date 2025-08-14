@@ -43,7 +43,7 @@ void CHTLUnifiedScanner::scanTopLevel(std::vector<CodeFragment>& fragments) {
         
         if (pos_ >= input_.size()) break;
         
-        size_t startPos = pos_;
+        // size_t startPos = pos_; // 未使用，注释掉
         size_t startLine = line_;
         size_t startColumn = column_;
         
@@ -94,7 +94,7 @@ void CHTLUnifiedScanner::scanTopLevel(std::vector<CodeFragment>& fragments) {
 }
 
 void CHTLUnifiedScanner::scanStyleBlock(std::vector<CodeFragment>& fragments) {
-    size_t startPos = pos_;
+    // size_t startPos = pos_; // 未使用，注释掉
     size_t startLine = line_;
     size_t startColumn = column_;
     
@@ -134,7 +134,7 @@ void CHTLUnifiedScanner::scanStyleBlock(std::vector<CodeFragment>& fragments) {
 }
 
 void CHTLUnifiedScanner::scanScriptBlock(std::vector<CodeFragment>& fragments) {
-    size_t startPos = pos_;
+    // size_t startPos = pos_; // 未使用，注释掉
     size_t startLine = line_;
     size_t startColumn = column_;
     
@@ -186,12 +186,30 @@ void CHTLUnifiedScanner::scanScriptBlock(std::vector<CodeFragment>& fragments) {
         scanCHTLJavaScript(fragments);
     } else {
         // 没有CHTL JS特征，进一步检查是否需要混合处理
-        scanMixedScriptContent(fragments);
+        // TODO: 实现混合脚本内容扫描
+        // scanMixedScriptContent(fragments);
+        
+        // 暂时作为普通JS处理
+        size_t startLine = line_;
+        size_t startColumn = column_;
+        // 收集剩余的script内容作为JS
+        std::string content;
+        while (pos_ < input_.size() && !match("</script>")) {
+            content += advance();
+        }
+        
+        CodeFragment jsFragment(
+            FragmentType::JS, 
+            content,
+            startLine, startColumn,
+            line_, column_
+        );
+        fragments.push_back(jsFragment);
     }
 }
 
 void CHTLUnifiedScanner::scanCHTLJavaScript(std::vector<CodeFragment>& fragments) {
-    size_t startPos = pos_;
+    // size_t startPos = pos_; // 未使用，注释掉
     size_t startLine = line_;
     size_t startColumn = column_;
     
@@ -218,6 +236,7 @@ void CHTLUnifiedScanner::scanCHTLJavaScript(std::vector<CodeFragment>& fragments
     }
 }
 
+/* 注释掉未使用的函数
 void CHTLUnifiedScanner::scanMixedScriptContent(std::vector<CodeFragment>& fragments) {
     size_t startLine = line_;
     size_t startColumn = column_;
@@ -288,6 +307,7 @@ void CHTLUnifiedScanner::scanMixedScriptContent(std::vector<CodeFragment>& fragm
                    fragmentStartLine, fragmentStartColumn, line_, column_);
     }
 }
+*/
 
 // 辅助方法实现
 char CHTLUnifiedScanner::peek() const {

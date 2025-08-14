@@ -1,25 +1,36 @@
 html {
     head {
-        title { text { "CHTL Demo Page" } }
+        title { text { "CHTL测试页面" } }
         style {
             body {
-                background-color: #f0f0f0;
                 font-family: Arial, sans-serif;
+                margin: 20px;
             }
-            h1 {
-                color: #333;
-                text-align: center;
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
             }
         }
     }
     body {
-        h1 { text { "Welcome to CHTL!" } }
-        div {
-            p { text { "CHTL is a C++ based hypertext language." } }
-            p { text { "It provides high performance and type safety for web development." } }
-        }
-        script {
-            console.log("CHTL page loaded!");
+        div.container {
+            h1 { text { "欢迎使用CHTL" } }
+            p { text { "这是一个使用CHTL编写的简单页面" } }
+            
+            // 使用CHTL特性
+            @Var ThemeColor(primary: "#007bff", secondary: "#6c757d")
+            
+            button {
+                style {
+                    background-color: ThemeColor(primary);
+                    color: white;
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 4px;
+                }
+                text { "点击我" }
+                onclick: "alert('Hello CHTL!')"
+            }
         }
     }
 }

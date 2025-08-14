@@ -1,37 +1,12 @@
-// 简单的CHTL测试文件
-div {
-    h1 {
-        text "欢迎使用CHTL!"
+html {
+    head {
+        title { text { "简单CHTL测试" } }
     }
-    
-    p {
-        text "CHTL是一个创新的Web开发语言。"
-    }
-    
-    div {
-        style {
-            background-color: #f0f0f0;
-            padding: 20px;
+    body {
+        h1 { text { "Hello CHTL!" } }
+        p { text { "这是一个段落" } }
+        div {
+            text { "这是一个div" }
         }
-        
-        h2 {
-            text "特性"
-        }
-        
-        ul {
-            li {
-                text "支持嵌套语法"
-            }
-            li {
-                text "内置样式支持"
-            }
-            li {
-                text "简洁的语法"
-            }
-        }
-    }
-    
-    script {
-        console.log("Hello from CHTL!");
     }
 }
