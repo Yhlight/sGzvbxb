@@ -1,0 +1,19 @@
+// 测试导入功能
+[Import] @Html from "test_content.html" as htmlContent
+[Import] @Style from "test_style.css" as styleContent
+[Import] @JavaScript from "test_script.js" as scriptContent
+
+body {
+    // 使用导入的命名原始嵌入
+    [Origin] @Html htmlContent;
+    
+    style {
+        // 使用导入的样式
+        [Origin] @Style styleContent;
+    }
+    
+    script {
+        // 使用导入的脚本
+        [Origin] @JavaScript scriptContent;
+    }
+}

@@ -1,6 +1,9 @@
 #include "CHTLCodeGenVisitor.h"
 #include <algorithm>
 #include <regex>
+#include <fstream>
+#include <sstream>
+#include <iostream>
 
 namespace chtl {
 namespace parser {
@@ -604,14 +607,28 @@ void CHTLCodeGenVisitor::handleFileImport(std::shared_ptr<ParseContext> ctx) {
     
     // 如果有 as 子句，创建命名的原始嵌入节点
     if (!asName.empty()) {
+        // 读取文件内容
+        std::string fileContent;
+        std::ifstream file(filePath);
+        
+        if (file.is_open()) {
+            std::stringstream buffer;
+            buffer << file.rdbuf();
+            fileContent = buffer.str();
+            file.close();
+        } else {
+            // 如果文件不存在，记录错误并使用占位内容
+            std::cerr << "Warning: Cannot open file: " + filePath << std::endl;
+            fileContent = "<!-- Error: Cannot read file " + filePath + " -->";
+        }
+        
         if (fileType == "Html") {
             // 将导入的HTML内容存储为命名节点，供后续使用
-            // TODO: 实际读取文件内容
-            namedOriginNodes_[asName] = {fileType, "<!-- Content from " + filePath + " -->"};
+            namedOriginNodes_[asName] = {fileType, fileContent};
         } else if (fileType == "Style") {
-            namedOriginNodes_[asName] = {fileType, "/* Content from " + filePath + " */"};
+            namedOriginNodes_[asName] = {fileType, fileContent};
         } else if (fileType == "JavaScript") {
-            namedOriginNodes_[asName] = {fileType, "// Content from " + filePath};
+            namedOriginNodes_[asName] = {fileType, fileContent};
         }
     }
     
