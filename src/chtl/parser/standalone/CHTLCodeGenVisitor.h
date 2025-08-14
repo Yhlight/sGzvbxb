@@ -43,6 +43,11 @@ private:
     std::unordered_map<std::string, ElementTemplate> elementTemplates_;
     std::unordered_map<std::string, VarTemplate> varTemplates_;
     
+    // 自定义元素、样式和变量
+    std::unordered_map<std::string, std::shared_ptr<ParseContext>> customElements_;
+    std::unordered_map<std::string, std::string> customStyles_;
+    std::unordered_map<std::string, std::string> customVars_;
+    
     // 局部样式块的类名生成
     int localStyleCounter_ = 0;
     std::unordered_map<std::string, std::string> localStyleMapping_;

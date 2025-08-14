@@ -1,0 +1,13 @@
+// 测试特定导入
+[Import] [Template] @Element Button from "template_source.chtl" as MyButton
+[Import] [Template] @Style ButtonStyle from "template_source.chtl"
+[Import] [Custom] @Element Card from "template_source.chtl" as MyCard
+[Import] [Custom] @Style CardStyle from "template_source.chtl"
+
+body {
+    // 使用导入的模板
+    @Element MyButton;
+    
+    // 使用导入的自定义元素
+    @Element MyCard;
+}

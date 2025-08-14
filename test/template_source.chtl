@@ -1,0 +1,41 @@
+// 模板定义
+[Template] @Element Button {
+    button class="custom-button" {
+        text "Click Me"
+    }
+}
+
+[Template] @Style ButtonStyle {
+    background-color: blue;
+    color: white;
+    padding: 10px;
+}
+
+[Template] @Var Colors {
+    primary: #007bff;
+    secondary: #6c757d;
+}
+
+// 自定义定义
+[Custom] @Element Card {
+    div class="card" {
+        h3 {
+            text "Card Title"
+        }
+        p {
+            text "Card content"
+        }
+    }
+}
+
+[Custom] @Style CardStyle {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 16px;
+}
+
+[Custom] @Var Sizes {
+    small: 8px;
+    medium: 16px;
+    large: 24px;
+}

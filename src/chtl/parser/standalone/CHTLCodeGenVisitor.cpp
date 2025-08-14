@@ -105,7 +105,7 @@ std::string CHTLCodeGenVisitor::visit(std::shared_ptr<ParseContext> tree) {
 void CHTLCodeGenVisitor::visitCompilationUnit(std::shared_ptr<ParseContext> ctx) {
     if (!ctx) return;
     
-    std::cerr << "DEBUG: visitCompilationUnit called, children count: " << ctx->getChildren().size() << "\n";
+
     
     // 第一遍：收集所有模板和自定义定义
     for (const auto& child : ctx->getChildren()) {
@@ -128,7 +128,7 @@ void CHTLCodeGenVisitor::visitCompilationUnit(std::shared_ptr<ParseContext> ctx)
         auto childCtx = std::dynamic_pointer_cast<ParseContext>(child);
         if (childCtx) {
             const std::string& name = childCtx->getName();
-            std::cerr << "DEBUG: Processing child with name: " << name << "\n";
+
             
             if (name == "htmlElement") {
                 visitHtmlElement(childCtx);
@@ -291,7 +291,7 @@ void CHTLCodeGenVisitor::visitCustomDefinition(std::shared_ptr<ParseContext> ctx
 void CHTLCodeGenVisitor::visitHtmlElement(std::shared_ptr<ParseContext> ctx) {
     if (!ctx || ctx->getChildren().empty()) return;
     
-    std::cerr << "DEBUG: visitHtmlElement called\n";
+
     
     // 获取元素名
     std::string tagName;
@@ -558,7 +558,6 @@ void CHTLCodeGenVisitor::visitOriginDeclaration(std::shared_ptr<ParseContext> ct
     
     // 检查是否是命名引用（通过查看typeCtx的内容）
     std::string typeCtxText = typeCtx->getText();
-    std::cerr << "DEBUG: typeCtx text: " << typeCtxText << "\n";
     
     // 如果内容包含分号，说明是引用
     bool isNamedReference = typeCtxText.find(";") != std::string::npos;
@@ -583,14 +582,14 @@ void CHTLCodeGenVisitor::visitOriginDeclaration(std::shared_ptr<ParseContext> ct
             }
         }
         
-        std::cerr << "DEBUG: Looking for reference: " << referenceName << "\n";
+
         
         // 从namedOriginNodes_中查找内容
         if (!referenceName.empty()) {
             auto it = namedOriginNodes_.find(referenceName);
             if (it != namedOriginNodes_.end()) {
                 const auto& [type, content] = it->second;
-                std::cerr << "DEBUG: Found named origin node, type: " << type << "\n";
+
                 if (type == "Html") {
                     html_ << content;
                 } else if (type == "Style") {
@@ -626,33 +625,49 @@ void CHTLCodeGenVisitor::visitOriginDeclaration(std::shared_ptr<ParseContext> ct
 void CHTLCodeGenVisitor::visitImportStatement(std::shared_ptr<ParseContext> ctx) {
     if (!ctx) return;
     
-    std::cerr << "DEBUG: visitImportStatement called\n";
-    std::cerr << "DEBUG: import statement children count: " << ctx->getChildren().size() << "\n";
+    // 打印整个导入语句的文本
+    std::cerr << "Import statement full text: " << ctx->getText() << "\n";
     
-    // 打印所有子节点信息
-    for (size_t i = 0; i < ctx->getChildren().size(); ++i) {
-        auto child = ctx->getChildren()[i];
-        if (child) {
-            std::cerr << "DEBUG: import child[" << i << "] name: " << child->getName() 
-                      << " isTerminal: " << child->isTerminal()
-                      << " text: " << child->getText() << "\n";
+
+    
+    // 检查是什么类型的导入
+    // 由于解析器可能合并了节点，我们需要在源文本中查找
+    std::string fullText = ctx->getText();
+    
+    // 查找是否包含 [Template] 或 [Custom] 标记
+    bool isSpecificImport = false;
+    
+    // 检查第二个子节点
+    if (ctx->getChildren().size() > 1) {
+        auto secondChild = ctx->getChildren()[1];
+        if (secondChild) {
+            std::string childText = secondChild->getText();
+            // 检查是否以Template或Custom开头
+            if (childText.find("Template") == 0 || childText.find("Custom") == 0) {
+                isSpecificImport = true;
+            }
         }
     }
     
-    // 直接处理导入（不检查子节点类型）
-    handleFileImport(ctx);
+    if (isSpecificImport) {
+        std::cerr << "Processing specific import\n";
+        handleSpecificImport(ctx);
+    } else {
+        std::cerr << "Processing file import\n";
+        handleFileImport(ctx);
+    }
 }
 
 void CHTLCodeGenVisitor::handleFileImport(std::shared_ptr<ParseContext> ctx) {
     if (!ctx || ctx->getChildren().size() < 2) return;
     
-    std::cerr << "DEBUG: handleFileImport called\n";
+
     
     // 第二个子节点应该是fileImport
     auto fileImportCtx = std::dynamic_pointer_cast<ParseContext>(ctx->getChildren()[1]);
     if (!fileImportCtx) return;
     
-    std::cerr << "DEBUG: fileImport text: " << fileImportCtx->getText() << "\n";
+
     
     // 解析fileImport内容
     // 文本格式看起来是: Html"hello.html"helloContent (没有空格)
@@ -687,7 +702,7 @@ void CHTLCodeGenVisitor::handleFileImport(std::shared_ptr<ParseContext> ctx) {
         asName.erase(asName.find_last_not_of(" \n\r\t") + 1);
     }
     
-    std::cerr << "DEBUG: fileType: " << fileType << ", filePath: " << filePath << ", asName: " << asName << "\n";
+
     
     // 如果有 as 子句，创建命名的原始嵌入节点
     if (!asName.empty()) {
@@ -709,13 +724,10 @@ void CHTLCodeGenVisitor::handleFileImport(std::shared_ptr<ParseContext> ctx) {
         if (fileType == "Html") {
             // 将导入的HTML内容存储为命名节点，供后续使用
             namedOriginNodes_[asName] = {fileType, fileContent};
-            std::cerr << "DEBUG: Stored named origin node: " << asName << " type: " << fileType << "\n";
         } else if (fileType == "Style") {
             namedOriginNodes_[asName] = {fileType, fileContent};
-            std::cerr << "DEBUG: Stored named origin node: " << asName << " type: " << fileType << "\n";
         } else if (fileType == "JavaScript") {
             namedOriginNodes_[asName] = {fileType, fileContent};
-            std::cerr << "DEBUG: Stored named origin node: " << asName << " type: " << fileType << "\n";
         }
     }
     
@@ -723,8 +735,149 @@ void CHTLCodeGenVisitor::handleFileImport(std::shared_ptr<ParseContext> ctx) {
 }
 
 void CHTLCodeGenVisitor::handleSpecificImport(std::shared_ptr<ParseContext> ctx) {
-    // TODO: 处理特定导入（模板、自定义等）
-    (void)ctx;
+    if (!ctx) return;
+    
+    // 解析特定导入语句
+    // 格式: [Import] [Template/Custom] @Type name from "file" as alias
+    
+    std::string importCategory;  // Template 或 Custom
+    std::string importType;      // Element, Style, 或 Var
+    std::string itemName;        // 要导入的项目名称
+    std::string filePath;        // 源文件路径
+    std::string asName;          // 可选的别名
+    
+    // 遍历子节点以提取信息
+    bool foundCategory = false;
+    bool foundType = false;
+    bool foundFrom = false;
+    
+    for (size_t i = 0; i < ctx->getChildren().size(); ++i) {
+        auto child = ctx->getChildren()[i];
+        if (!child) continue;
+        
+        std::string text = child->getText();
+        
+        // 查找 [Template] 或 [Custom]
+        if (text == "[Template]" || text == "Template") {
+            importCategory = "Template";
+            foundCategory = true;
+        } else if (text == "[Custom]" || text == "Custom") {
+            importCategory = "Custom";
+            foundCategory = true;
+        }
+        // 查找 @Element, @Style, @Var
+        else if (text.find("@") == 0) {
+            importType = text.substr(1);  // 去掉@符号
+            foundType = true;
+            // 下一个应该是项目名称
+            if (i + 1 < ctx->getChildren().size()) {
+                itemName = ctx->getChildren()[i + 1]->getText();
+                i++;  // 跳过已处理的名称
+            }
+        }
+        // 查找 from 关键字
+        else if (text == "from" && i + 1 < ctx->getChildren().size()) {
+            foundFrom = true;
+            filePath = ctx->getChildren()[i + 1]->getText();
+            // 去除引号
+            if (filePath.length() >= 2 && filePath.front() == '"' && filePath.back() == '"') {
+                filePath = filePath.substr(1, filePath.length() - 2);
+            }
+            i++;  // 跳过文件路径
+        }
+        // 查找 as 关键字
+        else if (text == "as" && i + 1 < ctx->getChildren().size()) {
+            asName = ctx->getChildren()[i + 1]->getText();
+            i++;  // 跳过别名
+        }
+    }
+    
+    // 验证必要的信息是否完整
+    if (!foundCategory || !foundType || !foundFrom || itemName.empty() || filePath.empty()) {
+        std::cerr << "Warning: Incomplete specific import statement\n";
+        return;
+    }
+    
+    // 读取并解析目标文件
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        std::cerr << "Warning: Cannot open file for specific import: " << filePath << std::endl;
+        return;
+    }
+    
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    std::string fileContent = buffer.str();
+    file.close();
+    
+    // 根据导入类型处理
+    if (importCategory == "Template") {
+        if (importType == "Element") {
+            // TODO: 解析文件内容，查找指定的模板元素定义
+            // 暂时存储为注释
+            std::string templateDef = "<!-- Template Element '" + itemName + "' from " + filePath + " -->";
+            
+            // 如果有别名，使用别名；否则使用原始名称
+            std::string storeName = asName.empty() ? itemName : asName;
+            // elementTemplates_ 需要 ElementTemplate 类型
+            ElementTemplate elemTemplate;
+            // 创建一个虚拟的 ParseContext
+            elemTemplate.content = std::make_shared<ParseContext>("importedElement");
+            elementTemplates_[storeName] = elemTemplate;
+            
+            std::cerr << "Imported Template Element: " << itemName << " as " << storeName << std::endl;
+        } else if (importType == "Style") {
+            // TODO: 解析文件内容，查找指定的模板样式定义
+            std::string templateDef = "/* Template Style '" + itemName + "' from " + filePath + " */";
+            
+            std::string storeName = asName.empty() ? itemName : asName;
+            // styleTemplates_ 需要 StyleTemplate 类型
+            StyleTemplate styleTemplate;
+            // 暂时存储为属性
+            styleTemplate.properties["_import_content"] = templateDef;
+            styleTemplates_[storeName] = styleTemplate;
+            
+            std::cerr << "Imported Template Style: " << itemName << " as " << storeName << std::endl;
+        } else if (importType == "Var") {
+            // TODO: 解析文件内容，查找指定的模板变量定义
+            std::string templateDef = "/* Template Var '" + itemName + "' from " + filePath + " */";
+            
+            std::string storeName = asName.empty() ? itemName : asName;
+            // varTemplates_ 需要 VarTemplate 类型，暂时创建一个简单的
+            VarTemplate varTemplate;
+            // 暂时存储为变量
+            varTemplate.variables["_import_content"] = templateDef;
+            varTemplates_[storeName] = varTemplate;
+            
+            std::cerr << "Imported Template Var: " << itemName << " as " << storeName << std::endl;
+        }
+    } else if (importCategory == "Custom") {
+        if (importType == "Element") {
+            // TODO: 解析文件内容，查找指定的自定义元素定义
+            std::string customDef = "<!-- Custom Element '" + itemName + "' from " + filePath + " -->";
+            
+            std::string storeName = asName.empty() ? itemName : asName;
+            customElements_[storeName] = std::make_shared<ParseContext>("customElement");
+            
+            std::cerr << "Imported Custom Element: " << itemName << " as " << storeName << std::endl;
+        } else if (importType == "Style") {
+            // TODO: 解析文件内容，查找指定的自定义样式定义
+            std::string customDef = "/* Custom Style '" + itemName + "' from " + filePath + " */";
+            
+            std::string storeName = asName.empty() ? itemName : asName;
+            customStyles_[storeName] = customDef;
+            
+            std::cerr << "Imported Custom Style: " << itemName << " as " << storeName << std::endl;
+        } else if (importType == "Var") {
+            // TODO: 解析文件内容，查找指定的自定义变量定义
+            std::string customDef = "/* Custom Var '" + itemName + "' from " + filePath + " */";
+            
+            std::string storeName = asName.empty() ? itemName : asName;
+            customVars_[storeName] = customDef;
+            
+            std::cerr << "Imported Custom Var: " << itemName << " as " << storeName << std::endl;
+        }
+    }
 }
 
 void CHTLCodeGenVisitor::applyStyleTemplate(const std::string& templateName) {
