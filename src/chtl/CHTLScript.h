@@ -165,7 +165,7 @@ public:
     
     // 处理增强选择器
     std::string processEnhancedSelectors(const std::string& script,
-                                        std::vector<EnhancedSelector>& selectors);
+                                        const std::vector<EnhancedSelector>& selectors);
     
     // 检测脚本类型
     ScriptType detectScriptType(const std::string& script);

@@ -401,29 +401,33 @@ std::shared_ptr<ScriptBlock> ScriptProcessor::processScriptBlock(const std::stri
     auto block = std::make_shared<ScriptBlock>(ScriptType::JAVASCRIPT, scope);
     
     // 获取JS上下文
-    auto jsContext = manager.getJSContext();
-    if (!jsContext) {
-        return block;
-    }
+    // TODO: Enable when JSContext is available
+    // auto jsContext = manager.getJSContext();
+    // if (!jsContext) {
+    //     return block;
+    // }
     
     // 进入脚本状态
-    jsContext->getStateMachine().handleEvent(CHTLJSEvent::EnterScript);
+    // TODO: Enable when CHTLJSContext is available
+    // jsContext->getStateMachine().handleEvent(CHTLJSEvent::EnterScript);
     
     // 检测脚本类型
     ScriptType type = detectScriptType(content);
-    block->type = type;
+    block->setType(type);
     
     std::string processedContent = content;
     
     // 如果是CHTL JS，处理增强功能
-    if (type == ScriptType::CHTLJS) {
+    if (type == ScriptType::CHTL_JS) {
         // 应用CJMOD扩展（预处理）
-        if (cjmodManager) {
-            processedContent = cjmodManager->preprocessScript(processedContent);
-        }
+        // TODO: Get cjmodManager from manager when available
+        // if (manager.getCJMODManager()) {
+        //     processedContent = manager.getCJMODManager()->preprocessScript(processedContent);
+        // }
         
         // 处理无修饰字面量
-        processedContent = processUnquotedLiterals(processedContent, jsContext);
+        // TODO: Enable when jsContext is available
+        // processedContent = processUnquotedLiterals(processedContent, jsContext);
         
         // 处理箭头语法
         if (ScriptHelper::hasArrowSyntax(processedContent)) {
@@ -431,28 +435,30 @@ std::shared_ptr<ScriptBlock> ScriptProcessor::processScriptBlock(const std::stri
         }
         
         // 处理增强选择器
-        processedContent = processEnhancedSelectors(processedContent, block->selectors);
+        processedContent = processEnhancedSelectors(processedContent, block->getSelectors());
         
         // 检测并处理特殊方法
         processedContent = detectAndProcessMethods(processedContent);
         
         // 应用CJMOD扩展（转换）
-        if (cjmodManager) {
-            processedContent = cjmodManager->transformScript(processedContent);
-        }
+        // TODO: Get cjmodManager from manager when available
+        // if (manager.getCJMODManager()) {
+        //     processedContent = manager.getCJMODManager()->transformScript(processedContent);
+        // }
     }
     
     // 退出脚本状态
-    jsContext->getStateMachine().handleEvent(CHTLJSEvent::ExitScript);
+    // TODO: Enable when CHTLJSContext is available  
+    // jsContext->getStateMachine().handleEvent(CHTLJSEvent::ExitScript);
     
-    block->content = processedContent;
-    block->isProcessed = true;
+    block->setContent(processedContent);
+    block->markProcessed();
     
     return block;
 }
 
-std::string ScriptProcessor::processEnhancedSelectors(const std::string& script, 
-                                                     std::vector<EnhancedSelector>& selectors) {
+std::string ScriptProcessor::processEnhancedSelectors(const std::string& script,
+                                                    const std::vector<EnhancedSelector>& selectors) {
     std::string processed = script;
     EnhancedSelectorProcessor selectorProcessor(manager);
     
@@ -553,25 +559,25 @@ std::string ScriptProcessor::processEnhancedSelectors(const std::string& script,
 ScriptType ScriptProcessor::detectScriptType(const std::string& content) {
     // 如果包含增强选择器，则是CHTL JS
     if (ScriptHelper::hasEnhancedSelector(content)) {
-        return ScriptType::CHTLJS;
+        return ScriptType::CHTL_JS;
     }
     
     // 如果包含->语法，则是CHTL JS
     if (ScriptHelper::hasArrowSyntax(content)) {
-        return ScriptType::CHTLJS;
+        return ScriptType::CHTL_JS;
     }
     
     // 如果包含listen/delegate/animate，则是CHTL JS
     std::regex chtlMethods(R"(\b(listen|delegate|animate)\s*\()");
     if (std::regex_search(content, chtlMethods)) {
-        return ScriptType::CHTLJS;
+        return ScriptType::CHTL_JS;
     }
     
     // 检查CJMOD注册的语法模式
     for (const auto& [pattern, transformer] : syntaxTransformers) {
         std::regex patternRegex(pattern);
         if (std::regex_search(content, patternRegex)) {
-            return ScriptType::CHTLJS;
+            return ScriptType::CHTL_JS;
         }
     }
     
@@ -668,10 +674,18 @@ std::string CHTLJSTransformer::transform(const std::string& chtljs) {
     
     // 转换增强选择器
     std::regex selectorRegex(R"(\{\{([^}]+)\}\})");
-    transformed = std::regex_replace(transformed, selectorRegex, 
-        [this](const std::smatch& match) {
-            return transformSelector(match[1]);
-        });
+    std::string result;
+    auto begin = std::sregex_iterator(transformed.begin(), transformed.end(), selectorRegex);
+    auto end = std::sregex_iterator();
+    
+    size_t lastPos = 0;
+    for (auto it = begin; it != end; ++it) {
+        result += transformed.substr(lastPos, it->position() - lastPos);
+        result += transformSelector((*it)[1]);
+        lastPos = it->position() + it->length();
+    }
+    result += transformed.substr(lastPos);
+    transformed = result;
     
     // 转换其他CHTL JS特性
     
@@ -680,10 +694,16 @@ std::string CHTLJSTransformer::transform(const std::string& chtljs) {
     
     // 转换 listen 方法
     std::regex listenRegex(R"(\.listen\s*\(\s*\{([^}]+)\}\s*\))");
-    transformed = std::regex_replace(transformed, listenRegex, 
-        [this](const std::smatch& match) {
-            return transformListen(match[1]);
-        });
+    result.clear();
+    begin = std::sregex_iterator(transformed.begin(), transformed.end(), listenRegex);
+    lastPos = 0;
+    for (auto it = begin; it != end; ++it) {
+        result += transformed.substr(lastPos, it->position() - lastPos);
+        result += transformListen((*it)[1]);
+        lastPos = it->position() + it->length();
+    }
+    result += transformed.substr(lastPos);
+    transformed = result;
     
     // 转换 on 语法（事件委托）
     std::regex onRegex(R"(on\s+(\w+)\s+from\s+(.+?)\s*\{)");

@@ -12,25 +12,28 @@ namespace chtl {
 
 // ConstraintManager、ConstraintHelper、ConstraintProcessor 和 ConstraintRule 已移至 CHTLConstraint.cpp
 
-// ========== ImportManager ==========
-ImportManager::ImportManager(std::shared_ptr<CHTLContext> ctx) : context(ctx) {}
+// ImportManager 已移至 CHTLImport.cpp
 
-bool ImportManager::processImport(const ImportDeclaration&, CHTLGenerator&) {
-    return true;
+// ImportProcessor 已移至 CHTLImport.cpp
+
+// ========== NamespaceManager ==========
+// 临时实现，直到 CHTLNamespace.cpp 完全修复
+NamespaceManager::NamespaceManager(std::shared_ptr<CHTLContext> ctx) : context(ctx) {}
+
+void NamespaceManager::beginNamespace(const std::string&) {}
+void NamespaceManager::endNamespace() {}
+
+std::shared_ptr<NamespaceDefinition> NamespaceManager::getCurrentNamespace() const {
+    return nullptr;
 }
 
-bool ImportManager::processImports(const std::vector<ImportDeclaration>&, CHTLGenerator&) {
-    return true;
+// ========== NamespaceProcessor ==========
+void NamespaceProcessor::processNamespaceDeclaration(const std::string&) {}
+
+// ========== NamespaceResolver ==========
+std::shared_ptr<void> NamespaceResolver::resolveItem(const std::string&, NamespaceItemType, const std::string&) {
+    return nullptr;
 }
-
-void ImportManager::configurePaths(const ImportPathConfig&) {}
-
-// ========== ImportProcessor ==========
-ImportDeclaration ImportProcessor::parseImportStatement(const std::string&) {
-    return ImportDeclaration();
-}
-
-// NamespaceManager、NamespaceProcessor 和 NamespaceResolver 已移至 CHTLNamespace.cpp
 
 // ========== ScriptManager ==========
 // ScriptManager uses Impl pattern, so we need to define the Impl class
@@ -63,33 +66,15 @@ std::shared_ptr<ScriptBlock> ScriptProcessor::processScriptBlock(const std::stri
     return std::make_shared<ScriptBlock>();
 }
 
-// ========== CMODManager ==========
-CMODManager::CMODManager(std::shared_ptr<CHTLContext> ctx) : context(ctx) {}
+// CMODManager 已移至 CHTLCMOD.cpp
 
-// ========== OriginManager ==========
-bool OriginManager::registerNamedOrigin(const std::string&, std::shared_ptr<OriginDefinition>) {
-    return true;
-}
+// OriginManager 已移至 CHTLOrigin.cpp
 
-bool OriginManager::useNamedOrigin(const std::string&, CHTLGenerator&) {
-    return true;
-}
-
-// ========== OriginProcessor ==========
-OriginProcessor::OriginDeclaration OriginProcessor::parseOriginDeclaration(const std::string&) {
-    return OriginDeclaration();
-}
-
-std::shared_ptr<OriginDefinition> OriginProcessor::createOriginInstance(const OriginDeclaration&) {
-    return std::make_shared<OriginDefinition>();
-}
-
-void OriginProcessor::processOriginContent(std::shared_ptr<OriginDefinition>, const std::string&) {}
+// OriginProcessor 已移至 CHTLOrigin.cpp
 
 // ========== TemplateManager ==========
 void TemplateManager::processInheritance() {}
 
-// ========== OriginDefinition ==========
-void OriginDefinition::generate(CHTLGenerator&) const {}
+// OriginDefinition 已移至 CHTLOrigin.cpp
 
 } // namespace chtl
