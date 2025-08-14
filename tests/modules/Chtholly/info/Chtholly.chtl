@@ -1,0 +1,20 @@
+[Configuration] {
+    name = "Chtholly";
+    version = "1.0.0";
+    author = "CHTL Team";
+    description = "Chtholly UI Framework with submodules";
+}
+
+[Export] {
+    // 导出子模块
+    @Module Space, Other;
+    
+    // 导出的样式
+    @Style ChthollyBase, ChthollyTheme;
+    
+    // 导出的元素
+    @Element ChthollyContainer, ChthollyLayout;
+    
+    // 导出的变量
+    @Var ChthollyConfig;
+}

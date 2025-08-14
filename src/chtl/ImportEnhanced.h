@@ -114,6 +114,7 @@ private:
 // 增强的导入管理器
 class ImportManagerEnhanced : public ImportManager, 
                              public std::enable_shared_from_this<ImportManagerEnhanced> {
+    friend class ImportProcessorEnhanced;  // 允许处理器访问私有成员
 private:
     // 路径规范化缓存（避免重复计算）
     mutable std::unordered_map<std::string, std::filesystem::path> pathCache;
@@ -207,7 +208,8 @@ public:
     
     // 处理子模块导入
     bool processSubmoduleImport(const std::string& moduleName, 
-                               const std::string& submodulePath);
+                               const std::string& submodulePath,
+                               std::shared_ptr<CHTLGenerator> generator);
     
     // 处理模块内容
     bool processModuleContent(const std::string& content,

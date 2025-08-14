@@ -526,11 +526,9 @@ bool ImportManagerEnhanced::processModuleImport(const ImportDeclaration& decl,
     // 处理子模块导入 (e.g., Chtholly.Space)
     size_t dotPos = decl.sourcePath.find('.');
     if (dotPos != std::string::npos && !PathNormalizer::hasExtension(decl.sourcePath)) {
-        std::string moduleName = decl.sourcePath.substr(0, dotPos);
-        std::string submodulePath = decl.sourcePath.substr(dotPos + 1);
-        
+        // 完整的子模块路径就是sourcePath本身
         ImportProcessorEnhanced processor(std::static_pointer_cast<ImportManagerEnhanced>(shared_from_this()), context);
-        return processor.processSubmoduleImport(moduleName, submodulePath);
+        return processor.processSubmoduleImport("", decl.sourcePath, generator);
     }
     
     // 搜索模块文件
@@ -877,13 +875,142 @@ std::string ImportProcessorEnhanced::loadFileContent(const std::filesystem::path
 }
 
 bool ImportProcessorEnhanced::processSubmoduleImport(const std::string& moduleName, 
-                                                    const std::string& submodulePath) {
-    // TODO: 实现子模块导入逻辑
-    // 1. 找到主模块
-    // 2. 解析子模块路径
-    // 3. 导入指定的子模块
+                                                    const std::string& submodulePath,
+                                                    std::shared_ptr<CHTLGenerator> generator) {
+    // 实现子模块导入逻辑
+    // 子模块路径格式：ModuleName.SubmoduleName 或 ModuleName.Sub1.Sub2
     
-    return true;
+    // 1. 解析模块路径
+    std::vector<std::string> pathParts;
+    std::string currentPart;
+    std::stringstream ss(submodulePath);
+    
+    while (std::getline(ss, currentPart, '.')) {
+        if (!currentPart.empty()) {
+            pathParts.push_back(currentPart);
+        }
+    }
+    
+    if (pathParts.empty()) {
+        context->reportError("Invalid submodule path: " + submodulePath);
+        return false;
+    }
+    
+    // 2. 构建文件路径
+    std::filesystem::path modulePath;
+    
+    // 主模块名称
+    std::string mainModule = pathParts[0];
+    
+    // 查找模块的可能位置
+    auto searcher = manager->fileSearcher.get();
+    if (!searcher) {
+        context->reportError("File searcher not available");
+        return false;
+    }
+    
+    // 搜索主模块
+    std::vector<std::string> searchPaths = {
+        mainModule + ".cmod",  // CMOD压缩包
+        mainModule + ".chtl",  // 单文件模块
+        mainModule            // 目录形式
+    };
+    
+    std::string foundPath;
+    for (const auto& searchPath : searchPaths) {
+        bool preferCMOD = (searchPath.size() >= 5 && searchPath.substr(searchPath.size() - 5) == ".cmod");
+        auto result = searcher->searchModuleFile(searchPath, preferCMOD);
+        if (!result.empty() && std::filesystem::exists(result)) {
+            foundPath = result;
+            break;
+        }
+    }
+    
+    if (foundPath.empty()) {
+        context->reportError("Module not found: " + mainModule);
+        return false;
+    }
+    
+    modulePath = foundPath;
+    
+    // 3. 如果是子模块，继续构建路径
+    if (pathParts.size() > 1) {
+        // 检查是否是目录形式的模块
+        if (!std::filesystem::is_directory(modulePath)) {
+            context->reportError("Module '" + mainModule + "' is not a directory, cannot access submodule");
+            return false;
+        }
+        
+        // 构建子模块路径：ModuleName/src/SubmoduleName/src/...
+        for (size_t i = 1; i < pathParts.size(); ++i) {
+            if (i == 1) {
+                modulePath /= "src";  // 主模块的src目录
+            }
+            
+            modulePath /= pathParts[i];
+            
+            if (i < pathParts.size() - 1) {
+                // 中间的子模块，需要进入其src目录
+                modulePath /= "src";
+            }
+        }
+        
+        // 最终的子模块文件
+        std::string submoduleName = pathParts.back();
+        std::filesystem::path submoduleFile = modulePath / "src" / (submoduleName + ".chtl");
+        
+        if (!std::filesystem::exists(submoduleFile)) {
+            // 尝试不带src的路径
+            submoduleFile = modulePath / (submoduleName + ".chtl");
+            
+            if (!std::filesystem::exists(submoduleFile)) {
+                context->reportError("Submodule file not found: " + submoduleFile.string());
+                return false;
+            }
+        }
+        
+        modulePath = submoduleFile;
+    }
+    
+    // 4. 处理找到的模块文件
+    if (std::filesystem::is_regular_file(modulePath)) {
+        // 创建ImportDeclaration
+        ImportDeclaration decl;
+        decl.type = ImportType::CHTL;
+        decl.sourcePath = modulePath.string();
+        decl.asName = "";  // 子模块导入通常不使用别名
+        
+        // 生成器需要知道这是子模块导入
+        if (pathParts.size() > 1 && generator) {
+            // 添加子模块标记
+            generator->processSingleLineComment("Importing submodule: " + submodulePath);
+        }
+        
+        // 使用现有的模块处理逻辑
+        return manager->processModuleImport(decl, generator);
+    } else if (std::filesystem::is_directory(modulePath)) {
+        // 如果最终路径是目录，尝试加载该目录下的主模块文件
+        std::string lastName = pathParts.back();
+        std::filesystem::path mainFile = modulePath / "src" / (lastName + ".chtl");
+        
+        if (!std::filesystem::exists(mainFile)) {
+            mainFile = modulePath / (lastName + ".chtl");
+        }
+        
+        if (std::filesystem::exists(mainFile)) {
+            ImportDeclaration decl;
+            decl.type = ImportType::CHTL;
+            decl.sourcePath = mainFile.string();
+            decl.asName = "";
+            
+            return manager->processModuleImport(decl, generator);
+        } else {
+            context->reportError("Main module file not found in directory: " + modulePath.string());
+            return false;
+        }
+    }
+    
+    return false;
 }
 
 bool ImportProcessorEnhanced::processModuleContent(const std::string& content,
