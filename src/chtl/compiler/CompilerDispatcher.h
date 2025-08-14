@@ -18,6 +18,11 @@ struct CompilationResult {
     std::string javascript;
     std::vector<std::string> errors;
     bool success;
+    
+    // Source Maps
+    std::string htmlSourceMap;
+    std::string cssSourceMap;
+    std::string jsSourceMap;
 };
 
 // 片段编译结果
@@ -39,6 +44,12 @@ public:
     // 配置选项
     void setDebugMode(bool debug) { debugMode_ = debug; }
     void setOptimizationLevel(int level) { optimizationLevel_ = level; }
+    void setParallelCompilation(bool enable) { enableParallel_ = enable; }
+    void setSourceMapEnabled(bool enable) { sourceMapEnabled_ = enable; }
+    void setSourceFile(const std::string& file) { sourceFile_ = file; }
+    
+    // 编译单个片段（供并行编译使用）
+    FragmentResult compileFragment(const scanner::CodeFragment& fragment);
     
 private:
     // 成员变量
@@ -48,6 +59,9 @@ private:
     
     bool debugMode_;
     int optimizationLevel_;
+    bool enableParallel_;
+    bool sourceMapEnabled_;
+    std::string sourceFile_;
     
     // 编译方法
     FragmentResult compileCHTLFragment(const scanner::CodeFragment& fragment);

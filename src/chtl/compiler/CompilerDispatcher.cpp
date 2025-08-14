@@ -1,5 +1,16 @@
 #include "CompilerDispatcher.h"
 #include "../parser/standalone/CHTLLexer.h"
+#include "../cache/FragmentCache.h"
+#include "../optimization/ParallelCompiler.h"
+
+#ifdef USE_ANTLR_CSS
+#include "antlr/CSSCompilerWrapper.h"
+#endif
+
+#ifdef USE_ANTLR_JS
+#include "antlr/JSCompilerWrapper.h"
+#endif
+
 #include <iostream>
 #include <sstream>
 #include <regex>
@@ -10,23 +21,70 @@ namespace compiler {
 CompilerDispatcher::CompilerDispatcher()
     : scanner_(std::make_unique<scanner::CHTLUnifiedScanner>())
     , debugMode_(false)
-    , optimizationLevel_(0) {
+    , optimizationLevel_(0)
+    , enableParallel_(false)
+    , sourceMapEnabled_(false) {
 }
 
 CompilerDispatcher::~CompilerDispatcher() = default;
+
+FragmentResult CompilerDispatcher::compileFragment(const scanner::CodeFragment& fragment) {
+    FragmentResult result;
+    result.type = fragment.type;
+    
+    switch (fragment.type) {
+        case scanner::FragmentType::CHTL:
+            result = compileCHTLFragment(fragment);
+            break;
+        case scanner::FragmentType::CHTL_JS:
+            result = compileCHTLJSFragment(fragment);
+            break;
+        case scanner::FragmentType::CSS:
+            result = compileCSSFragment(fragment);
+            break;
+        case scanner::FragmentType::JAVASCRIPT:
+            result = compileJavaScriptFragment(fragment);
+            break;
+    }
+    
+    return result;
+}
 
 CompilationResult CompilerDispatcher::compile(const std::string& source) {
     CompilationResult result;
     result.success = true;
     
     try {
-        // 步骤1：扫描源代码，切割成片段
-        if (debugMode_) {
-            std::cout << "=== Scanner Phase ===" << std::endl;
-            scanner_->setDebugMode(true);
+        // 步骤1：尝试从缓存获取片段
+        std::vector<scanner::CodeFragment> fragments;
+        auto& cache = cache::FragmentCacheManager::getInstance().getCache();
+        
+        if (cache.isEnabled()) {
+            auto cachedFragments = cache.get(source);
+            if (cachedFragments.has_value()) {
+                fragments = cachedFragments.value();
+                if (debugMode_) {
+                    std::cout << "=== Using Cached Fragments ===" << std::endl;
+                    auto stats = cache.getStats();
+                    std::cout << "Cache hit rate: " << stats.hitRate() * 100 << "%" << std::endl;
+                }
+            }
         }
         
-        auto fragments = scanner_->scan(source);
+        // 如果没有缓存，进行扫描
+        if (fragments.empty()) {
+            if (debugMode_) {
+                std::cout << "=== Scanner Phase ===" << std::endl;
+                scanner_->setDebugMode(true);
+            }
+            
+            fragments = scanner_->scan(source);
+            
+            // 存入缓存
+            if (cache.isEnabled()) {
+                cache.put(source, fragments);
+            }
+        }
         
         if (debugMode_) {
             std::cout << "Found " << fragments.size() << " fragments" << std::endl;
@@ -35,6 +93,20 @@ CompilationResult CompilerDispatcher::compile(const std::string& source) {
         // 步骤2：编译每个片段
         std::vector<FragmentResult> fragmentResults;
         
+        if (enableParallel_ && fragments.size() > 1) {
+            // 使用并行编译
+            if (debugMode_) {
+                std::cout << "=== Using Parallel Compilation ===" << std::endl;
+            }
+            
+            auto& parallelCompiler = optimization::ParallelCompilerManager::getInstance().getCompiler();
+            auto parallelResult = parallelCompiler.compileParallel(fragments);
+            
+            // 直接返回并行编译结果
+            return parallelResult;
+        }
+        
+        // 顺序编译
         for (const auto& fragment : fragments) {
             FragmentResult fragResult;
             
@@ -132,8 +204,21 @@ FragmentResult CompilerDispatcher::compileCSSFragment(const scanner::CodeFragmen
     result.type = fragment.type;
     
     try {
-        // 暂时直接输出，后续集成 ANTLR CSS 解析器
+        // 使用ANTLR CSS编译器
+        #ifdef USE_ANTLR_CSS
+        auto cssCompiler = std::make_unique<antlr::CSSCompilerWrapper>(nullptr);
+        auto compileResult = cssCompiler->compile(fragment);
+        
+        if (compileResult.success) {
+            result.output = compileResult.output;
+        } else {
+            result.errors = compileResult.errors;
+            return result;
+        }
+        #else
+        // 回退到简单处理
         result.output = fragment.content;
+        #endif
         
         // 如果需要，进行优化
         if (optimizationLevel_ > 0) {
@@ -152,8 +237,21 @@ FragmentResult CompilerDispatcher::compileJavaScriptFragment(const scanner::Code
     result.type = fragment.type;
     
     try {
-        // 暂时直接输出，后续集成 ANTLR JavaScript 解析器
+        // 使用ANTLR JavaScript编译器
+        #ifdef USE_ANTLR_JS
+        auto jsCompiler = std::make_unique<antlr::JSCompilerWrapper>(nullptr);
+        auto compileResult = jsCompiler->compile(fragment);
+        
+        if (compileResult.success) {
+            result.output = compileResult.output;
+        } else {
+            result.errors = compileResult.errors;
+            return result;
+        }
+        #else
+        // 回退到简单处理
         result.output = fragment.content;
+        #endif
         
         // 如果需要，进行优化
         if (optimizationLevel_ > 0) {
