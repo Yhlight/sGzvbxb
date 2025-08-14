@@ -1,0 +1,47 @@
+div {
+    h1 {
+        text {
+            "欢迎使用CHTL编译器"
+        }
+    }
+    
+    p {
+        text {
+            "这是一个使用CHTL语言编写的示例页面。"
+        }
+    }
+    
+    div {
+        h2 {
+            text {
+                "CHTL的特性"
+            }
+        }
+        
+        ul {
+            li {
+                text {
+                    "简洁的嵌套语法"
+                }
+            }
+            li {
+                text {
+                    "内置样式支持"
+                }
+            }
+            li {
+                text {
+                    "JavaScript增强"
+                }
+            }
+        }
+    }
+    
+    div {
+        p {
+            text {
+                "CHTL让Web开发更加优雅！"
+            }
+        }
+    }
+}

@@ -14,7 +14,7 @@ public:
     PrecisionScanner();
     
     // 重写扫描方法，实现精确截断
-    std::vector<CodeFragment> scan(const std::string& input) override;
+    std::vector<CodeFragment> scan(const std::string& input);
     
 private:
     enum class ScanMode {

@@ -120,6 +120,23 @@ public:
     const std::vector<std::string>& getWarnings() const { return warnings; }
     const std::vector<std::string>& getImports() const { return imports; }
     const std::vector<std::string>& getExports() const { return exports; }
+    std::vector<JSSymbol> getSymbols() const { 
+        std::vector<JSSymbol> symbols;
+        if (currentScope) {
+            currentScope->collectAllSymbols(symbols);
+        }
+        return symbols;
+    }
+    std::vector<JSSymbol> getUnusedSymbols() const {
+        std::vector<JSSymbol> unused;
+        auto symbols = getSymbols();
+        for (const auto& sym : symbols) {
+            if (!sym.isUsed) {
+                unused.push_back(sym);
+            }
+        }
+        return unused;
+    }
     
     // JavaScript解析器监听器方法
     void enterProgram(JavaScriptParser::ProgramContext* ctx) override;

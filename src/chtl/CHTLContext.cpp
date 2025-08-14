@@ -83,7 +83,7 @@ std::shared_ptr<Symbol> CHTLContext::lookupSymbolWithNamespace(const std::string
             // 如果没找到，创建一个引用符号
             auto refSymbol = std::make_shared<Symbol>(fullName, SymbolType::ELEMENT);
             refSymbol->source_file = nsSymbol->source_file;
-            refSymbol->namespace_name = ns;
+            refSymbol->namespace_path = ns;
             return refSymbol;
         }
     }

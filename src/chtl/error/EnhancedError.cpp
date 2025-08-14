@@ -7,6 +7,17 @@
 namespace chtl {
 namespace error {
 
+// 辅助函数
+std::string toString(ErrorLevel level) {
+    switch (level) {
+        case ErrorLevel::WARNING: return "WARNING";
+        case ErrorLevel::ERROR: return "ERROR";
+        case ErrorLevel::FATAL: return "FATAL";
+        case ErrorLevel::INFO: return "INFO";
+        default: return "UNKNOWN";
+    }
+}
+
 // ANSI颜色代码定义
 const char* ErrorVisualizer::Colors::RED = "\033[31m";
 const char* ErrorVisualizer::Colors::YELLOW = "\033[33m";
@@ -79,7 +90,8 @@ EnhancedErrorInfo::EnhancedErrorInfo(
     ErrorCategory category,
     const std::string& message,
     const SourceLocation& location)
-    : ErrorInfo(level, category, message, location) {
+    : ErrorInfo(level, category, message) {
+    this->location = location;
 }
 
 void EnhancedErrorInfo::addSuggestion(const ErrorSuggestion& suggestion) {

@@ -129,7 +129,7 @@ void CHTLMainCompiler::setMinifyJS(bool minify) {
 
 void CHTLMainCompiler::setStrictMode(bool strict) {
     // 设置严格模式
-    context_->setConfigValue("strict_mode", strict);
+    context_->setConfigValue("strict_mode", strict ? "true" : "false");
 }
 
 } // namespace chtl

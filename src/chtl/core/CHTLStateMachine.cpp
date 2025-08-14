@@ -14,38 +14,25 @@ void CHTLStateMachine::initializeTransitionTable() {
     // 从INITIAL状态的转换
     transitionTable[CHTLState::INITIAL][CHTLEvent::IDENTIFIER] = CHTLState::IN_ELEMENT;
     transitionTable[CHTLState::INITIAL][CHTLEvent::OPEN_BRACKET] = CHTLState::IN_CONFIGURATION;
-    transitionTable[CHTLState::INITIAL][CHTLEvent::AT] = CHTLState::IN_DIRECTIVE;
+    // AT事件可能触发模板或自定义声明
     
     // 从IN_ELEMENT状态的转换
     transitionTable[CHTLState::IN_ELEMENT][CHTLEvent::OPEN_BRACE] = CHTLState::IN_ELEMENT;
     transitionTable[CHTLState::IN_ELEMENT][CHTLEvent::CLOSE_BRACE] = CHTLState::INITIAL;
     transitionTable[CHTLState::IN_ELEMENT][CHTLEvent::IDENTIFIER] = CHTLState::IN_ELEMENT;  // 嵌套元素
-    transitionTable[CHTLState::IN_ELEMENT][CHTLEvent::KEYWORD] = CHTLState::IN_STYLE;       // style/script
+    // style/script通过IDENTIFIER事件处理
     
     // 从IN_CONFIGURATION状态的转换 ([Template], [Custom], etc.)
-    transitionTable[CHTLState::IN_CONFIGURATION][CHTLEvent::CLOSE_BRACKET] = CHTLState::IN_DIRECTIVE;
+    transitionTable[CHTLState::IN_CONFIGURATION][CHTLEvent::CLOSE_BRACKET] = CHTLState::INITIAL;
     transitionTable[CHTLState::IN_CONFIGURATION][CHTLEvent::IDENTIFIER] = CHTLState::IN_CONFIGURATION;
     
-    // 从IN_DIRECTIVE状态的转换 (@Element, @Style, @Var)
-    transitionTable[CHTLState::IN_DIRECTIVE][CHTLEvent::AT] = CHTLState::IN_DIRECTIVE;
-    transitionTable[CHTLState::IN_DIRECTIVE][CHTLEvent::IDENTIFIER] = CHTLState::IN_ELEMENT;
-    transitionTable[CHTLState::IN_DIRECTIVE][CHTLEvent::OPEN_BRACE] = CHTLState::IN_ELEMENT;
-    
     // 从IN_STYLE状态的转换
-    transitionTable[CHTLState::IN_STYLE][CHTLEvent::OPEN_BRACE] = CHTLState::IN_STYLE_BLOCK;
+    transitionTable[CHTLState::IN_STYLE][CHTLEvent::OPEN_BRACE] = CHTLState::IN_ELEMENT;
     transitionTable[CHTLState::IN_STYLE][CHTLEvent::CLOSE_BRACE] = CHTLState::IN_ELEMENT;
     
-    // 从IN_STYLE_BLOCK状态的转换
-    transitionTable[CHTLState::IN_STYLE_BLOCK][CHTLEvent::CLOSE_BRACE] = CHTLState::IN_STYLE;
-    transitionTable[CHTLState::IN_STYLE_BLOCK][CHTLEvent::AT] = CHTLState::IN_STYLE_BLOCK;  // CHTL扩展
-    
     // 从IN_SCRIPT状态的转换
-    transitionTable[CHTLState::IN_SCRIPT][CHTLEvent::OPEN_BRACE] = CHTLState::IN_SCRIPT_BLOCK;
+    transitionTable[CHTLState::IN_SCRIPT][CHTLEvent::OPEN_BRACE] = CHTLState::IN_ELEMENT;
     transitionTable[CHTLState::IN_SCRIPT][CHTLEvent::CLOSE_BRACE] = CHTLState::IN_ELEMENT;
-    
-    // 从IN_SCRIPT_BLOCK状态的转换
-    transitionTable[CHTLState::IN_SCRIPT_BLOCK][CHTLEvent::CLOSE_BRACE] = CHTLState::IN_SCRIPT;
-    transitionTable[CHTLState::IN_SCRIPT_BLOCK][CHTLEvent::AT] = CHTLState::IN_SCRIPT_BLOCK;  // @Var等
 }
 
 bool CHTLStateMachine::processEvent(CHTLEvent event) {
