@@ -1,0 +1,10 @@
+.imported-content {
+    background-color: #f0f0f0;
+    padding: 20px;
+    border: 1px solid #ddd;
+}
+
+.imported-content h2 {
+    color: #333;
+    margin-top: 0;
+}

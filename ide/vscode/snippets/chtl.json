@@ -1,0 +1,171 @@
+{
+    "CHTL Template": {
+        "prefix": "chtl-template",
+        "body": [
+            "[Template] @${1:Element} ${2:TemplateName} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "Create a CHTL template"
+    },
+    "CHTL Custom Style": {
+        "prefix": "chtl-custom",
+        "body": [
+            "[Custom] @Style ${1:StyleName} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "Create a CHTL custom style"
+    },
+    "CHTL Import": {
+        "prefix": "chtl-import",
+        "body": [
+            "[Import] @${1|Html,Style,JavaScript,Chtl,CJmod|} from \"${2:path}\" as ${3:name}"
+        ],
+        "description": "Import external resources"
+    },
+    "CHTL Namespace": {
+        "prefix": "chtl-namespace",
+        "body": [
+            "[Namespace] ${1:NamespaceName} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "Create a CHTL namespace"
+    },
+    "CHTL Configuration": {
+        "prefix": "chtl-config",
+        "body": [
+            "[Configuration] {",
+            "\tcompiler = \"${1|standard,strict,lenient|}\";",
+            "\toutput = \"${2:optimized}\";",
+            "\t$0",
+            "}"
+        ],
+        "description": "Create CHTL configuration block"
+    },
+    "CHTL Element": {
+        "prefix": "div",
+        "body": [
+            "div {",
+            "\t${1:class: \"${2:className}\";}",
+            "\t$0",
+            "}"
+        ],
+        "description": "Create a div element"
+    },
+    "CHTL Text": {
+        "prefix": "text",
+        "body": [
+            "text \"${1:content}\""
+        ],
+        "description": "Add text content"
+    },
+    "CHTL Style Block": {
+        "prefix": "style",
+        "body": [
+            "style {",
+            "\t${1:selector} {",
+            "\t\t$0",
+            "\t}",
+            "}"
+        ],
+        "description": "Create a style block"
+    },
+    "CHTL Script Block": {
+        "prefix": "script",
+        "body": [
+            "script {",
+            "\t$0",
+            "}"
+        ],
+        "description": "Create a script block"
+    },
+    "CHTL JS Selector": {
+        "prefix": "chtl-select",
+        "body": [
+            "{{${1:selector}}}"
+        ],
+        "description": "CHTL JS selector syntax"
+    },
+    "CHTL JS Listen": {
+        "prefix": "chtl-listen",
+        "body": [
+            "{{${1:.btn}}}.listen({",
+            "\t${2:click}: () => {",
+            "\t\t$0",
+            "\t}",
+            "})"
+        ],
+        "description": "CHTL JS event listener"
+    },
+    "CHTL JS Animate": {
+        "prefix": "chtl-animate",
+        "body": [
+            "{{${1:selector}}}.animate({",
+            "\t${2:opacity}: [${3:0}, ${4:1}]",
+            "}, {",
+            "\tduration: ${5:300},",
+            "\teasing: \"${6:ease-out}\"",
+            "})"
+        ],
+        "description": "CHTL JS animation"
+    },
+    "CHTL JS Chain": {
+        "prefix": "->",
+        "body": [
+            "->${1:property}"
+        ],
+        "description": "CHTL JS chain access"
+    },
+    "CHTL HTML Document": {
+        "prefix": "chtl-html",
+        "body": [
+            "html {",
+            "\thead {",
+            "\t\ttitle { text \"${1:Page Title}\" }",
+            "\t\tstyle {",
+            "\t\t\tbody {",
+            "\t\t\t\tmargin: 0;",
+            "\t\t\t\tpadding: 0;",
+            "\t\t\t}",
+            "\t\t}",
+            "\t}",
+            "\tbody {",
+            "\t\t$0",
+            "\t}",
+            "}"
+        ],
+        "description": "Complete CHTL HTML document structure"
+    },
+    "CHTL Insert": {
+        "prefix": "insert",
+        "body": [
+            "insert ${1|after,before,replace,at top,at bottom|} ${2:selector} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "Insert content at specific position"
+    },
+    "CHTL Var": {
+        "prefix": "@var",
+        "body": [
+            "@Var ${1:varName} = ${2:value};"
+        ],
+        "description": "Declare a CHTL variable"
+    },
+    "CHTL Element Reference": {
+        "prefix": "@element",
+        "body": [
+            "@Element ${1:elementName}"
+        ],
+        "description": "Reference a CHTL element"
+    },
+    "CHTL Style Reference": {
+        "prefix": "@style",
+        "body": [
+            "@Style ${1:styleName}"
+        ],
+        "description": "Reference a CHTL style"
+    }
+}

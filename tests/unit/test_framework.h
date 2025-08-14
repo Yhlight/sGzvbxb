@@ -22,6 +22,7 @@ struct TestResult {
 // 测试套件
 class TestSuite {
 public:
+    TestSuite() : name_("unnamed") {}  // 添加默认构造函数
     TestSuite(const std::string& name) : name_(name) {}
     
     // 添加测试用例

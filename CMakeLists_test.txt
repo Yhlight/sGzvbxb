@@ -1,0 +1,22 @@
+cmake_minimum_required(VERSION 3.16)
+project(CHTL_TEST VERSION 1.0.0 LANGUAGES CXX)
+
+# C++17标准
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# 包含目录
+include_directories(${CMAKE_SOURCE_DIR}/src)
+
+# 简化的源文件列表
+set(CHTL_TEST_SOURCES
+    src/main_test.cpp
+    src/chtl/parser/CHTLSimpleParser.cpp
+)
+
+# 创建可执行文件
+add_executable(chtl_test ${CHTL_TEST_SOURCES})
+
+# 链接线程库
+find_package(Threads REQUIRED)
+target_link_libraries(chtl_test Threads::Threads)

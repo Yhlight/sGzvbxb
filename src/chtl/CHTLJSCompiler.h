@@ -8,9 +8,10 @@
 #include <unordered_set>
 #include <sstream>
 #include "CHTLContext.h"
-#include "../../generated/JavaScriptLexer.h"
-#include "../../generated/JavaScriptParser.h"
-#include "../../generated/JavaScriptBaseListener.h"
+#include "../../generated/javascript/grammars/JavaScriptLexer.h"
+#include "../../generated/javascript/grammars/JavaScriptParser.h"
+#include "../../generated/javascript/grammars/JavaScriptBaseListener.h"
+#include "error/ANTLRErrorAdapter.h"
 
 namespace chtl {
 
@@ -74,6 +75,16 @@ public:
     std::shared_ptr<JSScope> getParent() const { return parent; }
     const std::string& getName() const { return name; }
     const std::unordered_map<std::string, JSSymbol>& getSymbols() const { return symbols; }
+    
+    // 收集所有符号
+    void collectAllSymbols(std::vector<JSSymbol>& result) const {
+        for (const auto& [name, symbol] : symbols) {
+            result.push_back(symbol);
+        }
+        if (parent) {
+            parent->collectAllSymbols(result);
+        }
+    }
 };
 
 // JavaScript编译器监听器
@@ -87,6 +98,12 @@ private:
     std::shared_ptr<JSScope> currentScope;
     std::vector<std::shared_ptr<JSScope>> scopeStack;
     
+public:
+    // 访问器方法
+    void setPreserveComments(bool value) { preserveComments = value; }
+    void setAddSourceMap(bool value) { addSourceMap = value; }
+    
+private:
     // 编译选项
     bool minify = false;
     bool preserveComments = false;
@@ -113,6 +130,23 @@ public:
     const std::vector<std::string>& getWarnings() const { return warnings; }
     const std::vector<std::string>& getImports() const { return imports; }
     const std::vector<std::string>& getExports() const { return exports; }
+    std::vector<JSSymbol> getSymbols() const { 
+        std::vector<JSSymbol> symbols;
+        if (currentScope) {
+            currentScope->collectAllSymbols(symbols);
+        }
+        return symbols;
+    }
+    std::vector<JSSymbol> getUnusedSymbols() const {
+        std::vector<JSSymbol> unused;
+        auto symbols = getSymbols();
+        for (const auto& sym : symbols) {
+            if (!sym.isUsed) {
+                unused.push_back(sym);
+            }
+        }
+        return unused;
+    }
     
     // JavaScript解析器监听器方法
     void enterProgram(JavaScriptParser::ProgramContext* ctx) override;
@@ -127,8 +161,8 @@ public:
     void enterVariableDeclaration(JavaScriptParser::VariableDeclarationContext* ctx) override;
     void exitVariableDeclaration(JavaScriptParser::VariableDeclarationContext* ctx) override;
     
-    void enterImportDeclaration(JavaScriptParser::ImportDeclarationContext* ctx) override;
-    void enterExportDeclaration(JavaScriptParser::ExportDeclarationContext* ctx) override;
+    void enterImportStatement(JavaScriptParser::ImportStatementContext* ctx) override;
+    void enterExportStatement(JavaScriptParser::ExportStatementContext* ctx) override;
     
     void enterBlockStatement(JavaScriptParser::BlockStatementContext* ctx) override;
     void exitBlockStatement(JavaScriptParser::BlockStatementContext* ctx) override;
@@ -145,7 +179,9 @@ private:
     void exitScope();
     
     // 符号管理
-    void registerSymbol(const std::string& name, const std::string& type, bool isConst = false, bool isLet = false);
+    void registerSymbol(const std::string& name, const std::string& type, 
+                       bool isConst = false, bool isLet = false, 
+                       antlr4::ParserRuleContext* ctx = nullptr);
     void markSymbolAsUsed(const std::string& name);
     
     // 错误报告
@@ -157,6 +193,7 @@ private:
 class JSCompiler {
 private:
     std::shared_ptr<CHTLContext> context;
+    std::shared_ptr<error::IErrorReporter> errorReporter;
     
     // 编译选项
     struct Options {
@@ -201,35 +238,30 @@ public:
     // 语法检查
     bool checkSyntax(const std::string& js);
     
+    // 设置错误报告器
+    void setErrorReporter(std::shared_ptr<error::IErrorReporter> reporter) {
+        errorReporter = reporter;
+    }
+    
 private:
-    // 错误监听器
-    class JSErrorListener : public antlr4::BaseErrorListener {
-    private:
-        std::vector<std::string>& errors;
-        
-    public:
-        JSErrorListener(std::vector<std::string>& errs) : errors(errs) {}
-        
-        void syntaxError(antlr4::Recognizer* recognizer,
-                        antlr4::Token* offendingSymbol,
-                        size_t line,
-                        size_t charPositionInLine,
-                        const std::string& msg,
-                        std::exception_ptr e) override;
-    };
 };
 
 // JavaScript优化器
 class JSOptimizer {
 public:
     struct Options {
-        bool removeDeadCode = true;
-        bool inlineConstants = true;
-        bool simplifyExpressions = true;
-        bool mangleVariables = false;  // 变量名混淆
-        bool removeConsoleLog = false;
-        bool removeDebugger = false;
-        bool optimizeLoops = true;
+        bool removeDeadCode;
+        bool inlineConstants;
+        bool simplifyExpressions;
+        bool mangleVariables;  // 变量名混淆
+        bool removeConsoleLog;
+        bool removeDebugger;
+        bool optimizeLoops;
+        
+        Options() : removeDeadCode(true), inlineConstants(true),
+                   simplifyExpressions(true), mangleVariables(false),
+                   removeConsoleLog(false), removeDebugger(false),
+                   optimizeLoops(true) {}
     };
     
 private:

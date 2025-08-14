@@ -1,0 +1,19 @@
+html {
+    head {
+        title { text { "基础 CHTL 测试" } }
+    }
+    
+    body {
+        h1 { 
+            text { "欢迎使用 CHTL" } 
+        }
+        
+        p {
+            text { "这是一个简单的 CHTL 页面。" }
+        }
+        
+        div {
+            text { "CHTL 让 Web 开发更简单！" }
+        }
+    }
+}

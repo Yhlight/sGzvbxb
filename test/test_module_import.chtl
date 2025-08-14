@@ -1,0 +1,22 @@
+// 测试模块导入
+[Import] @Chtl from "test_module.chtl"
+
+body {
+    // 使用导入的模块组件
+    @Element ChthollyPage {
+        @Element ChthollyNav;
+        
+        div class="content" {
+            h1 {
+                text "Welcome to CHTL Module Test"
+            }
+            
+            @Element ChthollyModal;
+            
+            button {
+                @Style ChthollyButton;
+                text "Click Me"
+            }
+        }
+    }
+}

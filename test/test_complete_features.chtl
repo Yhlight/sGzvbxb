@@ -1,0 +1,128 @@
+// 测试完整的 CHTL 功能
+
+// 模板定义
+[Template] @Style ThemeButton {
+    background-color: "#007bff";
+    color: "white";
+    padding: "10px 20px";
+    border: "none";
+    border-radius: "4px";
+    cursor: "pointer";
+}
+
+[Template] @Style DangerButton : ThemeButton {
+    background-color: "#dc3545";
+}
+
+[Template] @Var Colors {
+    primary: "#007bff";
+    danger: "#dc3545";
+    success: "#28a745";
+}
+
+[Template] @Element Card {
+    div {
+        style {
+            border: "1px solid #ddd";
+            border-radius: "8px";
+            padding: "20px";
+            margin: "10px";
+            
+            .header {
+                font-size: "24px";
+                font-weight: "bold";
+                margin-bottom: "10px";
+            }
+            
+            .content {
+                color: "#666";
+            }
+        }
+        
+        h2 {
+            text "Card Title"
+        }
+        
+        p {
+            text "Card content goes here"
+        }
+    }
+}
+
+// 主要内容
+body {
+    style {
+        font-family: "Arial, sans-serif";
+        margin: "0";
+        padding: "20px";
+        background-color: "#f5f5f5";
+    }
+    
+    h1 {
+        text "CHTL Complete Features Test"
+        style {
+            color: ThemeColor(primary);
+            text-align: "center";
+        }
+    }
+    
+    // 使用元素模板
+    @Element Card;
+    
+    div {
+        style {
+            text-align: "center";
+            margin-top: "20px";
+        }
+        
+        button {
+            style {
+                @Style ThemeButton;
+            }
+            text "Primary Button"
+        }
+        
+        button {
+            style {
+                @Style DangerButton;
+                margin-left: "10px";
+            }
+            text "Danger Button"
+        }
+    }
+    
+    // 局部样式测试
+    div {
+        id: "local-style-test";
+        style {
+            background: "white";
+            padding: "15px";
+            border-radius: "5px";
+            margin-top: "20px";
+            
+            #title {
+                color: "navy";
+                font-size: "20px";
+            }
+            
+            .highlight {
+                background-color: "yellow";
+                padding: "5px";
+            }
+        }
+        
+        h3 {
+            id: "title";
+            text "Local Style Test"
+        }
+        
+        p {
+            text "This paragraph has "
+            span {
+                class: "highlight";
+                text "highlighted text"
+            }
+            text " in it."
+        }
+    }
+}

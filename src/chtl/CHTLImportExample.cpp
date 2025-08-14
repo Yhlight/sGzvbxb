@@ -187,8 +187,8 @@ int main() {
     
     // 使用导入的自定义元素
     generator.generateElement("div", {{"class", "container"}});
-    // TODO: 使用导入的Card自定义元素
-    // generator.useCustom("@Element Card");
+    // 使用导入的Card自定义元素
+    generator.processElementUse("@Element Card");
     generator.closeElement();
     
     // 示例5：导入模板
@@ -200,8 +200,8 @@ int main() {
     // 使用导入的模板
     generator.generateElement("button", {});
     generator.beginStyleBlock();
-    // TODO: 使用导入的ButtonStyle模板
-    // generator.useTemplate("@Style ButtonStyle");
+    // 使用导入的ButtonStyle模板
+    generator.processStyleTemplate("@Style ButtonStyle");
     generator.endStyleBlock();
     generator.generateTextNode("Click Me");
     generator.closeElement();
@@ -215,9 +215,9 @@ int main() {
     // 使用导入的变量
     generator.generateElement("div", {});
     generator.beginStyleBlock();
-    // TODO: 使用导入的Colors变量
-    // std::string primaryColor = generator.processVariableReference("Colors(primary)");
-    // generator.generateInlineStyle("color", primaryColor);
+    // 使用导入的Colors变量
+    std::string primaryColor = generator.processVariableReference("Colors(primary)");
+    generator.generateInlineStyle("color", primaryColor);
     generator.endStyleBlock();
     generator.closeElement();
     
@@ -244,7 +244,7 @@ int main() {
     generator.processImportStatement("[Import] [Template] @Element Header from utils as SiteHeader");
     
     // 使用别名访问
-    // TODO: 使用别名SiteHeader
+    generator.processElementUse("@Element SiteHeader");
     
     // 示例10：批量导入
     std::cout << "\n=== 示例10：批量导入 ===" << std::endl;

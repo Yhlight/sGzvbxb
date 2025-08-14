@@ -1,0 +1,56 @@
+// 测试扫描器的精准字符级切割
+
+// 全局样式块 - 由CSS编译器管理，但包含CHTL语法
+style {
+    body {
+        margin: 0;
+        padding: 0;
+    }
+}
+
+body {
+    // 局部样式块 - 整块由CHTL编译器管理
+    style {
+        background: #f0f0f0;
+        .container {
+            width: 100%;
+            max-width: 1200px;
+        }
+    }
+    
+    div {
+        id: "app";
+        
+        button {
+            class: "btn";
+            text "Click Me"
+        }
+        
+        // 局部script - 由三种编译器共同管理
+        script {
+            // JavaScript 代码
+            console.log("Button initialized");
+            
+            // CHTL JS - {{selector}}.listen() 应该作为整体
+            {{.btn}}.listen({
+                click: () => {
+                    // JavaScript
+                    console.log("Button clicked");
+                    // CHTL JS - 链式访问
+                    {{#app}}->textContent = "Clicked!";
+                }
+            });
+            
+            // JavaScript
+            setTimeout(() => {
+                // CHTL JS - animate 方法
+                {{.btn}}->animate({
+                    opacity: [0.5, 1],
+                    transform: ["scale(0.9)", "scale(1)"]
+                }, {
+                    duration: 300
+                });
+            }, 1000);
+        }
+    }
+}

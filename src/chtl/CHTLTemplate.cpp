@@ -176,29 +176,57 @@ void ElementTemplate::inheritFrom(const std::string& templateName) {
     inheritedTemplates.push_back(templateName);
 }
 
+bool ElementTemplate::hasCircularInheritance(const std::string& checkName,
+    const std::unordered_map<std::string, std::shared_ptr<ElementTemplate>>& templateMap) const {
+    
+    // 如果当前模板名与检查名相同，说明存在循环
+    if (name == checkName) {
+        return true;
+    }
+    
+    // 递归检查所有继承的模板
+    for (const auto& inheritedName : inheritedTemplates) {
+        auto it = templateMap.find(inheritedName);
+        if (it != templateMap.end()) {
+            if (it->second->hasCircularInheritance(checkName, templateMap)) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
+// 辅助函数：递归应用元素节点
+void applyElementNode(const std::shared_ptr<ElementTemplate::ElementNode>& element, CHTLGenerator& generator) {
+    generator.generateElement(element->name, element->attributes);
+    
+    // 处理样式块
+    if (element->hasStyleBlock && element->inlineStyles) {
+        generator.beginStyleBlock();
+        element->inlineStyles->applyToElement(generator);
+        generator.endStyleBlock();
+    }
+    
+    // 处理文本内容
+    if (!element->textContent.empty()) {
+        generator.beginTextBlock();
+        generator.generateTextNode(element->textContent);
+        generator.endTextBlock();
+    }
+    
+    // 递归处理子元素
+    for (const auto& child : element->children) {
+        applyElementNode(child, generator);  // 递归调用自身
+    }
+    
+    generator.closeElement();
+}
+
 void ElementTemplate::expand(CHTLGenerator& generator) const {
     // 展开所有元素
     for (const auto& element : elements) {
-        generator.generateElement(element->name, element->attributes);
-        
-        // 处理样式块
-        if (element->hasStyleBlock && element->inlineStyles) {
-            generator.beginStyleBlock();
-            element->inlineStyles->applyToElement(generator);
-            generator.endStyleBlock();
-        }
-        
-        // 处理文本内容
-        if (!element->textContent.empty()) {
-            generator.beginTextBlock();
-            generator.generateTextNode(element->textContent);
-            generator.endTextBlock();
-        }
-        
-        // 递归处理子元素
-        // TODO: 实现子元素处理
-        
-        generator.closeElement();
+        applyElementNode(element, generator);
     }
 }
 
@@ -223,6 +251,13 @@ std::vector<std::shared_ptr<ElementTemplate::ElementNode>> ElementTemplate::getA
 }
 
 // VarTemplate 实现
+std::optional<std::string> VarTemplate::getVariable(const std::string& varName) const {
+    auto it = variables.find(varName);
+    if (it != variables.end()) {
+        return it->second;
+    }
+    return std::nullopt;
+}
 void VarTemplate::addVariable(const std::string& varName, const std::string& value) {
     variables[varName] = value;
 }
@@ -231,12 +266,25 @@ void VarTemplate::inheritFrom(const std::string& templateName) {
     inheritedTemplates.push_back(templateName);
 }
 
-std::optional<std::string> VarTemplate::getVariable(const std::string& varName) const {
-    auto it = variables.find(varName);
-    if (it != variables.end()) {
-        return it->second;
+bool VarTemplate::hasCircularInheritance(const std::string& checkName,
+    const std::unordered_map<std::string, std::shared_ptr<VarTemplate>>& templateMap) const {
+    
+    // 如果当前模板名与检查名相同，说明存在循环
+    if (name == checkName) {
+        return true;
     }
-    return std::nullopt;
+    
+    // 递归检查所有继承的模板
+    for (const auto& inheritedName : inheritedTemplates) {
+        auto it = templateMap.find(inheritedName);
+        if (it != templateMap.end()) {
+            if (it->second->hasCircularInheritance(checkName, templateMap)) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
 }
 
 std::unordered_map<std::string, std::string> VarTemplate::getAllVariables(
@@ -277,6 +325,19 @@ std::string VarTemplate::replaceVariables(const std::string& text) const {
     }
     
     return result;
+}
+
+// TemplateManager 辅助函数
+std::shared_ptr<Template> TemplateManager::findTemplate(const std::string& name, TemplateType type) const {
+    switch(type) {
+        case TemplateType::STYLE:
+            return findStyleTemplate(name);
+        case TemplateType::ELEMENT:
+            return findElementTemplate(name);
+        case TemplateType::VAR:
+            return findVarTemplate(name);
+    }
+    return nullptr;
 }
 
 // TemplateManager 实现
@@ -608,5 +669,37 @@ VarReference parseVarReference(const std::string& reference) {
 }
 
 } // namespace TemplateHelper
+
+void TemplateManager::processInheritance() {
+    // 检查样式模板的循环继承
+    for (const auto& [name, styleTemplate] : styleTemplates) {
+        if (styleTemplate->hasCircularInheritance(name, styleTemplates)) {
+            if (context) {
+                context->reportError("Circular inheritance detected in style template: " + name);
+            }
+        }
+    }
+    
+    // 检查元素模板的循环继承
+    for (const auto& [name, elementTemplate] : elementTemplates) {
+        if (elementTemplate->hasCircularInheritance(name, elementTemplates)) {
+            if (context) {
+                context->reportError("Circular inheritance detected in element template: " + name);
+            }
+        }
+    }
+    
+    // 检查变量模板的循环继承
+    for (const auto& [name, varTemplate] : varTemplates) {
+        if (varTemplate->hasCircularInheritance(name, varTemplates)) {
+            if (context) {
+                context->reportError("Circular inheritance detected in var template: " + name);
+            }
+        }
+    }
+    
+    // 注意：实际的继承处理在模板使用时进行，通过 getAllStyles() 等方法实现
+    // 这里只进行验证和循环检查
+}
 
 } // namespace chtl

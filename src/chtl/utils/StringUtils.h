@@ -8,6 +8,7 @@
 #include <sstream>
 #include <charconv>
 #include <optional>
+#include <unordered_set>
 
 namespace chtl {
 namespace utils {

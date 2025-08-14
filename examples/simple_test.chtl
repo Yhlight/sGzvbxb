@@ -1,0 +1,11 @@
+// 简单的 CHTL 测试文件
+
+body {
+    h1 {
+        text "Hello CHTL!"
+    }
+    
+    p {
+        text "This is a simple test."
+    }
+}

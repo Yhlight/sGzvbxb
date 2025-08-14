@@ -4,8 +4,10 @@
 #include "CHTLCustom.h"
 #include "CHTLOrigin.h"
 #include "CHTLCMOD.h"
-#include "scanner/ScannerParserIntegration.h"
-#include "CHTLImportVisitor.h"
+// #include "scanner/ScannerParserIntegration.h" // Not available yet
+#include "parser/standalone/CHTLParser.h"
+#include "parser/standalone/CHTLLexer.h"
+#include "CHTLImportVisitorStandalone.h"
 #include <fstream>
 #include <sstream>
 #include <regex>
@@ -382,9 +384,9 @@ bool ImportProcessor::processChtlImport(const std::string& path) {
         return false;
     }
     
-    // 使用扫描器处理CHTL文件
-    auto scanner = std::make_shared<ScannerParserIntegration>();
-    CHTLImportVisitor visitor(manager);
+    // 使用独立解析器处理CHTL文件
+    // TODO: 实现独立解析器集成
+    CHTLImportVisitorStandalone visitor(manager);
     
     try {
         scanner->parseFile(filePath, content);

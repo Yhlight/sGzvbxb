@@ -8,6 +8,8 @@
 #include <stack>
 #include <exception>
 #include <sstream>
+#include <functional>
+#include <iostream>
 
 namespace chtl {
 namespace parser {
@@ -70,6 +72,8 @@ enum class TokenType {
     // 操作符
     LBRACE,             // {
     RBRACE,             // }
+    DOUBLE_LBRACE,      // {{
+    DOUBLE_RBRACE,      // }}
     LBRACKET,           // [
     RBRACKET,           // ]
     LPAREN,             // (
@@ -92,6 +96,19 @@ enum class TokenType {
     GREATER,            // >
     LESS,               // <
     TILDE,              // ~
+    ARROW,              // ->
+    BANG,               // !
+    BANG_EQUAL,         // !=
+    LESS_EQUAL,         // <=
+    GREATER_EQUAL,      // >=
+    
+    // 数据类型
+    BOOLEAN,            // true/false
+    NULL_LITERAL,       // null
+    
+    // 配置关键字
+    KEYWORD_CONFIGURATION, // Configuration
+    KEYWORD_NAME,       // Name
     
     // 注释
     COMMENT,            // //
@@ -281,7 +298,11 @@ protected:
     }
     
     void error(const std::string& msg, std::shared_ptr<Token> token) {
-        errorListener_->syntaxError(msg, token->getLine(), token->getColumn());
+        if (token) {
+            errorListener_->syntaxError(msg, token->getLine(), token->getColumn());
+        } else {
+            errorListener_->syntaxError(msg, 0, 0);
+        }
     }
     
     std::string tokenTypeName(TokenType type) {

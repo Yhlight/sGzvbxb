@@ -8,27 +8,29 @@
 
 namespace chtl {
 
-// NamespaceDefinition 实现
-std::shared_ptr<NamespaceDefinition> NamespaceDefinition::addChildNamespace(const std::string& childName) {
+
+
+// CHTLNamespaceDefinition 实现
+std::shared_ptr<CHTLNamespaceDefinition> CHTLNamespaceDefinition::addChildNamespace(const std::string& childName) {
     auto it = childNamespaces.find(childName);
     if (it != childNamespaces.end()) {
         return it->second;
     }
     
     std::string childFullPath = fullPath.empty() ? childName : fullPath + "." + childName;
-    auto child = std::make_shared<NamespaceDefinition>(childName, childFullPath);
+    auto child = std::make_shared<CHTLNamespaceDefinition>(childName, childFullPath);
     child->setParent(shared_from_this());
     childNamespaces[childName] = child;
     
     return child;
 }
 
-std::shared_ptr<NamespaceDefinition> NamespaceDefinition::getChildNamespace(const std::string& childName) const {
+std::shared_ptr<CHTLNamespaceDefinition> CHTLNamespaceDefinition::getChildNamespace(const std::string& childName) const {
     auto it = childNamespaces.find(childName);
     return (it != childNamespaces.end()) ? it->second : nullptr;
 }
 
-std::vector<std::string> NamespaceDefinition::getChildNamespaceNames() const {
+std::vector<std::string> CHTLNamespaceDefinition::getChildNamespaceNames() const {
     std::vector<std::string> names;
     for (const auto& [name, _] : childNamespaces) {
         names.push_back(name);
@@ -36,16 +38,16 @@ std::vector<std::string> NamespaceDefinition::getChildNamespaceNames() const {
     return names;
 }
 
-void NamespaceDefinition::addItem(const NamespaceItem& item) {
+void CHTLNamespaceDefinition::addItem(const NamespaceItem& item) {
     items[item.name].push_back(item);
 }
 
-std::vector<NamespaceItem> NamespaceDefinition::getItems(const std::string& itemName) const {
+std::vector<NamespaceItem> CHTLNamespaceDefinition::getItems(const std::string& itemName) const {
     auto it = items.find(itemName);
     return (it != items.end()) ? it->second : std::vector<NamespaceItem>();
 }
 
-std::vector<NamespaceItem> NamespaceDefinition::getAllItems() const {
+std::vector<NamespaceItem> CHTLNamespaceDefinition::getAllItems() const {
     std::vector<NamespaceItem> allItems;
     for (const auto& [_, itemList] : items) {
         allItems.insert(allItems.end(), itemList.begin(), itemList.end());
@@ -53,11 +55,11 @@ std::vector<NamespaceItem> NamespaceDefinition::getAllItems() const {
     return allItems;
 }
 
-bool NamespaceDefinition::hasItem(const std::string& itemName) const {
+bool CHTLNamespaceDefinition::hasItem(const std::string& itemName) const {
     return items.find(itemName) != items.end();
 }
 
-std::shared_ptr<void> NamespaceDefinition::findItem(const std::string& itemName, NamespaceItemType type) const {
+std::shared_ptr<void> CHTLNamespaceDefinition::findItem(const std::string& itemName, NamespaceItemType type) const {
     auto itemList = getItems(itemName);
     for (const auto& item : itemList) {
         if (item.type == type) {
@@ -67,7 +69,7 @@ std::shared_ptr<void> NamespaceDefinition::findItem(const std::string& itemName,
     return nullptr;
 }
 
-bool NamespaceDefinition::merge(const NamespaceDefinition& other, std::vector<std::string>& conflicts) {
+bool CHTLNamespaceDefinition::merge(const CHTLNamespaceDefinition& other, std::vector<std::string>& conflicts) {
     // 合并项目
     for (const auto& [itemName, otherItems] : other.items) {
         auto& myItems = items[itemName];
@@ -108,13 +110,13 @@ bool NamespaceDefinition::merge(const NamespaceDefinition& other, std::vector<st
 
 // NamespaceManager 实现
 NamespaceManager::NamespaceManager(std::shared_ptr<CHTLContext> ctx) : context(ctx) {
-    globalNamespace = std::make_shared<NamespaceDefinition>("", "");
+    globalNamespace = std::make_shared<CHTLNamespaceDefinition>("", "");
     namespaceIndex[""] = globalNamespace;
     namespaceStack.push_back(globalNamespace);
 }
 
 void NamespaceManager::beginNamespace(const std::string& name) {
-    auto current = getCurrentNamespace();
+    auto current = namespaceStack.empty() ? globalNamespace : namespaceStack.back();
     auto newNamespace = current->getChildNamespace(name);
     
     if (!newNamespace) {
@@ -134,48 +136,47 @@ void NamespaceManager::endNamespace() {
 }
 
 std::shared_ptr<NamespaceDefinition> NamespaceManager::getCurrentNamespace() const {
-    return namespaceStack.empty() ? globalNamespace : namespaceStack.back();
+    auto current = getCurrentCHTLNamespace();
+    if (current) {
+        return std::make_shared<NamespaceDefinitionAdapter>(current);
+    }
+    return nullptr;
 }
 
 std::shared_ptr<NamespaceDefinition> NamespaceManager::getOrCreateNamespace(const std::string& path) {
     if (path.empty()) {
-        return globalNamespace;
+        return std::make_shared<NamespaceDefinitionAdapter>(globalNamespace);
     }
     
     // 检查缓存
     auto it = namespaceIndex.find(path);
     if (it != namespaceIndex.end()) {
-        return it->second;
+        return std::make_shared<NamespaceDefinitionAdapter>(it->second);
     }
     
     // 分割路径并逐级创建
     auto components = NamespaceHelper::splitPath(path);
     auto current = globalNamespace;
     
-    std::string currentPath;
     for (const auto& component : components) {
-        currentPath = currentPath.empty() ? component : currentPath + "." + component;
-        
-        auto child = current->getChildNamespace(component);
-        if (!child) {
-            child = current->addChildNamespace(component);
-            namespaceIndex[child->getFullPath()] = child;
-        }
-        
-        current = child;
+        current = current->addChildNamespace(component);
+        namespaceIndex[current->getFullPath()] = current;
     }
     
-    return current;
+    return std::make_shared<NamespaceDefinitionAdapter>(current);
 }
 
 std::shared_ptr<NamespaceDefinition> NamespaceManager::findNamespace(const std::string& path) const {
     auto it = namespaceIndex.find(path);
-    return (it != namespaceIndex.end()) ? it->second : nullptr;
+    if (it != namespaceIndex.end()) {
+        return std::make_shared<NamespaceDefinitionAdapter>(it->second);
+    }
+    return nullptr;
 }
 
 void NamespaceManager::registerItem(const std::string& itemName, NamespaceItemType type, 
                                    std::shared_ptr<void> definition) {
-    auto current = getCurrentNamespace();
+    auto current = namespaceStack.empty() ? globalNamespace : namespaceStack.back();
     
     NamespaceItem item;
     item.name = itemName;
@@ -190,18 +191,24 @@ void NamespaceManager::registerItem(const std::string& itemName, NamespaceItemTy
 std::shared_ptr<void> NamespaceManager::findItemInNamespace(const std::string& itemName, 
                                                            const std::string& namespacePath,
                                                            NamespaceItemType type) const {
-    auto ns = findNamespace(namespacePath);
-    if (!ns) {
-        // 尝试文件默认命名空间
-        for (const auto& [file, defaultNs] : fileDefaultNamespaces) {
-            if (defaultNs == namespacePath) {
-                ns = findNamespace(defaultNs);
-                break;
+    // 直接使用 CHTLNamespaceDefinition
+    auto it = namespaceIndex.find(namespacePath);
+    if (it != namespaceIndex.end()) {
+        return it->second->findItem(itemName, type);
+    }
+    
+    // 尝试文件默认命名空间
+    for (const auto& [file, defaultNs] : fileDefaultNamespaces) {
+        if (defaultNs == namespacePath) {
+            auto nsIt = namespaceIndex.find(defaultNs);
+            if (nsIt != namespaceIndex.end()) {
+                return nsIt->second->findItem(itemName, type);
             }
+            break;
         }
     }
     
-    return ns ? ns->findItem(itemName, type) : nullptr;
+    return nullptr;
 }
 
 void NamespaceManager::setFileDefaultNamespace(const std::string& filePath, const std::string& namespaceName) {
@@ -219,16 +226,17 @@ std::string NamespaceManager::getFileDefaultNamespace(const std::string& filePat
 }
 
 bool NamespaceManager::mergeNamespaces(const std::string& targetPath, const std::string& sourcePath) {
-    auto target = findNamespace(targetPath);
-    auto source = findNamespace(sourcePath);
+    // 直接使用 CHTLNamespaceDefinition
+    auto targetIt = namespaceIndex.find(targetPath);
+    auto sourceIt = namespaceIndex.find(sourcePath);
     
-    if (!target || !source) {
+    if (targetIt == namespaceIndex.end() || sourceIt == namespaceIndex.end()) {
         context->reportError("Cannot merge namespaces: namespace not found");
         return false;
     }
     
     std::vector<std::string> conflicts;
-    bool success = target->merge(*source, conflicts);
+    bool success = targetIt->second->merge(*sourceIt->second, conflicts);
     
     // 报告冲突
     for (const auto& conflict : conflicts) {
@@ -240,14 +248,25 @@ bool NamespaceManager::mergeNamespaces(const std::string& targetPath, const std:
 
 std::vector<std::string> NamespaceManager::detectConflicts(const std::string& namespacePath) const {
     std::vector<std::string> conflicts;
-    auto ns = findNamespace(namespacePath);
     
-    if (!ns) {
+    // 直接使用 CHTLNamespaceDefinition
+    auto it = namespaceIndex.find(namespacePath);
+    if (it == namespaceIndex.end()) {
         return conflicts;
     }
     
+    auto ns = it->second;
+    
+    // 使用 getAllItems() 方法获取所有项目
+    auto allItems = ns->getAllItems();
+    std::unordered_map<std::string, std::vector<NamespaceItem>> itemsByName;
+    
+    for (const auto& item : allItems) {
+        itemsByName[item.name].push_back(item);
+    }
+    
     // 检查同名不同类型的项目
-    for (const auto& [itemName, itemList] : ns->items) {
+    for (const auto& [itemName, itemList] : itemsByName) {
         if (itemList.size() > 1) {
             std::set<NamespaceItemType> types;
             for (const auto& item : itemList) {
@@ -269,7 +288,7 @@ void NamespaceManager::clear() {
     namespaceStack.clear();
     fileDefaultNamespaces.clear();
     
-    globalNamespace = std::make_shared<NamespaceDefinition>("", "");
+    globalNamespace = std::make_shared<CHTLNamespaceDefinition>("", "");
     namespaceIndex[""] = globalNamespace;
     namespaceStack.push_back(globalNamespace);
 }
@@ -313,7 +332,7 @@ std::shared_ptr<void> NamespaceResolver::resolveItem(const std::string& itemName
     }
     
     // 在当前命名空间及其父命名空间中查找
-    auto current = manager.getCurrentNamespace();
+    auto current = manager.getCurrentCHTLNamespace();
     while (current) {
         auto item = current->findItem(itemName, type);
         if (item) {
@@ -351,14 +370,63 @@ bool NamespaceProcessor::processNamespacedUse(const std::string& useStatement, N
     }
     
     // 根据类型使用项目
+    std::string fullName = ref.hasExplicitNamespace ? 
+        ref.namespacePath + "." + ref.itemName : ref.itemName;
+    
     switch (expectedType) {
         case NamespaceItemType::CUSTOM_ELEMENT:
-            // TODO: 使用自定义元素
+            // 使用自定义元素
+            if (generator.getCustomManager()) {
+                auto custom = generator.getCustomManager()->findCustomElement(fullName);
+                if (custom) {
+                    custom->expand(generator);
+                }
+            }
             break;
+            
         case NamespaceItemType::TEMPLATE_STYLE:
-            // TODO: 使用模板样式
+            // 使用模板样式  
+            if (generator.getTemplateManager()) {
+                auto tmpl = generator.getTemplateManager()->findStyleTemplate(fullName);
+                if (tmpl) {
+                    generator.getTemplateManager()->useStyleTemplate(fullName, generator);
+                }
+            }
             break;
-        // ... 其他类型
+            
+        case NamespaceItemType::TEMPLATE_ELEMENT:
+            // 使用模板元素
+            if (generator.getTemplateManager()) {
+                auto tmpl = generator.getTemplateManager()->findElementTemplate(fullName);
+                if (tmpl) {
+                    generator.getTemplateManager()->useElementTemplate(fullName, generator);
+                }
+            }
+            break;
+            
+        case NamespaceItemType::TEMPLATE_VAR:
+            // 使用模板变量
+            if (generator.getTemplateManager()) {
+                // 变量使用通常需要具体的变量名
+                // 这里只是注册到上下文，实际使用在变量引用时
+            }
+            break;
+            
+        case NamespaceItemType::CUSTOM_STYLE:
+            // 使用自定义样式
+            if (generator.getCustomManager()) {
+                generator.getCustomManager()->useCustomStyle(fullName, generator);
+            }
+            break;
+            
+        case NamespaceItemType::CUSTOM_VAR:
+            // 使用自定义变量
+            // 变量使用通常需要具体的变量名和值
+            // 这里只是注册到上下文，实际使用在变量引用时
+            break;
+            
+        default:
+            break;
     }
     
     return true;
@@ -391,8 +459,21 @@ bool NamespaceMerger::merge(NamespaceDefinition& target,
                            const NamespaceDefinition& source,
                            const MergeOptions& options,
                            std::vector<std::string>& conflicts) {
-    // 实现已在NamespaceDefinition::merge中
-    return target.merge(source, conflicts);
+    // 尝试转换为适配器以获取实现
+    auto* targetAdapter = dynamic_cast<NamespaceDefinitionAdapter*>(&target);
+    auto* sourceAdapter = dynamic_cast<const NamespaceDefinitionAdapter*>(&source);
+    
+    if (targetAdapter && sourceAdapter) {
+        auto targetImpl = targetAdapter->getImplementation();
+        auto sourceImpl = sourceAdapter->getImplementation();
+        if (targetImpl && sourceImpl) {
+            return targetImpl->merge(*sourceImpl, conflicts);
+        }
+    }
+    
+    // 如果不是适配器类型，无法合并
+    conflicts.push_back("Cannot merge: incompatible namespace types");
+    return false;
 }
 
 std::vector<std::string> NamespaceMerger::detectPotentialConflicts(
@@ -400,16 +481,43 @@ std::vector<std::string> NamespaceMerger::detectPotentialConflicts(
     const NamespaceDefinition& ns2) {
     std::vector<std::string> conflicts;
     
-    // 检查项目冲突
-    for (const auto& [itemName, items1] : ns1.items) {
-        auto items2 = ns2.getItems(itemName);
+    // 尝试转换为适配器以获取实现
+    auto* adapter1 = dynamic_cast<const NamespaceDefinitionAdapter*>(&ns1);
+    auto* adapter2 = dynamic_cast<const NamespaceDefinitionAdapter*>(&ns2);
+    
+    if (adapter1 && adapter2) {
+        auto impl1 = adapter1->getImplementation();
+        auto impl2 = adapter2->getImplementation();
         
-        for (const auto& item1 : items1) {
-            for (const auto& item2 : items2) {
-                if (item1.type == item2.type) {
-                    conflicts.push_back("Potential conflict: " + 
-                                      NamespaceHelper::itemTypeToString(item1.type) + 
-                                      " '" + itemName + "' exists in both namespaces");
+        if (impl1 && impl2) {
+            // 使用 getAllItems() 方法获取所有项目
+            auto items1 = impl1->getAllItems();
+            auto items2 = impl2->getAllItems();
+            
+            // 构建名称到项目的映射
+            std::unordered_map<std::string, std::vector<NamespaceItem>> itemMap1;
+            std::unordered_map<std::string, std::vector<NamespaceItem>> itemMap2;
+            
+            for (const auto& item : items1) {
+                itemMap1[item.name].push_back(item);
+            }
+            for (const auto& item : items2) {
+                itemMap2[item.name].push_back(item);
+            }
+            
+            // 检查冲突
+            for (const auto& [name, items] : itemMap1) {
+                auto it = itemMap2.find(name);
+                if (it != itemMap2.end()) {
+                    for (const auto& item1 : items) {
+                        for (const auto& item2 : it->second) {
+                            if (item1.type == item2.type) {
+                                conflicts.push_back("Potential conflict: " + 
+                                                  NamespaceHelper::itemTypeToString(item1.type) + 
+                                                  " '" + name + "' exists in both namespaces");
+                            }
+                        }
+                    }
                 }
             }
         }

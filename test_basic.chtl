@@ -1,0 +1,152 @@
+html {
+    head {
+        title { text { "CHTL基础功能测试" } }
+        style {
+            body {
+                font-family: "Microsoft YaHei", Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f0f0f0;
+            }
+            
+            header {
+                background-color: #333;
+                color: white;
+                padding: 20px 0;
+                text-align: center;
+            }
+            
+            nav {
+                background-color: #444;
+                padding: 10px;
+            }
+            
+            nav ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+            }
+            
+            nav li {
+                margin: 0 15px;
+            }
+            
+            nav a {
+                color: white;
+                text-decoration: none;
+                font-size: 16px;
+            }
+            
+            nav a:hover {
+                text-decoration: underline;
+            }
+            
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: white;
+                min-height: 500px;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }
+            
+            .card {
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 20px 0;
+                background-color: #fafafa;
+            }
+            
+            .card h2 {
+                color: #333;
+                margin-top: 0;
+            }
+            
+            footer {
+                background-color: #333;
+                color: white;
+                text-align: center;
+                padding: 20px 0;
+                margin-top: 50px;
+            }
+        }
+    }
+    body {
+        header {
+            h1 { text { "CHTL编译器演示" } }
+            p { text { "使用CHTL语法构建现代Web页面" } }
+        }
+        
+        nav {
+            ul {
+                li { 
+                    a { 
+                        href: "#home";
+                        text { "首页" } 
+                    } 
+                }
+                li { 
+                    a { 
+                        href: "#features";
+                        text { "功能" } 
+                    } 
+                }
+                li { 
+                    a { 
+                        href: "#docs";
+                        text { "文档" } 
+                    } 
+                }
+                li { 
+                    a { 
+                        href: "#about";
+                        text { "关于" } 
+                    } 
+                }
+            }
+        }
+        
+        div.container {
+            h2 { text { "欢迎使用CHTL" } }
+            p { text { "CHTL是一种基于C++的超文本语言，旨在提供更高效、更安全的Web开发体验。" } }
+            
+            div.card {
+                h2 { text { "主要特性" } }
+                ul {
+                    li { text { "简洁的语法：减少冗余代码" } }
+                    li { text { "编译时优化：提高性能" } }
+                    li { text { "类型安全：减少运行时错误" } }
+                    li { text { "模块化支持：更好的代码组织" } }
+                }
+            }
+            
+            div.card {
+                h2 { text { "快速开始" } }
+                p { text { "使用CHTL编译器将.chtl文件编译为标准HTML：" } }
+                pre {
+                    text { "./chtl input.chtl -o output.html" }
+                }
+            }
+        }
+        
+        footer {
+            p { text { "© 2024 CHTL Project. All rights reserved." } }
+        }
+        
+        script {
+            console.log("CHTL页面加载完成");
+            
+            // 添加导航高亮
+            const links = document.querySelectorAll('nav a');
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    links.forEach(l => l.style.fontWeight = 'normal');
+                    this.style.fontWeight = 'bold';
+                });
+            });
+        }
+    }
+}

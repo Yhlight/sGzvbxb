@@ -1,0 +1,120 @@
+// 测试上下文推断 & 符号
+
+// 推荐方式：使用自动化类名 + & 简化伪类
+div {
+    text { "鼠标悬停会变色" }
+    
+    style {
+        // 自动化类名
+        .hover-box {
+            padding: 20px;
+            background: #f0f0f0;
+            transition: all 0.3s;
+        }
+        
+        // 使用 & 简化伪类
+        &:hover {
+            background: #e0e0e0;
+            transform: scale(1.02);
+        }
+        
+        &:active {
+            background: #d0d0d0;
+        }
+        
+        // 伪元素
+        &::before {
+            content: "→ ";
+            color: blue;
+        }
+        
+        &::after {
+            content: " ←";
+            color: red;
+        }
+    }
+}
+
+// 测试多个伪类组合
+button {
+    style {
+        // 自动化类名
+        .btn-primary {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+        }
+        
+        // 组合伪类
+        &:hover:not(:disabled) {
+            background: #0056b3;
+            cursor: pointer;
+        }
+        
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        &:focus {
+            outline: 2px solid #0056b3;
+            outline-offset: 2px;
+        }
+    }
+    
+    text { "交互按钮" }
+}
+
+// 测试伪元素选择器
+p {
+    style {
+        .styled-paragraph {
+            line-height: 1.6;
+            text-indent: 2em;
+        }
+        
+        // 首字母
+        &::first-letter {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        // 首行
+        &::first-line {
+            font-weight: bold;
+        }
+        
+        // 选中文本
+        &::selection {
+            background: yellow;
+            color: black;
+        }
+    }
+    
+    text { 
+        这是一个带有特殊样式的段落。
+        首字母会更大，首行会加粗。
+        选中文本时会有黄色背景。
+    }
+}
+
+// 不推荐方式示例（手动设置类名然后使用 &）
+div {
+    class: "manual-class";
+    
+    style {
+        // & 会被解析为 .manual-class
+        & {
+            margin: 10px;
+        }
+        
+        &:hover {
+            background: lightgray;
+        }
+    }
+    
+    text { "不推荐的使用方式" }
+}

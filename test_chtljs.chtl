@@ -1,0 +1,322 @@
+// 测试 CHTL JS 特性
+
+// 为增强选择器创建一些元素
+div {
+    id: "container";
+    
+    button {
+        class: "btn primary";
+        text { "按钮 1" }
+    }
+    
+    button {
+        class: "btn secondary";
+        text { "按钮 2" }
+    }
+    
+    div {
+        class: "box";
+        
+        p { text { "段落 1" } }
+        p { text { "段落 2" } }
+        
+        button {
+            class: "inner-btn";
+            text { "内部按钮" }
+        }
+    }
+    
+    ul {
+        id: "list";
+        class: "task-list";
+        
+        li { text { "任务 1" } }
+        li { text { "任务 2" } }
+        li { text { "任务 3" } }
+    }
+}
+
+// 测试增强选择器
+div {
+    script {
+        // 基础选择器
+        {{container}}  // ID 选择器
+        {{.box}}  // 类选择器
+        {{button}}  // 标签选择器
+        
+        // 后代选择器
+        {{.box button}}  // box 内的所有 button
+        {{#list li}}  // list 内的所有 li
+        
+        // 索引访问
+        {{button[0]}}  // 第一个 button
+        {{li[1]}}  // 第二个 li
+        
+        // 智能选择器（先判断标签，再判断类/ID）
+        {{box}}  // 会查找 class="box" 或 id="box"
+    }
+}
+
+// 测试链式访问（使用 -> 代替 .）
+section {
+    id: "demo";
+    
+    script {
+        // 获取元素并链式调用
+        {{#demo}}->style->backgroundColor = "lightblue";
+        
+        // 多级链式访问
+        {{button[0]}}->classList->add("active");
+        
+        // 获取文本内容
+        const text = {{.box p[0]}}->textContent;
+        
+        // 设置属性
+        {{#container}}->setAttribute("data-loaded", "true");
+    }
+}
+
+// 测试增强监听器 listen
+div {
+    class: "interactive";
+    
+    button {
+        id: "click-me";
+        text { "点击我" }
+    }
+    
+    script {
+        // 单个事件监听
+        {{#click-me}}->listen({
+            click: () => {
+                console.log("Button clicked!");
+            }
+        });
+        
+        // 多个事件监听
+        {{.interactive}}->listen({
+            click: function(e) {
+                console.log("Clicked:", e.target);
+            },
+            
+            mouseenter: () => {
+                {{.interactive}}->style->border = "2px solid blue";
+            },
+            
+            mouseleave: function() {
+                {{.interactive}}->style->border = "none";
+            }
+        });
+        
+        // 使用已存在的函数
+        function handleHover() {
+            console.log("Hovering!");
+        }
+        
+        {{button}}->listen({
+            mouseover: handleHover,
+            mouseout: () => console.log("Mouse out!")
+        });
+    }
+}
+
+// 测试事件委托 delegate
+ul {
+    class: "delegated-list";
+    
+    li { 
+        button { text { "删除" } }
+        span { text { "项目 1" } }
+    }
+    li { 
+        button { text { "删除" } }
+        span { text { "项目 2" } }
+    }
+    
+    script {
+        // 单个目标委托
+        {{.delegated-list}}->delegate({
+            target: {{button}},
+            click: function(e) {
+                // 删除对应的 li
+                e.target->parentElement->remove();
+            }
+        });
+        
+        // 多个目标委托
+        {{.delegated-list}}->delegate({
+            target: [{{button}}, {{span}}],
+            click: (e) => {
+                console.log("Clicked:", e.target->tagName);
+            },
+            mouseenter: function(e) {
+                e.target->style->backgroundColor = "#f0f0f0";
+            },
+            mouseleave: (e) => {
+                e.target->style->backgroundColor = "";
+            }
+        });
+    }
+}
+
+// 测试动画 API
+div {
+    id: "animated-box";
+    style {
+        width: 100px;
+        height: 100px;
+        background: red;
+        position: relative;
+    }
+    
+    script {
+        // 基础动画
+        animate({
+            duration: 1000,  // 1秒
+            easing: "ease-in-out",
+            
+            begin: {
+                left: "0px",
+                opacity: "1"
+            },
+            
+            end: {
+                left: "200px",
+                opacity: "0.5"
+            }
+        });
+        
+        // 带关键帧的动画
+        animate({
+            target: {{#animated-box}},
+            duration: 2000,
+            easing: "linear",
+            
+            begin: {
+                transform: "rotate(0deg)",
+                background: "red"
+            },
+            
+            when: [
+                {
+                    at: 0.25,  // 25%
+                    transform: "rotate(90deg)",
+                    background: "blue"
+                },
+                {
+                    at: 0.5,  // 50%
+                    transform: "rotate(180deg)",
+                    background: "green"
+                },
+                {
+                    at: 0.75,  // 75%
+                    transform: "rotate(270deg)",
+                    background: "yellow"
+                }
+            ],
+            
+            end: {
+                transform: "rotate(360deg)",
+                background: "red"
+            },
+            
+            loop: 3,  // 循环3次
+            direction: "alternate",  // 交替方向
+            delay: 500,  // 延迟500ms开始
+            
+            callback: function() {
+                console.log("Animation completed!");
+            }
+        });
+    }
+}
+
+// 复杂示例：结合所有特性
+div {
+    class: "app";
+    
+    header {
+        h1 { text { "CHTL JS 演示" } }
+        button {
+            id: "start-demo";
+            text { "开始演示" }
+        }
+    }
+    
+    div {
+        class: "content";
+        
+        div {
+            class: "card";
+            id: "card1";
+            
+            h3 { text { "卡片 1" } }
+            p { text { "点击卡片查看效果" } }
+        }
+        
+        div {
+            class: "card";
+            id: "card2";
+            
+            h3 { text { "卡片 2" } }
+            p { text { "鼠标悬停查看效果" } }
+        }
+    }
+    
+    script {
+        // 组合使用所有特性
+        {{#start-demo}}->listen({
+            click: () => {
+                // 使用增强选择器获取所有卡片
+                const cards = {{.card}};
+                
+                // 为每个卡片添加动画
+                cards->forEach((card, index) => {
+                    animate({
+                        target: card,
+                        duration: 500,
+                        delay: index * 100,
+                        
+                        begin: {
+                            transform: "scale(1)",
+                            opacity: "1"
+                        },
+                        
+                        end: {
+                            transform: "scale(1.1)",
+                            opacity: "0.8"
+                        },
+                        
+                        callback: () => {
+                            card->style->transform = "scale(1)";
+                            card->style->opacity = "1";
+                        }
+                    });
+                });
+            }
+        });
+        
+        // 事件委托处理所有卡片
+        {{.content}}->delegate({
+            target: {{.card}},
+            
+            click: function(e) {
+                const card = e.currentTarget;
+                card->classList->toggle("selected");
+                
+                // 使用链式访问修改样式
+                card->style->border = card->classList->contains("selected") 
+                    ? "2px solid blue" 
+                    : "none";
+            },
+            
+            mouseenter: (e) => {
+                e.currentTarget->style->boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
+            },
+            
+            mouseleave: (e) => {
+                e.currentTarget->style->boxShadow = "";
+            }
+        });
+    }
+}

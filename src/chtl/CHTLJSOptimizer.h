@@ -8,9 +8,9 @@
 #include <vector>
 #include <random>
 #include "antlr4-runtime.h"
-#include "generated/JSLexer.h"
-#include "generated/JSParser.h"
-#include "generated/JSParserBaseVisitor.h"
+#include "../generated/javascript/grammars/JavaScriptLexer.h"
+#include "../generated/javascript/grammars/JavaScriptParser.h"
+#include "../generated/javascript/grammars/JavaScriptBaseVisitor.h"
 
 namespace chtl {
 
@@ -35,7 +35,7 @@ struct VariableScope {
 };
 
 // JS变量混淆器
-class JSVariableObfuscator : public JSParserBaseVisitor {
+class JSVariableObfuscator : public JavaScriptBaseVisitor {
 public:
     explicit JSVariableObfuscator(const JSOptimizationOptions& options);
     
@@ -43,12 +43,14 @@ public:
     std::string obfuscate(const std::string& jsCode);
     
     // ANTLR访问者方法
-    antlrcpp::Any visitProgram(JSParser::ProgramContext* ctx) override;
-    antlrcpp::Any visitVariableDeclaration(JSParser::VariableDeclarationContext* ctx) override;
-    antlrcpp::Any visitFunctionDeclaration(JSParser::FunctionDeclarationContext* ctx) override;
-    antlrcpp::Any visitFormalParameterList(JSParser::FormalParameterListContext* ctx) override;
-    antlrcpp::Any visitIdentifierExpression(JSParser::IdentifierExpressionContext* ctx) override;
-    antlrcpp::Any visitBlock(JSParser::BlockContext* ctx) override;
+    antlrcpp::Any visitProgram(JavaScriptParser::ProgramContext* ctx) override;
+    antlrcpp::Any visitVariableDeclaration(JavaScriptParser::VariableDeclarationContext* ctx) override;
+    antlrcpp::Any visitFunctionDeclaration(JavaScriptParser::FunctionDeclarationContext* ctx) override;
+    antlrcpp::Any visitFormalParameterList(JavaScriptParser::FormalParameterListContext* ctx) override;
+    // 注意：以下方法取决于JavaScriptParser生成的具体Context类
+    // 可能需要根据实际的ANTLR语法文件调整
+    // antlrcpp::Any visitIdentifierExpression(JavaScriptParser::IdentifierExpressionContext* ctx) override;
+    // antlrcpp::Any visitBlock(JavaScriptParser::BlockContext* ctx) override;
     
 private:
     JSOptimizationOptions options;

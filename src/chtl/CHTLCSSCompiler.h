@@ -7,9 +7,10 @@
 #include <vector>
 #include <sstream>
 #include "CHTLContext.h"
-#include "../../generated/CSSLexer.h"
-#include "../../generated/CSSParser.h"
-#include "../../generated/CSSBaseListener.h"
+#include "../../generated/css/grammars/CSSLexer.h"
+#include "../../generated/css/grammars/CSSParser.h"
+#include "../../generated/css/grammars/CSSBaseListener.h"
+#include "error/ANTLRErrorAdapter.h"
 
 namespace chtl {
 
@@ -106,6 +107,7 @@ private:
     std::shared_ptr<CHTLContext> context;
     bool minify;
     bool preserveComments;
+    std::shared_ptr<error::IErrorReporter> errorReporter;
     
 public:
     CSSCompiler(std::shared_ptr<CHTLContext> ctx);
@@ -129,22 +131,12 @@ public:
     // 合并多个CSS块
     std::string mergeCSSBlocks(const std::vector<std::string>& blocks);
     
+    // 设置错误报告器
+    void setErrorReporter(std::shared_ptr<error::IErrorReporter> reporter) {
+        errorReporter = reporter;
+    }
+    
 private:
-    // 错误处理
-    class CSSErrorListener : public antlr4::BaseErrorListener {
-    private:
-        std::vector<std::string>& errors;
-        
-    public:
-        CSSErrorListener(std::vector<std::string>& errs) : errors(errs) {}
-        
-        void syntaxError(antlr4::Recognizer* recognizer,
-                        antlr4::Token* offendingSymbol,
-                        size_t line,
-                        size_t charPositionInLine,
-                        const std::string& msg,
-                        std::exception_ptr e) override;
-    };
 };
 
 // CSS优化器
@@ -152,12 +144,16 @@ class CSSOptimizer {
 public:
     // 优化选项
     struct Options {
-        bool mergeRules = true;         // 合并相同选择器的规则
-        bool removeEmptyRules = true;   // 移除空规则
-        bool shorthandProperties = true; // 使用简写属性
-        bool removeRedundant = true;    // 移除冗余声明
-        bool optimizeColors = true;     // 优化颜色值
-        bool optimizeUnits = true;      // 优化单位
+        bool mergeRules;         // 合并相同选择器的规则
+        bool removeEmptyRules;   // 移除空规则
+        bool shorthandProperties; // 使用简写属性
+        bool removeRedundant;    // 移除冗余声明
+        bool optimizeColors;     // 优化颜色值
+        bool optimizeUnits;      // 优化单位
+        
+        Options() : mergeRules(true), removeEmptyRules(true), 
+                   shorthandProperties(true), removeRedundant(true),
+                   optimizeColors(true), optimizeUnits(true) {}
     };
     
 private:

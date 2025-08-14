@@ -9,25 +9,67 @@ CHTLGenerator::CHTLGenerator(std::shared_ptr<CHTLContext> ctx, const GeneratorOp
     : context(ctx), options(opts) {
     // 初始化管理器
     templateManager = std::make_shared<TemplateManager>(ctx);
-    customManager = std::make_shared<CustomManager>(ctx);
+    customManager = std::make_shared<CustomManager>(ctx, templateManager);
     originManager = std::make_shared<OriginManager>(ctx);
     importManager = std::make_shared<ImportManager>(ctx);
     namespaceManager = std::make_shared<NamespaceManager>(ctx);
-    constraintManager = std::make_shared<ConstraintManager>(ctx, namespaceManager);
+    constraintManager = std::make_shared<ConstraintManager>(ctx);
     scriptManager = std::make_shared<ScriptManager>(ctx);
     cmodManager = std::make_shared<CMODManager>(ctx);
-    cjmodManager = std::make_shared<CJMODManager>(ctx);
+    // cjmodManager = std::make_shared<CJMODManager>(ctx);  // CJMODManager not implemented yet
     cssProcessor = std::make_shared<CHTLCSSProcessor>(ctx);
     jsProcessor = std::make_shared<CHTLJSProcessor>(ctx);  // 初始化JS处理器
     
     // 设置交叉引用
-    importManager->setTemplateManager(templateManager.get());
-    importManager->setCustomManager(customManager.get());
-    importManager->setOriginManager(originManager.get());
-    importManager->setNamespaceManager(namespaceManager.get());
+    importManager->setTemplateManager(templateManager);
+    importManager->setCustomManager(customManager);
+    importManager->setOriginManager(originManager);
+    // importManager->setNamespaceManager(namespaceManager);  // Method not available
     importManager->setCMODManager(cmodManager);
     
-    scriptManager->setCJMODManager(cjmodManager.get());
+    // scriptManager->setCJMODManager(cjmodManager);  // CJMODManager not implemented
+}
+
+std::string CHTLGenerator::escapeAttribute(const std::string& attr) const {
+    std::string result;
+    for (char c : attr) {
+        switch (c) {
+            case '"': result += "&quot;"; break;
+            case '&': result += "&amp;"; break;
+            case '<': result += "&lt;"; break;
+            case '>': result += "&gt;"; break;
+            default: result += c; break;
+        }
+    }
+    return result;
+}
+
+std::string CHTLGenerator::getCurrentElementPath() const {
+    // 构建元素路径，用于约束检查
+    std::string path;
+    for (const auto& element : elementStack) {
+        if (!path.empty()) {
+            path += "/";
+        }
+        path += element;
+    }
+    
+    // 如果在命名空间中，添加命名空间前缀
+    if (namespaceManager) {
+        auto currentNamespace = namespaceManager->getCurrentNamespace();
+        if (currentNamespace) {
+            std::string namespacePath = currentNamespace->getName();
+            if (!namespacePath.empty()) {
+                if (!path.empty()) {
+                    path = namespacePath + "/" + path;
+                } else {
+                    path = namespacePath;
+                }
+            }
+        }
+    }
+    
+    return path;
 }
 
 std::string CHTLGenerator::indent() const {
@@ -40,12 +82,22 @@ std::string CHTLGenerator::indent() const {
 
 // 元素生成
 void CHTLGenerator::generateElement(const std::string& tagName, 
-                                   const std::map<std::string, std::string>& attributes) {
+                                   const std::unordered_map<std::string, std::string>& attributes) {
     // 检查约束
     if (constraintManager) {
-        std::string error;
-        if (!constraintManager->checkConstraint(ConstraintChecker::canUseHtmlElement, tagName, error)) {
-            context->reportError(error);
+        // 创建HTML元素的约束目标
+        ConstraintTarget target(ConstraintTargetType::HTML_ELEMENT, tagName);
+        
+        // 获取当前作用域路径
+        std::string currentScope = getCurrentElementPath();
+        
+        // 检查是否违反约束
+        auto violations = constraintManager->getViolations(target, currentScope);
+        if (!violations.empty()) {
+            // 报告所有违反的约束
+            for (const auto& violation : violations) {
+                context->reportError(violation);
+            }
             return;
         }
     }
@@ -60,8 +112,11 @@ void CHTLGenerator::generateElement(const std::string& tagName,
     
     // 清空当前元素上下文
     currentElement = ElementContext();
-    currentElement.tagName = tagName;
-    currentElement.attributes = attributes;
+    currentElement.name = tagName;
+    // Convert unordered_map to map
+    for (const auto& [key, value] : attributes) {
+        currentElement.attributes[key] = value;
+    }
     
     // 进入约束作用域
     if (constraintManager) {
@@ -223,7 +278,7 @@ void CHTLGenerator::generateStyleRule(const std::string& selector,
     rule.selector = resolveContextSelector(selector);
     rule.properties = properties;
     rule.isInline = false;
-    rule.sourceElement = currentElementName;
+    rule.sourceElement = currentElement.name;
     
     // 检查是否应该提取到全局
     if (selector.find('.') == 0 || selector.find('#') == 0 || 
@@ -293,19 +348,19 @@ void CHTLGenerator::processGeneratorComment(const std::string& comment) {
 
 // 自动化功能
 void CHTLGenerator::autoAddClass(const std::string& className) {
-    if (!currentElementName.empty()) {
-        autoGeneratedClasses[currentElementName] = className;
+    if (!currentElement.name.empty()) {
+        autoGeneratedClasses[currentElement.name] = className;
     }
 }
 
 void CHTLGenerator::autoAddId(const std::string& idName) {
-    if (!currentElementName.empty()) {
-        autoGeneratedIds[currentElementName] = idName;
+    if (!currentElement.name.empty()) {
+        autoGeneratedIds[currentElement.name] = idName;
     }
 }
 
 std::string CHTLGenerator::getCurrentElementClass() const {
-    auto it = autoGeneratedClasses.find(currentElementName);
+    auto it = autoGeneratedClasses.find(currentElement.name);
     if (it != autoGeneratedClasses.end()) {
         return it->second;
     }
@@ -313,7 +368,7 @@ std::string CHTLGenerator::getCurrentElementClass() const {
 }
 
 std::string CHTLGenerator::getCurrentElementId() const {
-    auto it = autoGeneratedIds.find(currentElementName);
+    auto it = autoGeneratedIds.find(currentElement.name);
     if (it != autoGeneratedIds.end()) {
         return it->second;
     }
@@ -495,7 +550,7 @@ void CHTLGenerator::addInsertOperation(const std::string& insertStatement) {
     
     SpecializationOperation op;
     op.type = SpecializationType::INSERT;
-    op.insertOp = insertOp;
+    // TODO: Store insertOp in op.data once the variant is properly configured
     
     addSpecialization(op);
 }
@@ -580,7 +635,7 @@ void CHTLGenerator::reset() {
     cssOutput.str("");
     jsOutput.str("");
     indentLevel = 0;
-    currentElementName.clear();
+    currentElement = ElementContext();
     elementStack.clear();
     globalStyles.clear();
     autoGeneratedClasses.clear();
@@ -766,6 +821,20 @@ void CHTLGenerator::useOriginBlock(const std::string& name) {
     originManager->useNamedOrigin(name, *this);
 }
 
+void CHTLGenerator::addAvailableOrigin(const std::string& name, const std::string& type) {
+    if (!originManager) {
+        context->reportError("Origin manager not initialized");
+        return;
+    }
+    
+    // 记录这个命名的原始嵌入已经可用
+    // 这样后续的 [Origin] @Type name; 可以正确引用
+    std::cerr << "Registered available origin: " << name << " of type " << type << std::endl;
+    
+    // 如果需要，可以在这里添加到一个可用原始嵌入的映射中
+    // 以便后续快速查找和验证
+}
+
 // 导入处理
 void CHTLGenerator::processImportStatement(const std::string& statement) {
     if (!importManager) {
@@ -848,7 +917,7 @@ void CHTLGenerator::useTemplateFromNamespace(const std::string& templateName, co
         resolver.resolveItem(templateName, NamespaceItemType::TEMPLATE_STYLE, namespacePath)
     );
     if (styleTemplate) {
-        templateManager->useTemplate("@Style " + templateName, *this);
+        templateManager->useStyleTemplate(templateName, *this);
         return;
     }
     
@@ -857,7 +926,7 @@ void CHTLGenerator::useTemplateFromNamespace(const std::string& templateName, co
         resolver.resolveItem(templateName, NamespaceItemType::TEMPLATE_ELEMENT, namespacePath)
     );
     if (elementTemplate) {
-        templateManager->useTemplate("@Element " + templateName, *this);
+        templateManager->useElementTemplate(templateName, *this);
         return;
     }
     
@@ -866,7 +935,9 @@ void CHTLGenerator::useTemplateFromNamespace(const std::string& templateName, co
         resolver.resolveItem(templateName, NamespaceItemType::TEMPLATE_VAR, namespacePath)
     );
     if (varTemplate) {
-        templateManager->useTemplate("@Var " + templateName, *this);
+        // TODO: Implement var template usage with generator context
+        // For now, just use the template with a default variable name
+        templateManager->useVarTemplate(templateName, "default");
         return;
     }
     
@@ -886,7 +957,7 @@ void CHTLGenerator::useCustomFromNamespace(const std::string& customName, const 
         resolver.resolveItem(customName, NamespaceItemType::CUSTOM_STYLE, namespacePath)
     );
     if (customStyle) {
-        customManager->useCustom("@Style " + customName, *this);
+        customManager->useCustomStyle(customName, *this);
         return;
     }
     
@@ -895,7 +966,7 @@ void CHTLGenerator::useCustomFromNamespace(const std::string& customName, const 
         resolver.resolveItem(customName, NamespaceItemType::CUSTOM_ELEMENT, namespacePath)
     );
     if (customElement) {
-        customManager->useCustom("@Element " + customName, *this);
+        customManager->useCustomElement(customName, *this);
         return;
     }
     
@@ -904,7 +975,9 @@ void CHTLGenerator::useCustomFromNamespace(const std::string& customName, const 
         resolver.resolveItem(customName, NamespaceItemType::CUSTOM_VAR, namespacePath)
     );
     if (customVar) {
-        customManager->useCustomVar(customName, "", *this);
+        // TODO: Implement custom var usage with optional runtime value
+        // For now, just use the var with a default variable name
+        customManager->useCustomVar(customName, "default", std::nullopt);
         return;
     }
     
@@ -920,7 +993,9 @@ void CHTLGenerator::processExceptStatement(const std::string& statement) {
     
     std::string currentScope;
     if (namespaceManager && namespaceManager->getCurrentNamespace()) {
-        currentScope = namespaceManager->getCurrentNamespace()->getFullPath();
+        // TODO: Implement namespace scope tracking
+        // For now, use a default scope name
+        currentScope = "namespace";
     } else if (!elementStack.empty()) {
         currentScope = ConstraintHelper::buildElementPath(elementStack);
     }
@@ -1013,7 +1088,7 @@ void CHTLGenerator::processLocalScript(const std::string& script) {
     std::string currentScope = ConstraintHelper::buildElementPath(elementStack);
     
     // 创建脚本处理器
-    ScriptProcessor processor(*scriptManager, *this);
+    ScriptProcessor processor(*scriptManager);
     processor.processScriptBlock(script, currentScope);
 }
 
@@ -1039,21 +1114,7 @@ void CHTLGenerator::processGlobalStyleBlock(const std::string& cssContent) {
     }
 }
 
-std::string CHTLGenerator::getCSS() const {
-    if (!cssProcessor) {
-        return cssOutput.str();
-    }
-    
-    // 获取优化后的最终CSS
-    std::string finalCSS = cssProcessor->generateFinalCSS();
-    
-    // 如果有额外的CSS输出，合并它们
-    if (!cssOutput.str().empty()) {
-        return finalCSS + "\n" + cssOutput.str();
-    }
-    
-    return finalCSS;
-}
+// getCSS method is inline in header
 
 void CHTLGenerator::processGlobalScriptBlock(const std::string& jsContent, const std::string& type) {
     if (!jsProcessor) {

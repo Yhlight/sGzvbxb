@@ -21,6 +21,15 @@
 
 namespace chtl {
 
+// 元素上下文信息
+struct ElementContext {
+    std::string name;
+    std::string id;
+    std::vector<std::string> classes;
+    std::map<std::string, std::string> attributes;
+    bool hasInlineStyle = false;
+};
+
 // 生成选项
 struct GeneratorOptions {
     bool preserveGeneratorComments = true;  // 是否保留--注释
@@ -105,8 +114,12 @@ private:
     
     // 辅助方法
     std::string indent() const;
+    std::string escapeAttribute(const std::string& attr) const;
     void increaseIndent() { indentLevel++; }
     void decreaseIndent() { if (indentLevel > 0) indentLevel--; }
+    
+    // 获取当前元素路径（用于约束检查）
+    std::string getCurrentElementPath() const;
     
     // 样式处理
     std::string generateAutoClassName(const std::string& hint = "");
@@ -245,6 +258,7 @@ public:
     // 原始嵌入处理
     void processOriginBlock(const std::string& declaration, const std::string& content);
     void useOriginBlock(const std::string& name);
+    void addAvailableOrigin(const std::string& name, const std::string& type);
     
     // 导入处理
     void processImportStatement(const std::string& statement);

@@ -1,0 +1,51 @@
+// 测试增强的导入系统
+
+// 1. 资源文件导入（带 as 子句创建原始嵌入节点）
+[Import] @Html from "header.html" as headerTemplate
+[Import] @Style from "theme.css" as themeStyles
+[Import] @JavaScript from "utils.js" as utilsScript
+
+// 2. 资源文件导入（不带 as 子句，直接跳过）
+[Import] @Html from "footer.html"
+[Import] @Style from "reset.css"
+
+// 3. 模块导入（支持点号和斜杠）
+[Import] @Chtl from "Chtholly"           // 搜索 Chtholly.cmod 或 Chtholly.chtl
+[Import] @Chtl from "Chtholly.Space"     // 子模块导入
+[Import] @Chtl from "Chtholly/Timeline"  // 斜杠形式
+
+// 4. CJMOD 导入
+[Import] @CJmod from "animations"         // 搜索 animations.cjmod
+[Import] @CJmod from "animations.cjmod"   // 具体文件名
+
+// 5. 通配符导入
+[Import] @Chtl from "modules/*"           // 导入 modules 目录下所有 .cmod 和 .chtl
+[Import] @Chtl from "modules/*.cmod"      // 只导入 .cmod 文件
+[Import] @Chtl from "components.*.chtl"   // 点号形式的通配符
+
+// 6. 具体路径导入
+[Import] @Chtl from "/absolute/path/to/module.cmod"
+[Import] @Html from "../shared/header.html" as sharedHeader
+
+// 7. 使用导入的原始嵌入节点
+body {
+    // 使用带名称的原始嵌入
+    [Origin] @Html headerTemplate;
+    
+    div .container {
+        h1 {
+            text "Welcome to CHTL"
+        }
+        
+        // 应用导入的样式
+        [Origin] @Style themeStyles;
+    }
+    
+    // 使用导入的脚本
+    script {
+        [Origin] @JavaScript utilsScript;
+    }
+    
+    // 使用另一个原始嵌入
+    [Origin] @Html sharedHeader;
+}

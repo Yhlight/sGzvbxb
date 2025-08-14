@@ -1,0 +1,110 @@
+// 测试三种注释类型
+
+// 这是单行注释，不会被生成器识别
+div {
+    // 元素内的单行注释
+    id: "comment-test";
+    
+    /* 这是多行注释
+       可以跨越多行
+       同样不会被生成器识别 */
+    class: "test-container";
+    
+    -- 这是会被生成器识别的注释
+    -- 会生成到最终的 HTML 中
+    
+    text { "注释测试" }
+}
+
+/* 
+ * 多行注释示例
+ * 可以用来写文档说明
+ * 不会出现在生成的 HTML 中
+ */
+section {
+    // 样式块中的注释
+    style {
+        /* CSS 样式注释 */
+        padding: 20px; // 内边距
+        margin: 10px;  /* 外边距 */
+        
+        -- 生成器识别的样式注释
+        background: #f0f0f0;
+        
+        // 自动化类名
+        .comment-box {
+            /* 类选择器样式 */
+            border: 1px solid #ddd;
+            -- 这个边框会被生成器看到
+        }
+    }
+    
+    // 脚本块中的注释
+    script {
+        // JavaScript 单行注释
+        console.log("Hello");
+        
+        /* JavaScript 多行注释
+           这些都是标准的 JS 注释 */
+        
+        -- 生成器识别的脚本注释
+        const element = document.querySelector('.comment-box');
+    }
+}
+
+// 复杂注释场景
+ul {
+    -- 任务列表
+    li { 
+        text { "任务 1" } // 第一个任务
+    }
+    
+    /* 
+     * 第二个任务被注释掉了
+     * li { text { "任务 2" } }
+     */
+    
+    li { 
+        -- 重要任务
+        text { "任务 3" } 
+    }
+}
+
+// 嵌套结构中的注释
+[Template] @Style commentStyle {
+    // 模板内的注释
+    color: blue; -- 蓝色文本
+    /* font-size: 14px; */ // 被注释掉的属性
+}
+
+[Custom] @Element commentBox {
+    -- 自定义元素：带注释的盒子
+    div {
+        // 使用模板
+        use @Style commentStyle;
+        
+        /* 
+         * 这里可以添加更多内容
+         * 目前只是一个简单的示例
+         */
+        
+        text { 
+            -- 文本内容
+            "自定义注释盒子" 
+        }
+    }
+}
+
+// 测试注释不影响解析
+div {
+    // id: "commented-id";  // 这个属性被注释掉了
+    id: "actual-id";  // 实际使用的 ID
+    
+    /* class: "old-class"; */
+    class: "new-class";  -- 新的类名
+    
+    text { 
+        "注释不应该影响正常解析" 
+        // "这段文本被注释掉了"
+    }
+}

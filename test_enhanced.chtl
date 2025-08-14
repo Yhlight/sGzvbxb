@@ -1,0 +1,104 @@
+// 测试增强解析器的所有功能
+
+// 1. 模板定义
+[Template] @Style baseStyle {
+    color: blue;
+    font-size: 16px;
+}
+
+[Template] @Element card {
+    div {
+        class: "card";
+        style {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+    }
+}
+
+[Template] @Var theme {
+    primaryColor: "#007bff";
+    secondaryColor: "#6c757d";
+}
+
+// 2. 自定义定义
+[Custom] @Style customStyle {
+    @Style baseStyle;
+    font-weight: bold;
+}
+
+[Custom] @Element button {
+    button {
+        class: "btn";
+        text { "Click Me" }
+    }
+}
+
+// 3. 导入语句
+[Import] @Style from "styles.css" as myStyles
+[Import] [Template] @Element card from "components.chtl" as Card
+
+// 4. 命名空间
+[Namespace] components {
+    [Template] @Element nav {
+        nav {
+            style {
+                background: #333;
+            }
+        }
+    }
+}
+
+// 5. 原始嵌入
+[Origin] @Html {
+    <div>Raw HTML content</div>
+}
+
+// 6. HTML 元素测试
+div {
+    // 属性测试（冒号和等号语法）
+    id: "main";
+    class = "container";
+    
+    // text 块（支持无引号字面量）
+    text { Hello CHTL Enhanced Parser! }
+    
+    // 局部样式块
+    style {
+        color: red;
+        
+        // 自动化类名
+        .highlight {
+            background: yellow;
+        }
+        
+        // 自动化 ID
+        #header {
+            font-size: 24px;
+        }
+        
+        // 上下文推断
+        &:hover {
+            color: blue;
+        }
+    }
+    
+    // 局部脚本块
+    script {
+        console.log("Enhanced parser works!");
+    }
+    
+    // use 语句
+    use @Style baseStyle;
+    use @Element card {
+        text { "Custom content" }
+    }
+    
+    // except 约束
+    except span, [Custom] @Element Box;
+    except @Html;
+    except [Template] @Var;
+    
+    // insert 操作
+    insert content at top;
+}

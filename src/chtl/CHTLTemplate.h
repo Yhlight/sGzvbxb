@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 #include <optional>
 #include "CHTLContext.h"
 
@@ -15,6 +16,18 @@ enum class TemplateType {
     STYLE,      // @Style
     ELEMENT,    // @Element
     VAR         // @Var
+};
+
+// 模板基类
+class Template {
+public:
+    virtual ~Template() = default;
+    virtual std::string getName() const = 0;
+    virtual std::string getBaseTemplateName() const { return baseTemplateName_; }
+    virtual void setBaseTemplateName(const std::string& baseName) { baseTemplateName_ = baseName; }
+    
+protected:
+    std::string baseTemplateName_;
 };
 
 // 模板使用状态
@@ -52,6 +65,12 @@ public:
     
     // 构建全缀名
     std::string buildFullName() const;
+    
+    // 检查是否有限定符
+    bool hasQualifier() const { return nameType == QualifiedNameType::PARTIAL || nameType == QualifiedNameType::FULL; }
+    
+    // 获取完整名称
+    std::string getFullName() const { return buildFullName(); }
     std::string buildPartialName() const;
     
     // 匹配检查
@@ -60,21 +79,25 @@ public:
 };
 
 // 样式组模板
-class StyleTemplate : public TemplateDefinition {
+class StyleTemplate : public Template {
 private:
+    std::string name;
     std::vector<std::pair<std::string, std::string>> styles;
     std::vector<std::string> inheritedTemplates;
     bool hasExplicitInherit;
     
 public:
     StyleTemplate(const std::string& name) 
-        : TemplateDefinition(name, "@Style"), hasExplicitInherit(false) {}
+        : name(name), hasExplicitInherit(false) {}
     
     // 添加样式属性
     void addStyle(const std::string& property, const std::string& value);
     
     // 继承
     void inheritFrom(const std::string& templateName, bool isExplicit = false);
+    
+    // 实现基类接口
+    std::string getName() const override { return name; }
     
     // 获取所有样式（包括继承的）
     std::vector<std::pair<std::string, std::string>> getAllStyles(
@@ -88,9 +111,13 @@ public:
         const std::unordered_map<std::string, std::shared_ptr<StyleTemplate>>& templateMap) const;
 };
 
+// 前向声明
+class CustomElement;
+
 // 元素模板
-class ElementTemplate : public TemplateDefinition {
-private:
+class ElementTemplate : public Template {
+    friend class CustomElement;  // 允许CustomElement访问私有成员
+public:
     struct ElementNode {
         std::string name;
         std::unordered_map<std::string, std::string> attributes;
@@ -100,12 +127,14 @@ private:
         bool hasStyleBlock;
     };
     
+private:
+    std::string name;
     std::vector<std::shared_ptr<ElementNode>> elements;
     std::vector<std::string> inheritedTemplates;
     
 public:
     ElementTemplate(const std::string& name) 
-        : TemplateDefinition(name, "@Element") {}
+        : name(name) {}
     
     // 添加元素
     void addElement(std::shared_ptr<ElementNode> element);
@@ -113,29 +142,43 @@ public:
     // 继承
     void inheritFrom(const std::string& templateName);
     
+    // 实现基类接口
+    std::string getName() const override { return name; }
+    
     // 展开模板
     void expand(class CHTLGenerator& generator) const;
     
     // 获取所有元素（包括继承的）
     std::vector<std::shared_ptr<ElementNode>> getAllElements(
         const std::unordered_map<std::string, std::shared_ptr<ElementTemplate>>& templateMap) const;
+    
+    // 访问器方法
+    const std::vector<std::shared_ptr<ElementNode>>& getElements() const { return elements; }
+    
+    // 检查是否有循环继承
+    bool hasCircularInheritance(const std::string& checkName,
+        const std::unordered_map<std::string, std::shared_ptr<ElementTemplate>>& templateMap) const;
 };
 
 // 变量组模板
-class VarTemplate : public TemplateDefinition {
+class VarTemplate : public Template {
 private:
+    std::string name;
     std::unordered_map<std::string, std::string> variables;
     std::vector<std::string> inheritedTemplates;
     
 public:
     VarTemplate(const std::string& name) 
-        : TemplateDefinition(name, "@Var") {}
+        : name(name) {}
     
     // 添加变量
     void addVariable(const std::string& varName, const std::string& value);
     
     // 继承
     void inheritFrom(const std::string& templateName);
+    
+    // 实现基类接口
+    std::string getName() const override { return name; }
     
     // 获取变量值
     std::optional<std::string> getVariable(const std::string& varName) const;
@@ -146,6 +189,10 @@ public:
     
     // 变量替换
     std::string replaceVariables(const std::string& text) const;
+    
+    // 检查是否有循环继承
+    bool hasCircularInheritance(const std::string& checkName,
+        const std::unordered_map<std::string, std::shared_ptr<VarTemplate>>& templateMap) const;
 };
 
 // 模板管理器
@@ -167,7 +214,7 @@ private:
     
 public:
     TemplateManager(std::shared_ptr<CHTLContext> ctx) 
-        : context(ctx), currentState(TemplateState::USE) {}
+        : currentState(TemplateState::USE), context(ctx) {}
     
     // 状态管理
     void setTemplateState(TemplateState state) { currentState = state; }
@@ -179,12 +226,12 @@ public:
     bool registerVarTemplate(const std::string& name, std::shared_ptr<VarTemplate> tmpl);
     
     // 查找模板（支持全缀名）
+    std::shared_ptr<Template> findTemplate(const std::string& name, TemplateType type) const;
     std::shared_ptr<StyleTemplate> findStyleTemplate(const std::string& name) const;
     std::shared_ptr<ElementTemplate> findElementTemplate(const std::string& name) const;
     std::shared_ptr<VarTemplate> findVarTemplate(const std::string& name) const;
     
-    // 通用查找（根据类型）
-    std::shared_ptr<TemplateDefinition> findTemplate(const std::string& name, TemplateType type) const;
+    // 通用查找（已经在前面声明）
     
     // 使用模板
     bool useStyleTemplate(const std::string& name, class CHTLGenerator& generator);
@@ -198,9 +245,22 @@ public:
     void registerAlias(const std::string& alias, const std::string& fullName);
     std::string resolveAlias(const std::string& name) const;
     
+    // 获取所有样式模板
+    std::unordered_map<std::string, std::shared_ptr<StyleTemplate>> getAllStyleTemplates() const { return styleTemplates; }
+    
     // 验证
     bool validateTemplate(const std::string& name, TemplateType type) const;
     bool checkCircularInheritance() const;
+    
+    // 获取所有样式模板（用于CSS预处理器）
+    std::unordered_map<std::string, std::shared_ptr<ElementTemplate>> getAllElementTemplates() const {
+        return elementTemplates;
+    }
+    
+    // 获取所有变量模板（用于自定义系统）
+    std::unordered_map<std::string, std::shared_ptr<VarTemplate>> getAllVarTemplates() const {
+        return varTemplates;
+    }
 };
 
 // 模板使用处理器

@@ -1,0 +1,65 @@
+// 测试CHTL JS错误报告
+body {
+    div id="error-test" {
+        text "错误测试"
+    }
+}
+
+[LocalScript] {
+    // 1. 未定义变量错误
+    console.log(undefinedVar);  // 错误：未定义的变量
+    
+    // 2. 无效的选择器
+    {{invalid selector}}.style.color = "red";  // 错误：无效的选择器语法
+    
+    // 3. 重复声明
+    let x = 10;
+    let x = 20;  // 错误：重复声明
+    
+    // 4. const重新赋值
+    const PI = 3.14;
+    PI = 3.14159;  // 错误：不能重新赋值const变量
+    
+    // 5. 时间死区（Temporal Dead Zone）
+    console.log(y);  // 错误：在声明前使用
+    let y = 5;
+    
+    // 6. 无效的CHTL JS语法
+    {{#app}}.listen({
+        click: "not a function"  // 错误：事件处理器必须是函数
+    });
+    
+    // 7. 无效的delegate配置
+    {{body}}->delegate({
+        // 缺少target属性
+        click: function() {}  // 错误：delegate必须指定target
+    });
+    
+    // 8. 无效的animate配置
+    animate({
+        // 缺少必要的动画属性
+    });  // 警告：空的动画配置
+    
+    // 9. 未使用的变量
+    let unusedVar = 42;  // 警告：未使用的变量
+    
+    // 10. 不可达代码
+    return;
+    console.log("This won't run");  // 警告：不可达代码
+    
+    // 11. 除零错误
+    let result = 10 / 0;  // 警告：除以零
+    
+    // 12. 空指针访问
+    let obj = null;
+    obj.property;  // 错误：空指针访问
+    
+    // 13. 类型错误
+    "string".forEach();  // 错误：字符串没有forEach方法
+    
+    // 14. 无效的箭头语法
+    {{#test}}->->style;  // 错误：无效的箭头语法
+    
+    // 15. 无效的方法调用
+    {{#button}}.unknownMethod();  // 错误：未知的方法
+}

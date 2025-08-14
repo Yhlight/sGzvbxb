@@ -1,0 +1,182 @@
+// 测试样式组继承
+
+// 基础样式模板
+[Template] @Style BaseText {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+}
+
+// 使用冒号语法继承（在定义时继承）
+[Template] @Style HeaderText : BaseText {
+    font-size: 24px;  // 覆盖父模板的属性
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+// 组合式继承（在模板内部使用 @Style）
+[Template] @Style ThemeColor {
+    color: rgba(255, 192, 203, 1);
+    background-color: rgba(253, 144, 162, 1);
+    padding: 10px;
+}
+
+[Template] @Style ThemeColor2 {
+    background-color: yellow;  // 重复的元素，根据书写顺序进行值替换
+    @Style ThemeColor;  // 样式组模板继承，获得 ThemeColor 所有的属性
+}
+
+// 显性继承（使用 inherit 关键字）
+[Template] @Style ButtonBase {
+    display: inline-block;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+[Template] @Style PrimaryButton {
+    background-color: #007bff;
+    color: white;
+    inherit @Style ButtonBase;  // 显性继承
+}
+
+[Template] @Style DangerButton {
+    background-color: #dc3545;
+    color: white;
+    inherit @Style ButtonBase;  // 继承相同的基础样式
+}
+
+// 测试样式继承的使用
+div {
+    h1 {
+        style {
+            @Style HeaderText;  // 使用继承了 BaseText 的样式
+        }
+        text { "这是标题文本" }
+    }
+    
+    p {
+        style {
+            @Style BaseText;  // 使用基础样式
+        }
+        text { "这是基础段落文本，使用了 BaseText 样式。" }
+    }
+}
+
+// 测试组合式继承
+section {
+    div {
+        style {
+            @Style ThemeColor2;  // 使用组合继承的样式
+        }
+        text { "这个 div 使用了 ThemeColor2，背景应该是黄色" }
+    }
+}
+
+// 测试显性继承的按钮
+div {
+    class: "button-group";
+    
+    button {
+        style {
+            @Style PrimaryButton;
+        }
+        text { "主要按钮" }
+    }
+    
+    button {
+        style {
+            @Style DangerButton;
+        }
+        text { "危险按钮" }
+    }
+}
+
+// 多层继承测试
+[Template] @Style Level1 {
+    margin: 10px;
+    padding: 10px;
+}
+
+[Template] @Style Level2 : Level1 {
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+}
+
+[Template] @Style Level3 : Level2 {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+// 使用多层继承
+div {
+    style {
+        @Style Level3;  // 获得所有三层的样式
+    }
+    text { "多层继承：包含 Level1、Level2 和 Level3 的所有样式" }
+}
+
+// 自定义样式组继承测试
+[Custom] @Style CustomBase {
+    font-family: Georgia, serif;
+    color: #666;
+}
+
+[Custom] @Style CustomExtended {
+    @Style CustomBase;  // 自定义样式也可以继承
+    font-size: 18px;
+    font-style: italic;
+}
+
+// 测试局部样式块中的样式继承
+article {
+    style {
+        // 局部样式块中使用模板
+        @Style BaseText;
+        
+        // 添加额外的内联样式
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    h2 {
+        style {
+            inherit @Style HeaderText;  // 在局部样式块中使用显性继承
+            color: #007bff;  // 覆盖继承的颜色
+        }
+        text { "局部样式块中的继承" }
+    }
+}
+
+// 复杂继承场景
+[Template] @Style CardBase {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 15px;
+}
+
+[Template] @Style InfoCard : CardBase {
+    border-left: 4px solid #17a2b8;
+}
+
+[Template] @Style WarningCard : CardBase {
+    border-left: 4px solid #ffc107;
+    background: #fff3cd;
+}
+
+div {
+    use @Style InfoCard;
+    h3 { text { "信息卡片" } }
+    p { text { "这是一个信息提示卡片" } }
+}
+
+div {
+    use @Style WarningCard;
+    h3 { text { "警告卡片" } }
+    p { text { "这是一个警告提示卡片" } }
+}

@@ -1,0 +1,36 @@
+html {
+    head {
+        title { text { "CHTL测试页面" } }
+        style {
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+            }
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+        }
+    }
+    body {
+        div.container {
+            h1 { text { "欢迎使用CHTL" } }
+            p { text { "这是一个使用CHTL编写的简单页面" } }
+            
+            // 使用CHTL特性
+            @Var ThemeColor(primary: "#007bff", secondary: "#6c757d")
+            
+            button {
+                style {
+                    background-color: ThemeColor(primary);
+                    color: white;
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 4px;
+                }
+                text { "点击我" }
+                onclick: "alert('Hello CHTL!')"
+            }
+        }
+    }
+}

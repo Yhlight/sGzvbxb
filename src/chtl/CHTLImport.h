@@ -18,6 +18,31 @@ class CustomManager;
 class OriginManager;
 class CMODManager;
 
+// 循环依赖检测器基类
+class CircularDependencyDetector {
+public:
+    virtual ~CircularDependencyDetector() = default;
+    
+    // 开始处理文件
+    virtual bool beginProcessing(const std::string& filePath) = 0;
+    
+    // 结束处理文件
+    virtual void endProcessing(const std::string& filePath) = 0;
+    
+    // 添加依赖
+    virtual void addDependency(const std::string& from, const std::string& to) = 0;
+    
+    // 检测循环依赖
+    virtual bool hasCircularDependency(const std::string& from, const std::string& to) const = 0;
+    
+    // 获取循环路径
+    virtual std::vector<std::string> getCircularPath(const std::string& from, 
+                                                     const std::string& to) const = 0;
+    
+    // 清理
+    virtual void clear() = 0;
+};
+
 // 导入类型
 enum class ImportType {
     HTML,           // @Html
@@ -65,7 +90,7 @@ struct ImportedFile {
 
 // 导入管理器
 class ImportManager {
-private:
+protected:
     // 已导入的文件（避免重复导入）
     std::unordered_set<std::string> importedFiles;
     
@@ -90,8 +115,8 @@ private:
     std::shared_ptr<OriginManager> originManager;
     std::shared_ptr<CMODManager> cmodManager;
     
-    // 循环依赖检测器
-    CircularDependencyDetector dependencyDetector;
+    // 循环依赖检测器（使用指针避免不完整类型）
+    std::unique_ptr<CircularDependencyDetector> dependencyDetector;
     
 public:
     ImportManager(std::shared_ptr<CHTLContext> ctx);
@@ -221,27 +246,6 @@ public:
     
     // 检查是否是模块名
     static bool isModuleName(const std::string& name);
-};
-
-// 循环依赖检测器
-class CircularDependencyDetector {
-private:
-    std::unordered_map<std::string, std::vector<std::string>> dependencyGraph;
-    std::unordered_set<std::string> visited;
-    std::unordered_set<std::string> recursionStack;
-    
-public:
-    // 添加依赖关系
-    void addDependency(const std::string& from, const std::string& to);
-    
-    // 检测循环依赖
-    bool hasCircularDependency();
-    
-    // 获取循环路径
-    std::vector<std::string> getCircularPath(const std::string& start);
-    
-private:
-    bool hasCycleUtil(const std::string& node, std::vector<std::string>& path);
 };
 
 // 导入解析器辅助函数

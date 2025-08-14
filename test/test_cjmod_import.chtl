@@ -1,0 +1,26 @@
+// 测试CJMOD导入
+[Import] @CJmod from "test_cjmod" as TestExt
+
+body {
+    div id="app" {
+        h1 {
+            text "CJMOD Extension Test"
+        }
+        
+        button id="test-btn" {
+            text "Test Custom Alert"
+        }
+    }
+}
+
+[LocalScript] {
+    // 使用CJMOD扩展的功能
+    {{#test-btn}}.listen("click", () => {
+        TestExt.customAlert("Hello from CJMOD!");
+        TestExt.customLog("Button clicked");
+    });
+    
+    // 使用自定义选择器
+    let customElements = TestExt.$custom(".special");
+    TestExt.customAnimate(customElements, "fadeIn");
+}

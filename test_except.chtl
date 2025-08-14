@@ -1,0 +1,145 @@
+// 测试 except 约束系统
+
+// 定义一些模板和自定义元素用于测试
+[Template] @Element Card {
+    div {
+        class: "card";
+        style {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px;
+        }
+    }
+}
+
+[Template] @Style BlueText {
+    color: blue;
+    font-weight: bold;
+}
+
+[Template] @Var Colors {
+    primary: "#007bff";
+    danger: "#dc3545";
+}
+
+[Custom] @Element Box {
+    div {
+        style {
+            border: 2px solid #333;
+            padding: 20px;
+        }
+        text { "自定义盒子" }
+    }
+}
+
+// 测试精确约束 - 禁止特定 HTML 元素和自定义元素
+div {
+    id: "restricted-div";
+    
+    // 禁止使用 span 和自定义元素 Box
+    except span, [Custom] @Element Box;
+    
+    // 这些是允许的
+    p { text { "段落是允许的" } }
+    h3 { text { "标题是允许的" } }
+    
+    // 以下如果出现将违反约束：
+    // span { text { "这会违反约束" } }
+    // use @Element Box;  // 这也会违反约束
+    
+    text { "这个 div 中不能使用 span 和 Box" }
+}
+
+// 测试类型约束
+section {
+    id: "type-constraints";
+    
+    // 禁止所有 HTML 元素
+    except @Html;
+    
+    // 只能使用模板和自定义元素
+    use @Element Card {
+        text { "只能使用模板元素" }
+    }
+    
+    // 以下会违反约束：
+    // div { text { "任何 HTML 元素都不允许" } }
+}
+
+// 测试多个类型约束
+article {
+    // 禁止变量组模板
+    except [Template] @Var;
+    
+    // 禁止所有自定义元素
+    except [Custom];
+    
+    // 可以使用样式模板
+    div {
+        use @Style BlueText;
+        text { "可以使用样式模板" }
+    }
+    
+    // 以下会违反约束：
+    // text { use @Var Colors.primary }  // 变量组模板被禁止
+    // use @Element Box;  // 自定义元素被禁止
+}
+
+// 测试命名空间中的全局约束
+[Namespace] RestrictedSpace {
+    // 全局约束 - 在整个命名空间内禁止模板
+    except [Template];
+    
+    // 以下会违反约束：
+    // [Template] @Style NewStyle { color: red; }
+    
+    // 但可以定义自定义元素
+    [Custom] @Element AllowedBox {
+        div {
+            text { "命名空间内的自定义元素" }
+        }
+    }
+}
+
+// 测试复杂的约束组合
+main {
+    // 禁止多个具体元素
+    except p, span, a, img;
+    
+    // 禁止特定的自定义元素
+    except [Custom] @Element Box;
+    
+    // 允许的内容
+    div {
+        h2 { text { "标题" } }
+        ul {
+            li { text { "列表项 1" } }
+            li { text { "列表项 2" } }
+        }
+    }
+    
+    // 使用允许的模板
+    use @Element Card {
+        text { "Card 模板是允许的" }
+    }
+}
+
+// 测试嵌套约束
+div {
+    except span;  // 外层禁止 span
+    
+    div {
+        except p;  // 内层额外禁止 p
+        
+        // 两层约束都生效
+        h4 { text { "标题允许" } }
+        
+        // 以下都会违反约束：
+        // span { text { "外层约束" } }
+        // p { text { "内层约束" } }
+    }
+    
+    // 这一层只有外层约束
+    p { text { "这里可以使用 p" } }
+    // span { text { "但不能使用 span" } }
+}

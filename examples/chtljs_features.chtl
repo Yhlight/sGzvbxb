@@ -1,0 +1,355 @@
+// CHTL JS特性示例 - 展示增强的JavaScript功能
+
+[Template] @Element TodoItem
+{
+    li
+    {
+        class: todo-item;
+        data-id: {{id}};
+        
+        style
+        {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.2s;
+            
+            &:hover {
+                background-color: #f5f5f5;
+            }
+            
+            &.completed {
+                opacity: 0.6;
+                text-decoration: line-through;
+            }
+        }
+        
+        input
+        {
+            type: checkbox;
+            class: todo-checkbox;
+            checked: {{completed}};
+            style
+            {
+                margin-right: 15px;
+                cursor: pointer;
+                width: 20px;
+                height: 20px;
+            }
+        }
+        
+        span
+        {
+            class: todo-text;
+            style { flex: 1; cursor: pointer; }
+            text { {{text}} }
+        }
+        
+        button
+        {
+            class: delete-btn;
+            style
+            {
+                background: none;
+                border: none;
+                color: #f44336;
+                cursor: pointer;
+                font-size: 20px;
+                padding: 5px;
+                opacity: 0.6;
+                transition: opacity 0.2s;
+                
+                &:hover {
+                    opacity: 1;
+                }
+            }
+            text { × }
+        }
+    }
+}
+
+html
+{
+    head
+    {
+        title { CHTL JS特性演示 }
+        style
+        {
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f0f0f0;
+                padding: 20px;
+            }
+            
+            .app-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                overflow: hidden;
+            }
+            
+            .app-header {
+                background: #2196F3;
+                color: white;
+                padding: 20px;
+                text-align: center;
+            }
+            
+            .add-todo-form {
+                display: flex;
+                padding: 20px;
+                border-bottom: 2px solid #e0e0e0;
+            }
+            
+            .todo-input {
+                flex: 1;
+                padding: 10px;
+                border: 2px solid #ddd;
+                border-radius: 4px 0 0 4px;
+                font-size: 16px;
+                outline: none;
+                
+                &:focus {
+                    border-color: #2196F3;
+                }
+            }
+            
+            .add-btn {
+                padding: 10px 20px;
+                background: #2196F3;
+                color: white;
+                border: none;
+                border-radius: 0 4px 4px 0;
+                cursor: pointer;
+                font-size: 16px;
+                
+                &:hover {
+                    background: #1976D2;
+                }
+            }
+            
+            .todo-list {
+                list-style: none;
+                max-height: 400px;
+                overflow-y: auto;
+            }
+            
+            .stats {
+                padding: 15px 20px;
+                background: #f5f5f5;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 14px;
+                color: #666;
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: app-container;
+            
+            div
+            {
+                class: app-header;
+                h1 { text { CHTL JS Todo应用 } }
+                p { text { 使用CHTL JS特性构建的交互式应用 } }
+            }
+            
+            form
+            {
+                class: add-todo-form;
+                id: todoForm;
+                
+                input
+                {
+                    type: text;
+                    class: todo-input;
+                    id: todoInput;
+                    placeholder: 添加新任务...;
+                    required: true;
+                }
+                
+                button
+                {
+                    type: submit;
+                    class: add-btn;
+                    text { 添加 }
+                }
+            }
+            
+            ul
+            {
+                class: todo-list;
+                id: todoList;
+            }
+            
+            div
+            {
+                class: stats;
+                span
+                {
+                    id: todoCount;
+                    text { 0 个任务 }
+                }
+                button
+                {
+                    id: clearCompleted;
+                    style
+                    {
+                        background: none;
+                        border: 1px solid #ddd;
+                        padding: 5px 10px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        
+                        &:hover {
+                            background: #f0f0f0;
+                        }
+                    }
+                    text { 清除已完成 }
+                }
+            }
+        }
+        
+        script
+        {
+            // 使用CHTL JS特性
+            let todos = [];
+            let nextId = 1;
+            
+            // DOM选择器增强 - 使用{{}}语法
+            const todoList = {{#todoList}};
+            const todoInput = {{#todoInput}};
+            const todoForm = {{#todoForm}};
+            const todoCount = {{#todoCount}};
+            const clearBtn = {{#clearCompleted}};
+            
+            // 渲染todo列表
+            function renderTodos() {
+                todoList->innerHTML = '';
+                
+                todos.forEach(todo => {
+                    // 这里应该使用模板，但为了演示直接创建
+                    const li = document.createElement('li');
+                    li.className = 'todo-item' + (todo.completed ? ' completed' : '');
+                    li.dataset.id = todo.id;
+                    
+                    li.innerHTML = `
+                        <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''}>
+                        <span class="todo-text">${todo.text}</span>
+                        <button class="delete-btn">×</button>
+                    `;
+                    
+                    todoList->appendChild(li);
+                });
+                
+                updateStats();
+            }
+            
+            // 更新统计信息
+            function updateStats() {
+                const activeCount = todos.filter(t => !t.completed).length;
+                todoCount->textContent = `${activeCount} 个待完成任务`;
+            }
+            
+            // 添加新todo - 使用listen方法
+            todoForm.listen({
+                submit: (e) => {
+                    e.preventDefault();
+                    const text = todoInput->value.trim();
+                    
+                    if (text) {
+                        todos.push({
+                            id: nextId++,
+                            text: text,
+                            completed: false
+                        });
+                        
+                        todoInput->value = '';
+                        renderTodos();
+                        
+                        // 使用animate函数添加动画
+                        animate({
+                            target: {{.todo-item:last-child}},
+                            duration: 300,
+                            from: { opacity: 0, transform: 'translateY(-20px)' },
+                            to: { opacity: 1, transform: 'translateY(0)' }
+                        });
+                    }
+                }
+            });
+            
+            // 委托事件处理
+            todoList.listen({
+                click: (e) => {
+                    const checkbox = e.target.closest('.todo-checkbox');
+                    const deleteBtn = e.target.closest('.delete-btn');
+                    const todoItem = e.target.closest('.todo-item');
+                    
+                    if (checkbox && todoItem) {
+                        const id = parseInt(todoItem.dataset.id);
+                        const todo = todos.find(t => t.id === id);
+                        if (todo) {
+                            todo.completed = checkbox.checked;
+                            renderTodos();
+                        }
+                    }
+                    
+                    if (deleteBtn && todoItem) {
+                        const id = parseInt(todoItem.dataset.id);
+                        
+                        // 删除动画
+                        animate({
+                            target: todoItem,
+                            duration: 200,
+                            to: { opacity: 0, transform: 'translateX(100%)' },
+                            onComplete: () => {
+                                todos = todos.filter(t => t.id !== id);
+                                renderTodos();
+                            }
+                        });
+                    }
+                }
+            });
+            
+            // 清除已完成任务
+            clearBtn.listen({
+                click: () => {
+                    const completedItems = {{.todo-item.completed}};
+                    
+                    // 批量动画
+                    completedItems.forEach((item, index) => {
+                        animate({
+                            target: item,
+                            duration: 200,
+                            delay: index * 50,
+                            to: { opacity: 0, transform: 'scale(0.8)' },
+                            onComplete: () => {
+                                if (index === completedItems.length - 1) {
+                                    todos = todos.filter(t => !t.completed);
+                                    renderTodos();
+                                }
+                            }
+                        });
+                    });
+                }
+            });
+            
+            // 初始化
+            renderTodos();
+        }
+    }
+}

@@ -118,8 +118,12 @@ private:
     std::vector<InsertOperation> insertOperations;
     std::vector<DeleteOperation> deleteOperations;
     
+    // 模板管理器引用（用于解析继承）
+    std::shared_ptr<TemplateManager> templateManager;
+    
 public:
-    CustomElement(const std::string& name) : ElementTemplate(name) {}
+    CustomElement(const std::string& name, std::shared_ptr<TemplateManager> tm = nullptr) 
+        : ElementTemplate(name), templateManager(tm) {}
     
     // 特例化操作
     void addElementSpecialization(const ElementSpecialization& spec);
@@ -177,6 +181,9 @@ private:
     std::unordered_map<std::string, std::shared_ptr<CustomElement>> customElements;
     std::unordered_map<std::string, std::shared_ptr<CustomVarGroup>> customVars;
     
+    // 名称别名映射
+    std::unordered_map<std::string, std::string> nameAliases;
+    
     // 模板管理器引用（用于模板和自定义的相互继承）
     std::shared_ptr<TemplateManager> templateManager;
     
@@ -185,7 +192,7 @@ private:
     
 public:
     CustomManager(std::shared_ptr<CHTLContext> ctx, std::shared_ptr<TemplateManager> tmplMgr)
-        : context(ctx), templateManager(tmplMgr) {}
+        : templateManager(tmplMgr), context(ctx) {}
     
     // 注册自定义
     bool registerCustomStyle(const std::string& name, std::shared_ptr<CustomStyleGroup> custom);
@@ -222,7 +229,7 @@ public:
     static SpecializationOperation parseDeleteStatement(const std::string& statement);
     
     // 解析插入语句
-    static InsertOperation parseInsertStatement(const std::string& statement);
+    static CustomElement::InsertOperation parseInsertStatement(const std::string& statement);
     
     // 解析变量特例化
     static std::pair<std::string, std::string> parseVariableSpecialization(const std::string& expr);

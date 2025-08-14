@@ -1,17 +1,18 @@
 #pragma once
 
-#include "../CHTLUnifiedScanner.h"
-#include "../generated/CHTLLexer.h"
-#include "../generated/CHTLParser.h"
-#include "../generated/CSSLexer.h"
-#include "../generated/CSSParser.h"
-#include "../generated/JSLexer.h"
-#include "../generated/JSParser.h"
-#include "../generated/CHTLJSLexer.h"
-#include "../generated/CHTLJSParser.h"
-#include "antlr4-runtime.h"
+#include "CHTLUnifiedScanner.h"
+#include "../../generated/chtl/grammars/CHTLLexer.h"
+#include "../../generated/chtl/grammars/CHTLParser.h"
+#include "../../generated/css/grammars/CSSLexer.h"
+#include "../../generated/css/grammars/CSSParser.h"
+#include "../../generated/javascript/grammars/JavaScriptLexer.h"
+#include "../../generated/javascript/grammars/JavaScriptParser.h"
+#include "../../generated/chtljs/grammars/CHTLJavaScriptLexer.h"
+#include "../../generated/chtljs/grammars/CHTLJavaScriptParser.h"
+#include <antlr4-runtime/antlr4-runtime.h>
 #include <memory>
 #include <vector>
+#include "../error/ANTLRErrorAdapter.h"
 
 namespace chtl {
 namespace scanner {
@@ -140,27 +141,8 @@ private:
     groupFragmentsByLanguage(const std::vector<ScanFragment>& fragments);
 };
 
-/**
- * 自定义错误监听器
- */
-class IntegrationErrorListener : public antlr4::BaseErrorListener {
-public:
-    void syntaxError(
-        antlr4::Recognizer* recognizer,
-        antlr4::Token* offendingSymbol,
-        size_t line,
-        size_t charPositionInLine,
-        const std::string& msg,
-        std::exception_ptr e
-    ) override;
-    
-    bool hasErrors() const { return !errors.empty(); }
-    const std::vector<std::string>& getErrors() const { return errors; }
-    void clearErrors() { errors.clear(); }
-    
-private:
-    std::vector<std::string> errors;
-};
+// 使用统一的错误处理系统
+// IntegrationErrorListener已被ANTLRErrorAdapter替代
 
 } // namespace scanner
 } // namespace chtl

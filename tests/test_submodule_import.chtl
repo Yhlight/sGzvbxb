@@ -1,0 +1,38 @@
+// 测试子模块导入功能
+
+// 导入Chtholly的Space子模块
+[Import] @Chtl from "Chtholly.Space"
+
+body {
+    style {
+        @Style SpaceUtilities;  // 使用Space子模块的样式
+    }
+    
+    div class="container flex flex-col p-4" {
+        h1 class="m-2" {
+            text "子模块导入测试"
+        }
+        
+        div class="flex flex-row items-center" {
+            div class="p-3" {
+                text "左侧内容"
+            }
+            
+            // 使用Space子模块的Spacer元素
+            @Element Spacer;
+            
+            div class="p-3" {
+                text "右侧内容"
+            }
+        }
+        
+        div class="m-4" {
+            text "使用了来自Chtholly.Space子模块的间距工具类"
+        }
+    }
+}
+
+[LocalScript] {
+    // 可以访问Space子模块导出的变量
+    console.log("Spacing scale from submodule:", SpacingScale);
+}

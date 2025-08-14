@@ -97,6 +97,7 @@ public:
     // 获取上下文
     std::shared_ptr<CHTLContext> getContext() const;
     std::shared_ptr<CHTLJSContext> getJSContext() const;
+    void setJSContext(std::shared_ptr<CHTLJSContext> ctx);
     
     // 添加局部脚本
     void addLocalScript(const std::string& elementPath, std::shared_ptr<ScriptBlock> script);
@@ -113,6 +114,8 @@ public:
     
     // 处理所有脚本
     void processAllScripts();
+    void processLocalScript(std::shared_ptr<ScriptBlock> script);
+    bool containsCHTLJSFeatures(const std::string& script) const;
     
     // 生成最终的JavaScript代码
     std::string generateJavaScript() const;
@@ -163,10 +166,16 @@ public:
     
     // 处理增强选择器
     std::string processEnhancedSelectors(const std::string& script,
-                                        std::vector<EnhancedSelector>& selectors);
+                                        const std::vector<EnhancedSelector>& selectors);
     
     // 检测脚本类型
     ScriptType detectScriptType(const std::string& script);
+    
+    // 处理无修饰字面量
+    std::string processUnquotedLiterals(const std::string& content);
+    
+    // 检测并处理特殊方法
+    std::string detectAndProcessMethods(const std::string& content);
     
     // 注册自定义函数（供CJMOD使用）
     void registerFunction(const std::string& name, 
@@ -197,8 +206,7 @@ private:
     std::string processLineForUnquotedLiterals(const std::string& line,
                                              std::shared_ptr<CHTLJSContext> jsContext);
     
-    // 检测并处理方法调用
-    std::string detectAndProcessMethods(const std::string& script);
+
 };
 
 // CHTL JS转换器
@@ -216,6 +224,11 @@ public:
     
     // 转换增强选择器
     std::string transformSelector(const std::string& selectorExpr);
+    
+    // 转换其他CHTL JS特性
+    std::string transformListen(const std::string& eventMap);
+    std::string transformEventDelegation(const std::string& eventType, const std::string& selector);
+    std::string transformAnimate(const std::string& properties, const std::string& options);
     
     // 生成DOM查询代码
     std::string generateQueryCode(const EnhancedSelector& selector);
@@ -295,15 +308,26 @@ struct AnimationKeyframe {
 
 // 动画配置
 struct AnimationConfig {
-    int duration;                         // 持续时间(ms)
-    std::string easing;                   // 缓动函数
+    int duration = 300;                   // 持续时间(ms)
+    std::string easing = "ease";          // 缓动函数
     std::map<std::string, std::string> begin;    // 起始状态
     std::vector<AnimationKeyframe> when;          // 关键帧
     std::map<std::string, std::string> end;      // 结束状态
-    int loop;                             // 循环次数（-1为无限）
-    std::string direction;                // 播放方向
-    int delay;                            // 延迟(ms)
+    int loop = 1;                         // 循环次数（-1为无限）
+    std::string direction = "normal";     // 播放方向
+    int delay = 0;                        // 延迟(ms)
     std::string callback;                 // 回调函数
+    
+    // 辅助标志
+    bool hasBegin = false;
+    bool hasEnd = false;
+    bool hasKeyframes = false;
+    bool hasCallback = false;
+    
+    // 字符串形式的状态（用于解析）
+    std::string beginState;
+    std::string endState;
+    std::string keyframes;
 };
 
 // 增强方法调用处理器
@@ -337,6 +361,9 @@ public:
     
     // 解析动画配置
     static AnimationConfig parseAnimationConfig(const std::string& config);
+    
+    // 解析关键帧
+    static std::string parseKeyframes(const std::string& keyframesStr);
     
     // 生成动画函数代码
     static std::string generateAnimationFunction(const AnimationConfig& config);

@@ -659,9 +659,58 @@ std::string BuiltinTransforms::transformCHTL(const ModuleInfo& module, const std
     // 生成输出
     std::stringstream output;
     
-    // TODO: 使用CHTLTreeVisitor生成代码
+    // 使用CHTLTreeVisitor生成代码
     output << "// Compiled from " << module.id << "\n";
-    output << "// CHTL compilation output placeholder\n";
+    output << "// Module: " << module.id << " (Version: " << module.version << ")\n";
+    output << "// Author: " << module.author << "\n";
+    output << "// Description: " << module.description << "\n\n";
+    
+    // 生成模块包装
+    output << "(function(exports, require, module) {\n";
+    output << "'use strict';\n\n";
+    
+    // 添加模块元信息
+    output << "// Module metadata\n";
+    output << "module.id = '" << module.id << "';\n";
+    output << "module.version = '" << module.version << "';\n";
+    output << "module.loaded = false;\n\n";
+    
+    // 生成导出的内容
+    if (!module.exports.empty()) {
+        output << "// Module exports\n";
+        
+        for (const auto& exportItem : module.exports) {
+            switch (exportItem.type) {
+                case ExportType::ELEMENT:
+                    output << "exports['" << exportItem.name << "'] = { type: 'element', name: '" 
+                          << exportItem.name << "' };\n";
+                    break;
+                case ExportType::STYLE:
+                    output << "exports['" << exportItem.name << "'] = { type: 'style', name: '" 
+                          << exportItem.name << "' };\n";
+                    break;
+                case ExportType::VAR:
+                    output << "exports['" << exportItem.name << "'] = { type: 'var', name: '" 
+                          << exportItem.name << "' };\n";
+                    break;
+                default:
+                    break;
+            }
+        }
+        output << "\n";
+    }
+    
+    // 添加编译后的代码
+    output << "// Module code\n";
+    output << module.compiledCode << "\n";
+    
+    // 标记模块已加载
+    output << "\nmodule.loaded = true;\n";
+    
+    // 关闭模块包装
+    output << "})(typeof exports !== 'undefined' ? exports : {}, \n";
+    output << "   typeof require !== 'undefined' ? require : function() {}, \n";
+    output << "   typeof module !== 'undefined' ? module : {});\n";
     
     return output.str();
 }

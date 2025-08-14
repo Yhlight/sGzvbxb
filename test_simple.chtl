@@ -1,0 +1,12 @@
+html {
+    head {
+        title { text { "简单CHTL测试" } }
+    }
+    body {
+        h1 { text { "Hello CHTL!" } }
+        p { text { "这是一个段落" } }
+        div {
+            text { "这是一个div" }
+        }
+    }
+}

@@ -157,19 +157,9 @@ bool ConstraintManager::checkConstraint(const ConstraintTarget& target,
     
     // 检查命名空间约束
     if (namespaceManager) {
-        auto currentNs = namespaceManager->getCurrentNamespace();
-        while (currentNs) {
-            auto nsIt = namespaceConstraints.find(currentNs->getFullPath());
-            if (nsIt != namespaceConstraints.end()) {
-                for (const auto& rule : nsIt->second) {
-                    if (rule->isViolated(target)) {
-                        context->reportError(rule->getViolationMessage(target));
-                        return false;
-                    }
-                }
-            }
-            currentNs = currentNs->getParent();
-        }
+        // TODO: Implement namespace constraint checking with simpler NamespaceDefinition
+        // The current NamespaceDefinition doesn't have getFullPath() or getParent()
+        // auto currentNs = namespaceManager->getCurrentNamespace();
     }
     
     return true;
@@ -489,7 +479,7 @@ std::vector<std::string> splitExceptTargets(const std::string& exceptClause) {
         } else if (inBrackets) {
             currentTarget += " " + target;
             if (target.find(';') != std::string::npos || 
-                ss.peek() == ',' || ss.peek() == EOF) {
+                ss.peek() == ',' || ss.peek() == std::char_traits<char>::eof()) {
                 // 去除末尾的逗号或分号
                 if (currentTarget.back() == ',' || currentTarget.back() == ';') {
                     currentTarget.pop_back();

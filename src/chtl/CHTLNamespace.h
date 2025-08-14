@@ -13,6 +13,10 @@ namespace chtl {
 // 前向声明
 class CHTLGenerator;
 class TemplateManager;
+class CHTLNamespaceDefinition;
+
+// Type alias for compatibility - removed due to conflict
+// using NamespaceDefinition = CHTLNamespaceDefinition;
 class CustomManager;
 
 // 命名空间中的项目类型
@@ -37,14 +41,14 @@ struct NamespaceItem {
 };
 
 // 命名空间定义
-class NamespaceDefinition : public std::enable_shared_from_this<NamespaceDefinition> {
+class CHTLNamespaceDefinition : public std::enable_shared_from_this<CHTLNamespaceDefinition> {
 private:
     std::string name;
     std::string fullPath;  // 完整命名空间路径
-    std::weak_ptr<NamespaceDefinition> parent;  // 父命名空间
+    std::weak_ptr<CHTLNamespaceDefinition> parent;  // 父命名空间
     
     // 子命名空间
-    std::unordered_map<std::string, std::shared_ptr<NamespaceDefinition>> childNamespaces;
+    std::unordered_map<std::string, std::shared_ptr<CHTLNamespaceDefinition>> childNamespaces;
     
     // 命名空间中的项目
     std::unordered_map<std::string, std::vector<NamespaceItem>> items;
@@ -55,21 +59,21 @@ private:
     int endLine;
     
 public:
-    NamespaceDefinition(const std::string& name, const std::string& fullPath = "")
+    CHTLNamespaceDefinition(const std::string& name, const std::string& fullPath = "")
         : name(name), fullPath(fullPath.empty() ? name : fullPath), 
           startLine(0), endLine(0) {}
     
     // 获取器
     const std::string& getName() const { return name; }
     const std::string& getFullPath() const { return fullPath; }
-    std::shared_ptr<NamespaceDefinition> getParent() const { return parent.lock(); }
+    std::shared_ptr<CHTLNamespaceDefinition> getParent() const { return parent.lock(); }
     
     // 设置父命名空间
-    void setParent(std::shared_ptr<NamespaceDefinition> p) { parent = p; }
+    void setParent(std::shared_ptr<CHTLNamespaceDefinition> p) { parent = p; }
     
     // 子命名空间管理
-    std::shared_ptr<NamespaceDefinition> addChildNamespace(const std::string& childName);
-    std::shared_ptr<NamespaceDefinition> getChildNamespace(const std::string& childName) const;
+    std::shared_ptr<CHTLNamespaceDefinition> addChildNamespace(const std::string& childName);
+    std::shared_ptr<CHTLNamespaceDefinition> getChildNamespace(const std::string& childName) const;
     std::vector<std::string> getChildNamespaceNames() const;
     
     // 项目管理
@@ -82,7 +86,7 @@ public:
     std::shared_ptr<void> findItem(const std::string& itemName, NamespaceItemType type) const;
     
     // 合并另一个命名空间
-    bool merge(const NamespaceDefinition& other, std::vector<std::string>& conflicts);
+    bool merge(const CHTLNamespaceDefinition& other, std::vector<std::string>& conflicts);
     
     // 源信息
     void setSourceInfo(const std::string& file, int start, int end) {
@@ -92,23 +96,43 @@ public:
     }
 };
 
+// 创建一个适配器，将 CHTLNamespaceDefinition 包装为 NamespaceDefinition
+class NamespaceDefinitionAdapter : public NamespaceDefinition {
+private:
+    std::shared_ptr<CHTLNamespaceDefinition> impl;
+    
+public:
+    NamespaceDefinitionAdapter(std::shared_ptr<CHTLNamespaceDefinition> impl_)
+        : NamespaceDefinition(impl_->getName()), impl(impl_) {}
+        
+    std::shared_ptr<CHTLNamespaceDefinition> getImplementation() const { return impl; }
+};
+
 // 命名空间管理器
 class NamespaceManager {
+    friend class NamespaceResolver;
+    friend class NamespaceProcessor;
 private:
+    // 内部使用 CHTLNamespaceDefinition
     // 根命名空间（全局）
-    std::shared_ptr<NamespaceDefinition> globalNamespace;
+    std::shared_ptr<CHTLNamespaceDefinition> globalNamespace;
     
-    // 所有命名空间的快速查找表（fullPath -> NamespaceDefinition）
-    std::unordered_map<std::string, std::shared_ptr<NamespaceDefinition>> namespaceIndex;
+    // 所有命名空间的快速查找表（fullPath -> CHTLNamespaceDefinition）
+    std::unordered_map<std::string, std::shared_ptr<CHTLNamespaceDefinition>> namespaceIndex;
     
     // 当前活动的命名空间栈
-    std::vector<std::shared_ptr<NamespaceDefinition>> namespaceStack;
+    std::vector<std::shared_ptr<CHTLNamespaceDefinition>> namespaceStack;
     
     // 文件默认命名空间映射
     std::unordered_map<std::string, std::string> fileDefaultNamespaces;
     
     // 上下文
     std::shared_ptr<CHTLContext> context;
+    
+    // 内部方法：获取当前的 CHTLNamespaceDefinition
+    std::shared_ptr<CHTLNamespaceDefinition> getCurrentCHTLNamespace() const {
+        return namespaceStack.empty() ? globalNamespace : namespaceStack.back();
+    }
     
     // 关联的管理器
     std::shared_ptr<TemplateManager> templateManager;

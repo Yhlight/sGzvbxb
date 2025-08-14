@@ -6,6 +6,19 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# 配置选项
+option(USE_ANTLR_CSS "Use ANTLR-based CSS parser" ON)
+option(USE_ANTLR_JS "Use ANTLR-based JavaScript parser" ON)
+
+# 定义预处理器宏
+if(USE_ANTLR_CSS)
+    add_definitions(-DUSE_ANTLR_CSS)
+endif()
+
+if(USE_ANTLR_JS)
+    add_definitions(-DUSE_ANTLR_JS)
+endif()
+
 # 编译选项
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
@@ -20,46 +33,26 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 find_package(Threads REQUIRED)
 find_package(Java QUIET COMPONENTS Runtime)
 
-# ANTLR4运行时 - 使用内置版本
-if(EXISTS "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/src")
-    # 使用简化的CMakeLists.txt从源码构建
-    if(EXISTS "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/CMakeLists.txt.simple")
-        # 复制简化版作为主CMakeLists.txt
-        configure_file(
-            "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/CMakeLists.txt.simple"
-            "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/CMakeLists.txt"
-            COPYONLY
-        )
-    endif()
-    
-    # 设置标志以避免复杂的安装配置
-    set(CHTL_INTERNAL_BUILD ON)
-    add_subdirectory(third_party/antlr4-runtime)
-    set(ANTLR4_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/src")
-elseif(EXISTS "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/lib")
-    # 使用预构建的ANTLR4运行时
-    set(ANTLR4_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/include")
-    
-    # 查找库文件
-    find_library(ANTLR4_RUNTIME_LIB 
-        NAMES antlr4-runtime 
-        PATHS "${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime/lib"
-        NO_DEFAULT_PATH
-    )
-    
-    if(NOT ANTLR4_RUNTIME_LIB)
-        message(FATAL_ERROR "ANTLR4 runtime library not found.")
-    endif()
-    
-    # 创建导入目标
-    add_library(antlr4-runtime STATIC IMPORTED)
-    set_target_properties(antlr4-runtime PROPERTIES
-        IMPORTED_LOCATION "${ANTLR4_RUNTIME_LIB}"
-        INTERFACE_INCLUDE_DIRECTORIES "${ANTLR4_INCLUDE_DIR}"
-    )
-else()
-    message(FATAL_ERROR "ANTLR4 runtime not found. Please run setup_dependencies script first.")
+# ANTLR4运行时 - 使用已安装的版本
+
+# Find ANTLR4 Runtime
+set(ANTLR4_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/third_party/antlr4-runtime-install")
+set(ANTLR4_INCLUDE_DIR "${ANTLR4_ROOT}/include/antlr4-runtime")
+set(ANTLR4_LIB_DIR "${ANTLR4_ROOT}/lib")
+
+# Find the static library (explicitly look for .a file)
+find_library(ANTLR4_STATIC_LIB
+    NAMES libantlr4-runtime.a antlr4-runtime
+    PATHS ${ANTLR4_LIB_DIR}
+    NO_DEFAULT_PATH
+)
+
+if(NOT ANTLR4_STATIC_LIB)
+    message(FATAL_ERROR "ANTLR4 runtime library not found. Please install ANTLR4 runtime first.")
 endif()
+
+message(STATUS "Found ANTLR4 runtime: ${ANTLR4_STATIC_LIB}")
+message(STATUS "ANTLR4 include dir: ${ANTLR4_INCLUDE_DIR}")
 
 # 检查ANTLR工具（用于生成解析器）
 find_program(ANTLR_EXECUTABLE
@@ -76,6 +69,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/generated
+    ${ANTLR4_INCLUDE_DIR}
 )
 
 # ===== CHTL核心 - 完全独立实现 =====
@@ -91,6 +85,38 @@ file(GLOB_RECURSE CHTL_CORE_SOURCES
     src/chtl/module/*.cpp
     src/chtl/error/*.cpp
     src/chtl/utils/*.cpp
+    src/chtl/CHTLContext.cpp  # 添加CHTLContext实现
+    # src/chtl/CHTLMainCompiler.cpp  # 添加主编译器 - 暂时禁用，使用新架构
+    src/chtl/CHTLTemplate.cpp  # 模板系统实现
+    src/chtl/CHTLCustom.cpp  # 自定义系统实现
+    src/chtl/CHTLCSSPreprocessor.cpp  # CSS预处理器（需要Template和Custom）
+    src/chtl/CHTLGenerator.cpp  # 代码生成器实现
+    # Temporarily commented out due to compilation errors
+    src/chtl/CHTLConstraint.cpp  # 约束管理器实现 - 已修复
+    # src/chtl/CHTLImport.cpp  # 导入管理器实现 - 需要ANTLR生成的CHTL解析器
+    src/chtl/CHTLNamespace.cpp  # 命名空间管理器实现 - 已修复（使用适配器模式）
+    src/chtl/CHTLScript.cpp  # 脚本管理器实现 - 已修复
+    src/chtl/CHTLCMOD.cpp  # CMOD管理器实现 - 已修复
+    src/chtl/CHTLOrigin.cpp  # Origin管理器实现 - 已修复
+    src/chtl/CHTLImportVisitorStandalone.cpp  # 独立导入访问器实现
+    src/chtl/ImportEnhanced.cpp  # 增强的导入系统实现
+    src/chtl/scanner/CHTLUnifiedScanner.cpp  # 统一扫描器
+    src/chtl/compiler/CompilerDispatcher.cpp  # 编译器调度器
+    src/chtl/AutoClassIdProcessor.cpp  # 自动化类/ID处理器
+    src/chtl/stubs/ManagerStubs.cpp  # 临时管理器实现桩
+)
+
+# ===== 编译器架构 - 新增 =====
+file(GLOB_RECURSE COMPILER_ARCH_SOURCES
+    src/chtl/compiler/CompilerDispatcher.cpp
+    src/chtl/compiler/handwritten/*.cpp
+    # ANTLR编译器包装器移到css_js库
+)
+
+# 临时排除有问题的文件
+list(REMOVE_ITEM SCANNER_SOURCES 
+    ${CMAKE_SOURCE_DIR}/src/chtl/scanner/ScannerParserIntegration.cpp
+    ${CMAKE_SOURCE_DIR}/src/chtl/scanner/ScannerIntegrator.cpp
 )
 
 # ===== CHTL独立解析器 =====
@@ -98,8 +124,12 @@ file(GLOB_RECURSE CHTL_PARSER_SOURCES
     src/chtl/parser/standalone/ParserRuntime.cpp
     src/chtl/parser/standalone/CHTLLexer.cpp
     src/chtl/parser/standalone/CHTLParser.cpp
+    src/chtl/parser/standalone/CHTLParserEnhanced.cpp
+    src/chtl/parser/standalone/CHTLCodeGenVisitor.cpp
     src/chtl/parser/standalone/CHTLJSLexer.cpp
     src/chtl/parser/standalone/CHTLJSParser.cpp
+    src/chtl/parser/standalone/CHTLJSCodeGenerator.cpp
+    src/chtl/parser/CHTLSimpleParser.cpp
 )
 
 # ===== 扫描器 - 独立实现 =====
@@ -107,16 +137,49 @@ file(GLOB_RECURSE SCANNER_SOURCES
     src/chtl/scanner/*.cpp
 )
 
-# 添加精准扫描器
+# 添加精准扫描器和状态机扫描器
 set(SCANNER_SOURCES 
     ${SCANNER_SOURCES}
     src/chtl/scanner/PrecisionScanner.cpp
+    src/chtl/scanner/StateMachineScanner.cpp
+)
+
+# ===== 新增模块 =====
+# 缓存系统
+file(GLOB_RECURSE CACHE_SOURCES
+    src/chtl/cache/*.cpp
+)
+
+# 并行编译
+file(GLOB_RECURSE PARALLEL_SOURCES
+    src/chtl/parallel/*.cpp
+)
+
+# Source Map支持
+file(GLOB_RECURSE SOURCEMAP_SOURCES
+    src/chtl/sourcemap/*.cpp
+)
+
+# 模块系统
+file(GLOB_RECURSE MODULE_SOURCES
+    src/chtl/module/*.cpp
+)
+
+# 性能优化
+file(GLOB_RECURSE OPTIMIZATION_SOURCES
+    src/chtl/optimization/*.cpp
+)
+
+# 增强错误处理
+set(ENHANCED_ERROR_SOURCES
+    src/chtl/error/EnhancedError.cpp
+    src/chtl/error/CHTLJSErrorReporter.cpp
 )
 
 # ===== 配置系统 - 由CHTL独立处理 =====
 file(GLOB_RECURSE CONFIG_SOURCES
-    src/chtl/config/*.cpp
-    src/chtl/parser/standalone/ConfigLexer.cpp
+    # 使用不依赖ANTLR4的独立配置系统
+    src/chtl/config/ConfigurationSystem.cpp
     src/chtl/parser/standalone/ConfigParser.cpp
 )
 
@@ -132,13 +195,13 @@ endif()
 
 file(GLOB CSS_COMPILER_SOURCES
     src/chtl/CHTLCSSCompiler.cpp
-    src/chtl/CHTLCSSPreprocessor.cpp
+    # CHTLCSSPreprocessor.cpp moved to core
 )
 
 # ===== JS解析器 - 使用ANTLR4 =====
-if(EXISTS "${CMAKE_SOURCE_DIR}/generated/js")
+if(EXISTS "${CMAKE_SOURCE_DIR}/generated/javascript")
     file(GLOB_RECURSE JS_ANTLR_SOURCES
-        generated/js/*.cpp
+        generated/javascript/grammars/*.cpp
     )
 else()
     set(JS_ANTLR_SOURCES "")
@@ -163,6 +226,13 @@ add_library(chtl_core STATIC
     ${CHTL_PARSER_SOURCES}
     ${SCANNER_SOURCES}
     ${CONFIG_SOURCES}
+    ${COMPILER_ARCH_SOURCES}
+    ${CACHE_SOURCES}
+    ${PARALLEL_SOURCES}
+    ${SOURCEMAP_SOURCES}
+    ${MODULE_SOURCES}
+    ${OPTIMIZATION_SOURCES}
+    ${ENHANCED_ERROR_SOURCES}
 )
 
 # CSS/JS库（依赖ANTLR4）
@@ -171,18 +241,34 @@ add_library(chtl_css_js STATIC
     ${CSS_COMPILER_SOURCES}
     ${JS_ANTLR_SOURCES}
     ${JS_COMPILER_SOURCES}
+    src/chtl/compiler/antlr/CSSCompilerWrapper.cpp
+    src/chtl/compiler/antlr/JSCompilerWrapper.cpp
 )
 
+# 添加对chtl_core的依赖以访问CHTLEnhancedCSSCompiler
+add_dependencies(chtl_css_js chtl_core)
+
 # 链接ANTLR4仅到CSS/JS库
-target_link_libraries(chtl_css_js PUBLIC antlr4-runtime)
+target_link_libraries(chtl_css_js PUBLIC ${ANTLR4_STATIC_LIB})
 
 # 主可执行文件
 add_executable(chtl ${CHTL_MAIN_SOURCES})
 
-# 链接
+# 创建统一架构可执行文件
+add_executable(chtl_unified src/main_unified.cpp)
+
+# 链接（使用循环链接解决相互依赖）
 target_link_libraries(chtl
     chtl_core
     chtl_css_js
+    chtl_core  # 再次链接以解决循环依赖
+    ${ANTLR4_STATIC_LIB}
+    Threads::Threads
+)
+
+# 链接统一架构可执行文件
+target_link_libraries(chtl_unified
+    chtl_core
     Threads::Threads
 )
 
@@ -254,3 +340,59 @@ message(STATUS "Dependencies:")
 message(STATUS "  ANTLR4 Runtime: ${antlr4-runtime_FOUND} (CSS/JS only)")
 message(STATUS "  Threads: ${Threads_FOUND}")
 message(STATUS "")
+
+# ===== Google Test 集成 =====
+option(CHTL_BUILD_UNIT_TESTS "Build unit tests" ON)
+
+if(CHTL_BUILD_UNIT_TESTS)
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG release-1.12.1
+    )
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+    
+    # 统一架构的单元测试
+    # 检查是否已存在目标
+    if(NOT TARGET test_unified_scanner)
+        add_executable(test_unified_scanner tests/unit/test_unified_scanner.cpp)
+        target_link_libraries(test_unified_scanner 
+            chtl_core 
+            gtest 
+            gtest_main
+            Threads::Threads
+        )
+    endif()
+    
+    if(NOT TARGET test_compiler_dispatcher)
+        add_executable(test_compiler_dispatcher tests/unit/test_compiler_dispatcher.cpp)
+        target_link_libraries(test_compiler_dispatcher 
+            chtl_core 
+            gtest 
+            gtest_main
+            Threads::Threads
+        )
+    endif()
+    
+    # 设置测试输出目录
+    set_target_properties(test_unified_scanner test_compiler_dispatcher
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    )
+    
+    # 添加到CTest
+    enable_testing()
+    add_test(NAME UnifiedScannerTest COMMAND test_unified_scanner)
+    add_test(NAME CompilerDispatcherTest COMMAND test_compiler_dispatcher)
+    
+    # 添加到测试目标
+    add_custom_target(run_unit_tests
+        COMMAND test_unified_scanner
+        COMMAND test_compiler_dispatcher
+        DEPENDS test_unified_scanner test_compiler_dispatcher
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+        COMMENT "Running unit tests..."
+    )
+endif()

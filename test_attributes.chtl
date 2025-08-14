@@ -1,0 +1,138 @@
+html {
+    head {
+        title { text { "CHTL属性测试" } }
+        style {
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            
+            .button {
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+            
+            #header {
+                background-color: #f8f9fa;
+                padding: 20px 0;
+                text-align: center;
+            }
+        }
+    }
+    body {
+        div#header {
+            h1 { text { "欢迎使用CHTL" } }
+        }
+        
+        div.container {
+            p { 
+                text { "这是一个支持属性的CHTL示例。" }
+            }
+            
+            a {
+                href: "https://example.com";
+                target: "_blank";
+                text { "访问示例网站" }
+            }
+            
+            button.button {
+                type: "button";
+                onclick: "alert('Hello CHTL!')";
+                text { "点击我" }
+            }
+            
+            img {
+                src: "/images/logo.png";
+                alt: "CHTL Logo";
+                width: "200";
+                height: "100";
+            }
+            
+            form {
+                action: "/submit";
+                method: "post";
+                
+                input {
+                    type: "text";
+                    name: "username";
+                    placeholder: "请输入用户名";
+                }
+                
+                input {
+                    type: "password";
+                    name: "password";
+                    placeholder: "请输入密码";
+                }
+                
+                button {
+                    type: "submit";
+                    text { "登录" }
+                }
+            }
+        }
+    }
+}
+
+// 测试属性语法 - 冒号和等号
+div {
+    // 冒号语法
+    id: "main-container";
+    class: "container wrapper";
+    
+    // 等号语法（CE对等式）
+    title = "这是一个提示";
+    data-value = "123";
+    
+    // 无引号字面量
+    width: 100%;
+    height: auto;
+    role: navigation;
+    
+    // 混合使用
+    style: "color: red;";
+    onclick = "handleClick()";
+    
+    text { "测试属性语法" }
+}
+
+// 测试各种HTML属性
+form {
+    action: "/submit";
+    method = "POST";
+    
+    input {
+        type: "text";
+        name = "username";
+        placeholder: "请输入用户名";
+        required: true;
+    }
+    
+    button {
+        type = "submit";
+        class: "btn btn-primary";
+        
+        text { "提交" }
+    }
+}
+
+// 测试链接属性
+a {
+    href: "https://example.com";
+    target = "_blank";
+    rel: "noopener noreferrer";
+    
+    text { "访问示例网站" }
+}
+
+// 测试图片属性
+img {
+    src = "/images/logo.png";
+    alt: "公司logo";
+    width: 200;
+    height = 60;
+}

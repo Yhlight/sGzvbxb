@@ -1,189 +1,213 @@
 // CHTL Compiler Main Entry Point
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <filesystem>
-#include <cstring>
+#include <sstream>
+#include <memory>
 #include "chtl/CHTLContext.h"
+#include "chtl/scanner/CHTLUnifiedScanner.h"
+#include "chtl/compiler/CompilerDispatcher.h"
+#include "chtl/error/ErrorInterface.h"
+#include "chtl/parser/CHTLSimpleParser.h"
+#include "chtl/parser/standalone/CHTLParserEnhanced.h"
+#include "chtl/parser/standalone/CHTLLexer.h"
+#include "chtl/parser/standalone/CHTLCodeGenVisitor.h"
 #include "chtl/CHTLGenerator.h"
-#include "chtl/CHTLUnifiedScanner.h"
-#include "chtl/CHTLCMOD.h"
-#include "chtl/scanner/ScannerParserIntegration.h"
-#include "chtl/CHTLTreeVisitor.h"
 
-namespace fs = std::filesystem;
-
-void printUsage(const char* programName) {
-    std::cout << "CHTL Compiler v1.0.0" << std::endl;
-    std::cout << "Usage: " << programName << " [options] <input-file>" << std::endl;
-    std::cout << "\nOptions:" << std::endl;
-    std::cout << "  -o <output>    Specify output file (default: a.html)" << std::endl;
-    std::cout << "  -m <dir>       Module search directory (default: ./module)" << std::endl;
-    std::cout << "  --no-optimize  Disable optimization" << std::endl;
-    std::cout << "  --verbose      Verbose output" << std::endl;
-    std::cout << "  --help         Show this help message" << std::endl;
-    std::cout << "\nExamples:" << std::endl;
-    std::cout << "  " << programName << " input.chtl" << std::endl;
-    std::cout << "  " << programName << " -o output.html input.chtl" << std::endl;
-    std::cout << "  " << programName << " -m /usr/share/chtl/module input.chtl" << std::endl;
-}
+using namespace chtl;
 
 int main(int argc, char* argv[]) {
-    // 解析命令行参数
-    std::string inputFile;
-    std::string outputFile = "a.html";
-    std::string moduleDir = "./module";
-    bool optimize = true;
-    bool verbose = false;
-    
-    for (int i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) {
-            outputFile = argv[++i];
-        } else if (strcmp(argv[i], "-m") == 0 && i + 1 < argc) {
-            moduleDir = argv[++i];
-        } else if (strcmp(argv[i], "--no-optimize") == 0) {
-            optimize = false;
-        } else if (strcmp(argv[i], "--verbose") == 0) {
-            verbose = true;
-        } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
-            printUsage(argv[0]);
-            return 0;
-        } else if (argv[i][0] != '-') {
-            inputFile = argv[i];
-        } else {
-            std::cerr << "Unknown option: " << argv[i] << std::endl;
-            printUsage(argv[0]);
-            return 1;
-        }
-    }
-    
-    if (inputFile.empty()) {
-        std::cerr << "Error: No input file specified" << std::endl;
-        printUsage(argv[0]);
-        return 1;
-    }
-    
-    // 检查输入文件是否存在
-    if (!fs::exists(inputFile)) {
-        std::cerr << "Error: Input file does not exist: " << inputFile << std::endl;
-        return 1;
-    }
+    std::cout << "\nCHTL Compiler v1.0.0\n";
+    std::cout << "===================\n";
     
     try {
+        // 解析命令行参数
+        std::string inputFile;
+        std::string outputFile = "output.html";
+        bool useFullCompiler = false;
+        bool useEnhancedParser = false;
+        bool useUnifiedArchitecture = false;
+        
+        if (argc < 2) {
+            std::cerr << "Usage: " << argv[0] << " <input.chtl> [-o output.html] [--full] [--enhanced] [--unified]\n";
+            std::cerr << "Options:\n";
+            std::cerr << "  -o <file>    Specify output file (default: output.html)\n";
+            std::cerr << "  --full       Use full compiler with advanced features\n";
+            std::cerr << "  --enhanced   Use enhanced parser with complete CHTL syntax support\n";
+            std::cerr << "  --unified    Use unified architecture with precise code splitting\n";
+            return 1;
+        }
+        
+        inputFile = argv[1];
+        
+        // 解析其他参数
+        for (int i = 2; i < argc; i++) {
+            if (std::string(argv[i]) == "-o" && i + 1 < argc) {
+                outputFile = argv[++i];
+            } else if (std::string(argv[i]) == "--full") {
+                useFullCompiler = true;
+                std::cerr << "Note: Using full compiler mode with ANTLR support.\n";
+            } else if (std::string(argv[i]) == "--enhanced") {
+                useEnhancedParser = true;
+                std::cerr << "Note: Using enhanced parser with complete CHTL syntax support.\n";
+            } else if (std::string(argv[i]) == "--unified") {
+                useUnifiedArchitecture = true;
+                std::cerr << "Note: Using unified architecture with precise code splitting.\n";
+            }
+        }
+        
         // 读取输入文件
-        std::ifstream ifs(inputFile);
-        if (!ifs) {
+        std::ifstream input(inputFile);
+        if (!input.is_open()) {
             std::cerr << "Error: Cannot open input file: " << inputFile << std::endl;
             return 1;
         }
         
-        std::string content((std::istreambuf_iterator<char>(ifs)),
-                           std::istreambuf_iterator<char>());
-        ifs.close();
+        std::stringstream buffer;
+        buffer << input.rdbuf();
+        std::string source = buffer.str();
+        input.close();
         
-        if (verbose) {
-            std::cout << "Processing: " << inputFile << std::endl;
-            std::cout << "Output: " << outputFile << std::endl;
-            std::cout << "Module directory: " << moduleDir << std::endl;
-        }
+        std::cout << "Compiling: " << inputFile << std::endl;
         
-        // 创建CHTL上下文
-        auto context = std::make_shared<chtl::CHTLContext>();
-        
-        // 设置模块搜索路径
-        if (fs::exists(moduleDir)) {
-            // TODO: 添加模块路径到上下文
-            if (verbose) {
-                std::cout << "Module directory found: " << moduleDir << std::endl;
+        if (useUnifiedArchitecture) {
+            std::cout << "Using unified architecture with precise code splitting...\n";
+            
+            // 创建编译器调度器
+            compiler::CompilerDispatcher dispatcher;
+            
+            // 启用调试模式（可选）
+            bool debug = false;
+            for (int i = 2; i < argc; i++) {
+                if (std::string(argv[i]) == "--debug") {
+                    debug = true;
+                    break;
+                }
             }
-        }
-        
-        // 创建统一扫描器
-        chtl::CHTLUnifiedScanner scanner(content, context);
-        
-        // 配置扫描器
-        chtl::ScannerConfig config;
-        config.processGenerativeComments = true;
-        config.expandStyleGroups = true;
-        config.expandVarGroups = true;
-        scanner.setConfig(config);
-        
-        // 执行扫描
-        if (verbose) {
-            std::cout << "Scanning CHTL source..." << std::endl;
-        }
-        scanner.scan();
-        
-        // 创建生成器
-        chtl::CHTLGenerator generator;
-        
-        // 配置生成器选项
-        chtl::CHTLGenerator::GeneratorOptions options;
-        options.enableOptimization = optimize;
-        options.minifyOutput = optimize;
-        options.generateComments = !optimize;
-        generator.setOptions(options);
-        
-        // 使用Scanner-Parser集成进行解析
-        scanner::ScannerParserIntegration integration(context);
-        integration.setConfigurationEnabled(true);
-        
-        auto parseResult = integration.parse(content, "");  // 使用content而不是input
-        
-        if (!parseResult.success) {
-            std::cerr << "Parse error: " << parseResult.errorMessage << std::endl;
+            dispatcher.setDebugMode(debug);
+            
+            // 编译源代码
+            auto result = dispatcher.compile(source);
+            
+            if (!result.success) {
+                std::cerr << "Compilation failed:\n";
+                for (const auto& error : result.errors) {
+                    std::cerr << "  Error: " << error << std::endl;
+                }
+                return 1;
+            }
+            
+            // 写入输出文件
+            std::ofstream output(outputFile);
+            if (!output.is_open()) {
+                std::cerr << "Error: Cannot open output file: " << outputFile << std::endl;
+                return 1;
+            }
+            
+            output << result.html;
+            output.close();
+            
+            std::cout << "\nOutput written to: " << outputFile << std::endl;
+            std::cout << "Compilation completed successfully!\n";
+            
+        } else if (useFullCompiler) {
+            std::cout << "Full compiler is currently disabled. Please use --unified option.\n";
             return 1;
+            
+        } else if (useEnhancedParser) {
+            std::cout << "Using enhanced parser with complete CHTL syntax support...\n";
+            
+            // 使用增强解析器
+            try {
+                std::cout << "Creating lexer...\n";
+                // 创建词法分析器
+                parser::CHTLLexer lexer(source);
+                std::cout << "Tokenizing source...\n";
+                auto tokens = lexer.tokenize();
+                std::cout << "Tokenization complete. Token count: " << tokens.size() << "\n";
+                
+                // 创建 TokenStream
+                std::cout << "Creating TokenStream...\n";
+                auto tokenStream = std::make_shared<parser::TokenStream>(tokens);
+                
+                // 创建增强解析器
+                std::cout << "Creating enhanced parser...\n";
+                parser::CHTLParserEnhanced parser(tokenStream);
+                std::cout << "Parsing compilation unit...\n";
+                std::shared_ptr<parser::ParseContext> parseTree;
+                try {
+                    parseTree = parser.compilationUnit();
+                    std::cout << "Parsing complete.\n";
+                } catch (const std::exception& e) {
+                    std::cerr << "Parse exception: " << e.what() << std::endl;
+                    return 1;
+                }
+                
+                if (!parseTree) {
+                    std::cerr << "Parse error: Failed to parse CHTL source\n";
+                    return 1;
+                }
+                
+                // 创建代码生成访问器
+                parser::CHTLCodeGenVisitor visitor;
+                std::string generatedCode = visitor.visit(parseTree);
+                
+                std::cout << "Code generation complete.\n";
+                
+                // 写入输出文件
+                std::ofstream output(outputFile);
+                if (!output.is_open()) {
+                    std::cerr << "Error: Cannot open output file: " << outputFile << std::endl;
+                    return 1;
+                }
+                
+                output << generatedCode;
+                output.close();
+                
+            } catch (const std::exception& e) {
+                std::cerr << "Parse error: " << e.what() << std::endl;
+                return 1;
+            }
+            
+        } else {
+            std::cout << "Using simple parser (basic features only)...\n";
+            
+            // 使用简单解析器
+            parser::CHTLSimpleParser parser;
+            auto parseResult = parser.parse(source);
+            
+            if (!parseResult.success) {
+                std::cerr << "Parse error at line " << parseResult.errorLine 
+                         << ", column " << parseResult.errorColumn 
+                         << ": " << parseResult.error << std::endl;
+                return 1;
+            }
+            
+            std::cout << "Parsing successful!" << std::endl;
+            
+            // 生成HTML
+            std::string html = parser::CHTLSimpleParser::generateHTML(parseResult.root);
+            
+            // 写入输出文件
+            std::ofstream output(outputFile);
+            if (!output.is_open()) {
+                std::cerr << "Error: Cannot create output file: " << outputFile << std::endl;
+                return 1;
+            }
+            
+            output << "<!DOCTYPE html>\n" << html;
+            output.close();
         }
         
-        // 使用解析树生成输出
-        chtl::CHTLTreeVisitor visitor(context);
-        if (parseResult.chtlTree) {
-            visitor.visit(parseResult.chtlTree);
-        }
+        std::cout << "\nOutput written to: " << outputFile << std::endl;
+        std::cout << "Compilation completed successfully!" << std::endl;
         
-        // 生成最终输出
-        std::string html = generator.getHTML();
-        std::string css = generator.getCSS();
-        std::string js = generator.getJS();
-        
-        // 组合最终输出
-        std::ostringstream output;
-        output << "<!DOCTYPE html>\n";
-        output << "<html>\n";
-        output << "<head>\n";
-        output << "    <meta charset=\"UTF-8\">\n";
-        output << "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
-        if (!css.empty()) {
-            output << "    <style>\n" << css << "\n    </style>\n";
-        }
-        output << "</head>\n";
-        output << "<body>\n";
-        output << html;
-        if (!js.empty()) {
-            output << "    <script>\n" << js << "\n    </script>\n";
-        }
-        output << "</body>\n";
-        output << "</html>\n";
-        
-        // 写入输出文件
-        std::ofstream ofs(outputFile);
-        if (!ofs) {
-            std::cerr << "Error: Cannot create output file: " << outputFile << std::endl;
-            return 1;
-        }
-        
-        ofs << output.str();
-        ofs.close();
-        
-        if (verbose) {
-            std::cout << "Compilation successful!" << std::endl;
-            std::cout << "Output written to: " << outputFile << std::endl;
-        }
-        
-        return 0;
-        
+    } catch (const chtl::error::CHTLException& e) {
+        std::cerr << "\nCHTL Error: " << e.what() << std::endl;
+        return 1;
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "\nError: " << e.what() << std::endl;
         return 1;
     }
+    
+    return 0;
 }

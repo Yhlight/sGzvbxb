@@ -1,0 +1,12 @@
+[Configuration] {
+    name = "Space";
+    version = "1.0.0";
+    parent = "Chtholly";
+    description = "Spacing and layout utilities for Chtholly";
+}
+
+[Export] {
+    @Style SpaceUtilities;
+    @Element Spacer;
+    @Var SpacingScale;
+}

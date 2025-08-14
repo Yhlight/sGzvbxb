@@ -1,0 +1,16 @@
+// CJMOD信息文件
+[Configuration] {
+    name = "TestCJMOD";
+    version = "1.0.0";
+    author = "CHTL Team";
+    description = "Test CJMOD for CHTL JS extensions";
+}
+
+// 导出的扩展功能
+[Export] {
+    // CHTL JS扩展函数
+    @Function customAlert, customLog, customAnimate;
+    
+    // CHTL JS扩展选择器
+    @Selector $custom, $$custom;
+}

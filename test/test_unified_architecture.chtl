@@ -1,0 +1,62 @@
+// 统一架构测试文件
+// 展示CHTL、CHTL JS、CSS、JavaScript的精准切割
+
+body {
+    h1 {
+        text "Unified Architecture Demo"
+        style {
+            // 这是CSS片段
+            color: #333;
+            font-size: 24px;
+            text-align: center;
+        }
+    }
+    
+    div {
+        id: "demo";
+        style {
+            // 局部CSS样式
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            
+            .button {
+                background: #007bff;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                cursor: pointer;
+            }
+        }
+        
+        button {
+            class: "button";
+            text "Click Me"
+        }
+        
+        p {
+            id: "result";
+            text "Result will appear here"
+        }
+    }
+    
+    script {
+        // 这是CHTL JS片段，包含特殊语法
+        {{#demo .button}}->listen({
+            click: () => {
+                // 使用CHTL JS的DOM选择和链式访问
+                {{#result}}->textContent = "Button clicked at " + new Date().toLocaleTimeString();
+                {{#result}}->animate({
+                    opacity: [0, 1],
+                    transform: ["scale(0.8)", "scale(1)"]
+                }, {
+                    duration: 300,
+                    easing: "ease-out"
+                });
+            }
+        });
+        
+        // 普通JavaScript代码
+        console.log("CHTL Unified Architecture initialized");
+    }
+}
