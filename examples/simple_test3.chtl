@@ -1,0 +1,13 @@
+body {
+    h1 {
+        text {
+            "Hello CHTL!"
+        }
+    }
+    
+    p {
+        text {
+            "This is a simple test."
+        }
+    }
+}
