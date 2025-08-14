@@ -33,6 +33,27 @@ ElementSelector ElementSelector::parse(const std::string& selector) {
 }
 
 // CustomStyleGroup 实现
+/*
+// 第一个版本暂时注释掉，使用下面更完整的版本
+std::vector<std::pair<std::string, std::string>> CustomStyleGroup::getEffectiveStyles(
+    const std::unordered_map<std::string, std::shared_ptr<StyleTemplate>>& templateMap,
+    const std::unordered_map<std::string, std::string>& params) const {
+    
+    std::vector<std::pair<std::string, std::string>> result;
+    
+    // 首先添加基础样式（使用StyleTemplate的访问器方法）
+    auto baseStyles = getAllStyles(templateMap);
+    for (const auto& style : baseStyles) {
+        result.push_back(style);
+    }
+    
+    // TODO: 处理参数化样式
+    
+    return result;
+}
+*/
+
+// requiresValue已经定义
 void CustomStyleGroup::addValuelessProperty(const std::string& property) {
     valueRequiredProperties.push_back(property);
 }
@@ -61,6 +82,7 @@ void CustomStyleGroup::applySpecialization(const SpecializationOperation& op) {
     specializations.push_back(op);
 }
 
+// 重载的getEffectiveStyles函数
 std::vector<std::pair<std::string, std::string>> CustomStyleGroup::getEffectiveStyles(
     const std::unordered_map<std::string, std::shared_ptr<StyleTemplate>>& templateMap,
     const std::unordered_map<std::string, std::string>& providedValues) const {
@@ -189,7 +211,7 @@ void CustomElement::expandWithSpecialization(CHTLGenerator& generator,
                     if (elem->inlineStyles) {
                         auto existingStyles = elem->inlineStyles->getAllStyles({});
                         for (const auto& [prop, value] : existingStyles) {
-                            mergedStyles->addProperty(prop, value);
+                            mergedStyles->addStyle(prop, value);
                         }
                     }
                     
@@ -197,7 +219,7 @@ void CustomElement::expandWithSpecialization(CHTLGenerator& generator,
                     if (spec.additionalStyles) {
                         auto newStyles = spec.additionalStyles->getAllStyles({});
                         for (const auto& [prop, value] : newStyles) {
-                            mergedStyles->addProperty(prop, value);
+                            mergedStyles->addStyle(prop, value);
                         }
                     }
                     
@@ -371,6 +393,13 @@ std::string CustomVarGroup::getVariableWithSpecialization(const std::string& var
 }
 
 // CustomManager 实现
+std::shared_ptr<CustomVarGroup> CustomManager::findCustomVar(const std::string& name) const {
+    auto it = customVars.find(name);
+    if (it != customVars.end()) {
+        return it->second;
+    }
+    return nullptr;
+}
 bool CustomManager::registerCustomStyle(const std::string& name, std::shared_ptr<CustomStyleGroup> custom) {
     customStyles[name] = custom;
     
@@ -437,6 +466,8 @@ std::shared_ptr<CustomElement> CustomManager::findCustomElement(const std::strin
     return nullptr;
 }
 
+// findCustomVar已经在前面定义
+/*
 std::shared_ptr<CustomVarGroup> CustomManager::findCustomVar(const std::string& name) const {
     auto it = customVars.find(name);
     if (it != customVars.end()) {
@@ -454,6 +485,7 @@ std::shared_ptr<CustomVarGroup> CustomManager::findCustomVar(const std::string& 
     
     return nullptr;
 }
+*/
 
 bool CustomManager::useCustomStyle(const std::string& name, CHTLGenerator& generator,
     const std::unordered_map<std::string, std::string>& providedValues) {
@@ -536,8 +568,8 @@ SpecializationOperation SpecializationProcessor::parseDeleteStatement(const std:
     return op;
 }
 
-InsertOperation SpecializationProcessor::parseInsertStatement(const std::string& statement) {
-    InsertOperation op;
+CustomElement::InsertOperation SpecializationProcessor::parseInsertStatement(const std::string& statement) {
+    CustomElement::InsertOperation op;
     
     // 解析格式: insert [position] [selector] { elements }
     std::regex insertRegex(R"(insert\s+(before|after|replace|at\s+top|at\s+bottom)\s+([^{]+)\s*\{([^}]*)\})");
@@ -566,7 +598,7 @@ InsertOperation SpecializationProcessor::parseInsertStatement(const std::string&
         
         // 解析要插入的元素
         // 简化处理：将内容作为原始HTML
-        auto element = std::make_shared<ElementNode>();
+        auto element = std::make_shared<CustomElement::ElementNode>();
         element->name = "div";  // 默认使用div包装
         element->textContent = content;
         op.elementsToInsert.push_back(element);
@@ -641,20 +673,16 @@ std::vector<SpecializationOperation> mergeSpecializations(
         merged.push_back(op);
         
         // 记录操作的索引（用于后续覆盖）
-        if (op.type == SpecializationType::STYLE && !op.styleName.empty()) {
-            operationIndex[op.styleName] = merged.size() - 1;
-        } else if (op.type == SpecializationType::VAR && !op.varGroup.empty()) {
-            operationIndex[op.varGroup] = merged.size() - 1;
+        if (!op.targets.empty()) {
+            operationIndex[op.targets[0]] = merged.size() - 1;
         }
     }
     
     // 添加或覆盖覆盖操作
     for (const auto& op : overrides) {
         std::string key;
-        if (op.type == SpecializationType::STYLE && !op.styleName.empty()) {
-            key = op.styleName;
-        } else if (op.type == SpecializationType::VAR && !op.varGroup.empty()) {
-            key = op.varGroup;
+        if (!op.targets.empty()) {
+            key = op.targets[0];
         }
         
         if (!key.empty() && operationIndex.find(key) != operationIndex.end()) {
@@ -688,11 +716,8 @@ std::vector<T> applyDeletionFilter(const std::vector<T>& items,
             itemName = item.first;  // 对于属性对，使用属性名
         } else {
             // 对于其他类型，假设有getName()方法
-            if constexpr (requires { item->getName(); }) {
-                itemName = item->getName();
-            } else if constexpr (requires { item->name; }) {
-                itemName = item->name;
-            }
+            // 默认处理
+            itemName = "unknown";
         }
         
         // 如果不在删除列表中，保留该项

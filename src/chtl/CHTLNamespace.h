@@ -13,6 +13,10 @@ namespace chtl {
 // 前向声明
 class CHTLGenerator;
 class TemplateManager;
+class CHTLNamespaceDefinition;
+
+// Type alias for compatibility - removed due to conflict
+// using NamespaceDefinition = CHTLNamespaceDefinition;
 class CustomManager;
 
 // 命名空间中的项目类型
@@ -37,7 +41,7 @@ struct NamespaceItem {
 };
 
 // 命名空间定义
-class NamespaceDefinition : public std::enable_shared_from_this<NamespaceDefinition> {
+class CHTLNamespaceDefinition : public std::enable_shared_from_this<CHTLNamespaceDefinition> {
 private:
     std::string name;
     std::string fullPath;  // 完整命名空间路径
@@ -55,7 +59,7 @@ private:
     int endLine;
     
 public:
-    NamespaceDefinition(const std::string& name, const std::string& fullPath = "")
+    CHTLNamespaceDefinition(const std::string& name, const std::string& fullPath = "")
         : name(name), fullPath(fullPath.empty() ? name : fullPath), 
           startLine(0), endLine(0) {}
     

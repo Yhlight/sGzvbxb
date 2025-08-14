@@ -75,14 +75,24 @@ file(GLOB_RECURSE CHTL_CORE_SOURCES
     src/chtl/CHTLContext.cpp  # 添加CHTLContext实现
     src/chtl/CHTLMainCompiler.cpp  # 添加主编译器
     src/chtl/CHTLTemplate.cpp  # 模板系统实现
-    src/chtl/CHTLCustom.cpp    # 自定义系统实现
+    src/chtl/CHTLCustom.cpp  # 自定义系统实现
+    src/chtl/CHTLCSSPreprocessor.cpp  # CSS预处理器（需要Template和Custom）
+    src/chtl/CHTLGenerator.cpp  # 代码生成器实现
+    # Temporarily commented out due to compilation errors
+    # src/chtl/CHTLConstraint.cpp  # 约束管理器实现
+    # src/chtl/CHTLImport.cpp  # 导入管理器实现
+    # src/chtl/CHTLNamespace.cpp  # 命名空间管理器实现
+    # src/chtl/CHTLScript.cpp  # 脚本管理器实现
+    # src/chtl/CHTLCMOD.cpp  # CMOD管理器实现
+    # src/chtl/CHTLOrigin.cpp  # Origin管理器实现
+    src/chtl/stubs/ManagerStubs.cpp  # 临时管理器实现桩
 )
 
 # ===== 编译器架构 - 新增 =====
 file(GLOB_RECURSE COMPILER_ARCH_SOURCES
     src/chtl/compiler/CompilerDispatcher.cpp
     src/chtl/compiler/handwritten/*.cpp
-    src/chtl/compiler/antlr/*.cpp
+    # ANTLR编译器包装器移到css_js库
 )
 
 # 临时排除有问题的文件
@@ -164,13 +174,13 @@ endif()
 
 file(GLOB CSS_COMPILER_SOURCES
     src/chtl/CHTLCSSCompiler.cpp
-    src/chtl/CHTLCSSPreprocessor.cpp
+    # CHTLCSSPreprocessor.cpp moved to core
 )
 
 # ===== JS解析器 - 使用ANTLR4 =====
-if(EXISTS "${CMAKE_SOURCE_DIR}/generated/js")
+if(EXISTS "${CMAKE_SOURCE_DIR}/generated/javascript")
     file(GLOB_RECURSE JS_ANTLR_SOURCES
-        generated/js/*.cpp
+        generated/javascript/grammars/*.cpp
     )
 else()
     set(JS_ANTLR_SOURCES "")
@@ -178,8 +188,7 @@ else()
 endif()
 
 file(GLOB JS_COMPILER_SOURCES
-    # src/chtl/CHTLJSCompiler.cpp  # 暂时禁用，等待JS解析器生成
-    src/chtl/CHTLJSCompilerStub.cpp  # 使用存根实现
+    src/chtl/CHTLJSCompiler.cpp
     src/chtl/CHTLJSOptimizer.cpp
     src/chtl/optimizer/*.cpp
 )
@@ -211,7 +220,12 @@ add_library(chtl_css_js STATIC
     ${CSS_COMPILER_SOURCES}
     ${JS_ANTLR_SOURCES}
     ${JS_COMPILER_SOURCES}
+    src/chtl/compiler/antlr/CSSCompilerWrapper.cpp
+    src/chtl/compiler/antlr/JSCompilerWrapper.cpp
 )
+
+# 添加对chtl_core的依赖以访问CHTLEnhancedCSSCompiler
+add_dependencies(chtl_css_js chtl_core)
 
 # 链接ANTLR4仅到CSS/JS库
 target_link_libraries(chtl_css_js PUBLIC ${ANTLR4_STATIC_LIB})
@@ -219,10 +233,11 @@ target_link_libraries(chtl_css_js PUBLIC ${ANTLR4_STATIC_LIB})
 # 主可执行文件
 add_executable(chtl ${CHTL_MAIN_SOURCES})
 
-# 链接
+# 链接（使用循环链接解决相互依赖）
 target_link_libraries(chtl
     chtl_core
     chtl_css_js
+    chtl_core  # 再次链接以解决循环依赖
     ${ANTLR4_STATIC_LIB}
     Threads::Threads
 )

@@ -4,7 +4,7 @@
 #include "CHTLCustom.h"
 #include "CHTLOrigin.h"
 #include "CHTLCMOD.h"
-#include "scanner/ScannerParserIntegration.h"
+// #include "scanner/ScannerParserIntegration.h" // Not available yet
 #include "CHTLImportVisitor.h"
 #include <fstream>
 #include <sstream>

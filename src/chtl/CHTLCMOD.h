@@ -103,8 +103,8 @@ public:
     bool loadFromCMODFile(const std::filesystem::path& cmodFile);
     
     // 信息和导出表
-    bool loadInfo(const std::filesystem::path& infoFile);
-    bool generateExportTable();
+    // bool loadInfo(const std::filesystem::path& infoFile); // 已在前面声明
+    // bool generateExportTable(); // 已在前面声明
     void scanSourceFiles();
     
     // 加载导出表

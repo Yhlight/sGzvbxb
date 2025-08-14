@@ -133,6 +133,10 @@ void JSCompilerListener::exitClassDeclaration(JavaScriptParser::ClassDeclaration
     }
 }
 
+void JSCompilerListener::exitVariableDeclaration(JavaScriptParser::VariableDeclarationContext* ctx) {
+    // 处理变量声明退出时的逻辑
+}
+
 void JSCompilerListener::enterVariableDeclaration(JavaScriptParser::VariableDeclarationContext* ctx) {
     // 获取变量声明的类型 (var/let/const)
     auto parent = ctx->parent;

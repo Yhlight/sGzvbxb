@@ -21,6 +21,15 @@
 
 namespace chtl {
 
+// 元素上下文信息
+struct ElementContext {
+    std::string name;
+    std::string id;
+    std::vector<std::string> classes;
+    std::map<std::string, std::string> attributes;
+    bool hasInlineStyle = false;
+};
+
 // 生成选项
 struct GeneratorOptions {
     bool preserveGeneratorComments = true;  // 是否保留--注释
@@ -105,6 +114,7 @@ private:
     
     // 辅助方法
     std::string indent() const;
+    std::string escapeAttribute(const std::string& attr) const;
     void increaseIndent() { indentLevel++; }
     void decreaseIndent() { if (indentLevel > 0) indentLevel--; }
     

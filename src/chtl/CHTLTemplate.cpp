@@ -176,31 +176,36 @@ void ElementTemplate::inheritFrom(const std::string& templateName) {
     inheritedTemplates.push_back(templateName);
 }
 
+// 辅助函数：递归应用元素节点
+void applyElementNode(const std::shared_ptr<ElementTemplate::ElementNode>& element, CHTLGenerator& generator) {
+    generator.generateElement(element->name, element->attributes);
+    
+    // 处理样式块
+    if (element->hasStyleBlock && element->inlineStyles) {
+        generator.beginStyleBlock();
+        element->inlineStyles->applyToElement(generator);
+        generator.endStyleBlock();
+    }
+    
+    // 处理文本内容
+    if (!element->textContent.empty()) {
+        generator.beginTextBlock();
+        generator.generateTextNode(element->textContent);
+        generator.endTextBlock();
+    }
+    
+    // 递归处理子元素
+    for (const auto& child : element->children) {
+        applyElementNode(child, generator);  // 递归调用自身
+    }
+    
+    generator.closeElement();
+}
+
 void ElementTemplate::expand(CHTLGenerator& generator) const {
     // 展开所有元素
     for (const auto& element : elements) {
-        generator.generateElement(element->name, element->attributes);
-        
-        // 处理样式块
-        if (element->hasStyleBlock && element->inlineStyles) {
-            generator.beginStyleBlock();
-            element->inlineStyles->applyToElement(generator);
-            generator.endStyleBlock();
-        }
-        
-        // 处理文本内容
-        if (!element->textContent.empty()) {
-            generator.beginTextBlock();
-            generator.generateTextNode(element->textContent);
-            generator.endTextBlock();
-        }
-        
-        // 递归处理子元素
-        for (const auto& child : element->children) {
-            generateElementNode(child, generator);
-        }
-        
-        generator.closeElement();
+        applyElementNode(element, generator);
     }
 }
 
@@ -225,20 +230,19 @@ std::vector<std::shared_ptr<ElementTemplate::ElementNode>> ElementTemplate::getA
 }
 
 // VarTemplate 实现
-void VarTemplate::addVariable(const std::string& varName, const std::string& value) {
-    variables[varName] = value;
-}
-
-void VarTemplate::inheritFrom(const std::string& templateName) {
-    inheritedTemplates.push_back(templateName);
-}
-
 std::optional<std::string> VarTemplate::getVariable(const std::string& varName) const {
     auto it = variables.find(varName);
     if (it != variables.end()) {
         return it->second;
     }
     return std::nullopt;
+}
+void VarTemplate::addVariable(const std::string& varName, const std::string& value) {
+    variables[varName] = value;
+}
+
+void VarTemplate::inheritFrom(const std::string& templateName) {
+    inheritedTemplates.push_back(templateName);
 }
 
 std::unordered_map<std::string, std::string> VarTemplate::getAllVariables(
@@ -279,6 +283,19 @@ std::string VarTemplate::replaceVariables(const std::string& text) const {
     }
     
     return result;
+}
+
+// TemplateManager 辅助函数
+std::shared_ptr<Template> TemplateManager::findTemplate(const std::string& name, TemplateType type) const {
+    switch(type) {
+        case TemplateType::STYLE:
+            return findStyleTemplate(name);
+        case TemplateType::ELEMENT:
+            return findElementTemplate(name);
+        case TemplateType::VAR:
+            return findVarTemplate(name);
+    }
+    return nullptr;
 }
 
 // TemplateManager 实现

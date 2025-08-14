@@ -192,7 +192,7 @@ private:
     
 public:
     CustomManager(std::shared_ptr<CHTLContext> ctx, std::shared_ptr<TemplateManager> tmplMgr)
-        : context(ctx), templateManager(tmplMgr) {}
+        : templateManager(tmplMgr), context(ctx) {}
     
     // 注册自定义
     bool registerCustomStyle(const std::string& name, std::shared_ptr<CustomStyleGroup> custom);

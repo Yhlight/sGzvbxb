@@ -17,6 +17,7 @@ class TemplateManager;
 class CustomManager;
 class OriginManager;
 class CMODManager;
+class CircularDependencyDetector;
 
 // 导入类型
 enum class ImportType {
@@ -90,8 +91,8 @@ private:
     std::shared_ptr<OriginManager> originManager;
     std::shared_ptr<CMODManager> cmodManager;
     
-    // 循环依赖检测器
-    CircularDependencyDetector dependencyDetector;
+    // 循环依赖检测器（使用指针避免不完整类型）
+    std::unique_ptr<CircularDependencyDetector> dependencyDetector;
     
 public:
     ImportManager(std::shared_ptr<CHTLContext> ctx);

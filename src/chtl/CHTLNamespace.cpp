@@ -9,26 +9,26 @@
 namespace chtl {
 
 // NamespaceDefinition 实现
-std::shared_ptr<NamespaceDefinition> NamespaceDefinition::addChildNamespace(const std::string& childName) {
+std::shared_ptr<CHTLNamespaceDefinition> CHTLNamespaceDefinition::addChildNamespace(const std::string& childName) {
     auto it = childNamespaces.find(childName);
     if (it != childNamespaces.end()) {
         return it->second;
     }
     
     std::string childFullPath = fullPath.empty() ? childName : fullPath + "." + childName;
-    auto child = std::make_shared<NamespaceDefinition>(childName, childFullPath);
+    auto child = std::make_shared<CHTLNamespaceDefinition>(childName, childFullPath);
     child->setParent(shared_from_this());
     childNamespaces[childName] = child;
     
     return child;
 }
 
-std::shared_ptr<NamespaceDefinition> NamespaceDefinition::getChildNamespace(const std::string& childName) const {
+std::shared_ptr<CHTLNamespaceDefinition> CHTLNamespaceDefinition::getChildNamespace(const std::string& childName) const {
     auto it = childNamespaces.find(childName);
     return (it != childNamespaces.end()) ? it->second : nullptr;
 }
 
-std::vector<std::string> NamespaceDefinition::getChildNamespaceNames() const {
+std::vector<std::string> CHTLNamespaceDefinition::getChildNamespaceNames() const {
     std::vector<std::string> names;
     for (const auto& [name, _] : childNamespaces) {
         names.push_back(name);
@@ -36,11 +36,11 @@ std::vector<std::string> NamespaceDefinition::getChildNamespaceNames() const {
     return names;
 }
 
-void NamespaceDefinition::addItem(const NamespaceItem& item) {
+void CHTLNamespaceDefinition::addItem(const NamespaceItem& item) {
     items[item.name].push_back(item);
 }
 
-std::vector<NamespaceItem> NamespaceDefinition::getItems(const std::string& itemName) const {
+std::vector<NamespaceItem> CHTLNamespaceDefinition::getItems(const std::string& itemName) const {
     auto it = items.find(itemName);
     return (it != items.end()) ? it->second : std::vector<NamespaceItem>();
 }
