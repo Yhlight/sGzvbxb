@@ -1,0 +1,26 @@
+[Template] @Element Card {
+    div .card {
+        h3 {
+            text "Card Title"
+        }
+        p {
+            text "Card content"
+        }
+    }
+}
+
+[Template] @Style CardStyle {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 16px;
+    border-radius: 8px;
+}
+
+body {
+    @Element Card;
+    
+    div {
+        @Style CardStyle;
+        text "This div uses CardStyle"
+    }
+}

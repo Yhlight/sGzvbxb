@@ -1,0 +1,8 @@
+[Import] @Html from "header.html" as headerContent
+[Import] @Style from "theme.css" as themeStyles
+
+body {
+    div {
+        text "Import test"
+    }
+}

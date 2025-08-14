@@ -1,0 +1,10 @@
+body {
+    div {
+        h1 {
+            text "Hello World"
+        }
+        p {
+            text "This is a test"
+        }
+    }
+}

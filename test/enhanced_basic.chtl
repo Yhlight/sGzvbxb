@@ -1,0 +1,48 @@
+// 测试增强解析器的基础功能
+
+// 单行注释
+/* 多行注释
+   支持多行 */
+-- 生成器识别注释
+
+body {
+    // HTML 元素
+    div {
+        h1 {
+            text "Welcome to CHTL"
+        }
+        
+        p .intro {
+            text "This is a paragraph with class"
+        }
+        
+        // 属性语法
+        button {
+            id: "submit-btn"
+            class: "btn primary"
+            onclick: "handleSubmit()"
+            text "Submit"
+        }
+    }
+    
+    // 内联样式
+    style {
+        .intro {
+            color: #333;
+            font-size: 16px;
+        }
+        
+        #submit-btn {
+            background: blue;
+            color: white;
+            padding: 10px 20px;
+        }
+    }
+    
+    // 脚本
+    script {
+        function handleSubmit() {
+            console.log("Button clicked!");
+        }
+    }
+}
