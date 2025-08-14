@@ -19,12 +19,12 @@ public:
     
     // 覆盖ANTLR的语法错误处理
     void syntaxError(
-        antlr4::Recognizer* recognizer,
-        antlr4::Token* offendingSymbol,
+        antlr4::Recognizer* /*recognizer*/,
+        antlr4::Token* /*offendingSymbol*/,
         size_t line,
         size_t charPositionInLine,
         const std::string& msg,
-        std::exception_ptr e) override {
+        std::exception_ptr /*e*/) override {
         
         // 创建源位置信息
         SourceLocation location;

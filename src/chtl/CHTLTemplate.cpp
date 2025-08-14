@@ -628,4 +628,16 @@ VarReference parseVarReference(const std::string& reference) {
 
 } // namespace TemplateHelper
 
+void TemplateManager::processInheritance() {
+    // TODO: 实现模板继承处理
+    // 这个功能会处理模板之间的继承关系
+    // 例如：[Template @Style myBase] 和 [Template @Style myDerived : myBase]
+    
+    // 暂时只记录日志
+    if (context) {
+        // 使用 reportWarning 作为信息日志的替代
+        // context->reportWarning("Template inheritance processing completed");
+    }
+}
+
 } // namespace chtl
