@@ -1,0 +1,213 @@
+// 测试命名空间系统
+
+// 基本命名空间
+[Namespace] ui {
+    // 在命名空间内定义模板
+    [Template] @Style ButtonStyle {
+        display: inline-block;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        background: #007bff;
+        color: white;
+        cursor: pointer;
+    }
+    
+    [Template] @Element Button {
+        button {
+            style {
+                @Style ButtonStyle;
+            }
+            text { "点击按钮" }
+        }
+    }
+    
+    // 在命名空间内定义自定义元素
+    [Custom] @Element Card {
+        div {
+            class: "card";
+            style {
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 10px;
+                background: white;
+            }
+        }
+    }
+}
+
+// 另一个命名空间
+[Namespace] layout {
+    [Template] @Style GridStyle {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        padding: 20px;
+    }
+    
+    [Custom] @Element GridContainer {
+        div {
+            style {
+                @Style GridStyle;
+            }
+        }
+    }
+}
+
+// 嵌套命名空间
+[Namespace] components {
+    // 嵌套命名空间 - 简写形式（单层）
+    [Namespace] forms
+    
+    [Custom] @Element Input {
+        input {
+            style {
+                padding: 8px 12px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+        }
+    }
+    
+    // 深层嵌套
+    [Namespace] widgets {
+        [Namespace] special {
+            [Custom] @Element SpecialBox {
+                div {
+                    style {
+                        border: 2px dashed #ff6b6b;
+                        padding: 15px;
+                        background: #ffe3e3;
+                    }
+                    text { "特殊组件" }
+                }
+            }
+        }
+    }
+}
+
+// 使用命名空间中的元素
+body {
+    // 从 ui 命名空间使用元素
+    @Element Button from ui;
+    
+    // 从 ui 命名空间使用自定义元素
+    @Element Card from ui {
+        h2 { text { "UI 卡片" } }
+        p { text { "这是从 ui 命名空间导入的卡片" } }
+    }
+    
+    // 从 layout 命名空间使用
+    @Element GridContainer from layout {
+        @Element Card from ui;
+        @Element Card from ui;
+        @Element Card from ui;
+    }
+    
+    // 使用嵌套命名空间中的元素
+    @Element Input from components.forms;
+    
+    // 使用深层嵌套的元素
+    @Element SpecialBox from components.widgets.special;
+}
+
+// 在样式中使用命名空间
+div {
+    style {
+        // 从命名空间使用样式模板
+        @Style ButtonStyle from ui;
+        margin: 20px;
+    }
+    
+    text { "使用了 ui 命名空间的按钮样式" }
+}
+
+// 全局约束测试
+[Namespace] restricted {
+    // 在此命名空间内禁止使用模板
+    except [Template];
+    
+    // 只允许自定义元素
+    [Custom] @Element AllowedBox {
+        div {
+            text { "这是允许的自定义元素" }
+        }
+    }
+    
+    // 以下会违反约束：
+    // [Template] @Style ForbiddenStyle { color: red; }
+}
+
+// 命名冲突测试
+[Namespace] theme1 {
+    [Template] @Style TextStyle {
+        color: blue;
+        font-size: 16px;
+    }
+}
+
+[Namespace] theme2 {
+    [Template] @Style TextStyle {
+        color: red;
+        font-size: 18px;
+    }
+}
+
+// 解决命名冲突
+section {
+    div {
+        style {
+            // 明确指定使用哪个命名空间的样式
+            @Style TextStyle from theme1;
+        }
+        text { "蓝色文本 - theme1" }
+    }
+    
+    div {
+        style {
+            @Style TextStyle from theme2;
+        }
+        text { "红色文本 - theme2" }
+    }
+}
+
+// 复杂的命名空间组合
+[Namespace] app {
+    [Namespace] modules {
+        [Custom] @Element Header {
+            header {
+                style {
+                    background: #333;
+                    color: white;
+                    padding: 20px;
+                }
+                
+                h1 { text { "应用标题" } }
+                
+                nav {
+                    @Element Button from ui;
+                    @Element Button from ui;
+                    @Element Button from ui;
+                }
+            }
+        }
+    }
+}
+
+// 使用复杂命名空间
+main {
+    @Element Header from app.modules;
+    
+    div {
+        class: "content";
+        
+        // 混合使用不同命名空间的组件
+        @Element GridContainer from layout {
+            @Element Card from ui {
+                @Element SpecialBox from components.widgets.special;
+            }
+        }
+    }
+}

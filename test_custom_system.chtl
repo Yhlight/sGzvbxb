@@ -1,0 +1,234 @@
+// 测试完整的自定义系统
+
+// 无值样式组
+[Custom] @Style TextSet {
+    color,
+    font-size;
+}
+
+// 使用无值样式组
+[Custom] @Style WhiteText {
+    @Style TextSet {
+        color: white;
+        font-size: 16px;
+    }
+    line-height: 1.6;
+}
+
+// 样式组的特例化 - 删除属性
+[Template] @Style BaseStyle {
+    color: white;
+    font-size: 16px;
+    line-height: 1.6;
+    border: 1px black solid;
+    padding: 10px;
+}
+
+[Custom] @Style YellowText {
+    @Style BaseStyle {
+        delete line-height, border;  // 删除特定属性
+    }
+    color: yellow;  // 覆盖颜色
+}
+
+// 删除样式组继承
+[Custom] @Style MinimalText {
+    @Style BaseStyle;
+    color: blue;
+}
+
+// 自定义元素
+[Custom] @Element Box {
+    div {
+        class: "box-container";
+        style {
+            border: 1px solid #ddd;
+            padding: 20px;
+        }
+    }
+    
+    div {
+        class: "box-content";
+        text { "Box 内容" }
+    }
+    
+    span {
+        class: "box-label";
+        text { "标签" }
+    }
+}
+
+// 自定义元素特例化 - 增加样式
+body {
+    // 测试无值样式组
+    div {
+        style {
+            @Style TextSet {
+                color: red;
+                font-size: 18px;
+            }
+        }
+        text { "使用无值样式组" }
+    }
+    
+    // 测试删除属性的样式
+    p {
+        style {
+            @Style YellowText;
+        }
+        text { "黄色文本，没有 line-height 和 border" }
+    }
+    
+    // 测试自定义元素特例化
+    @Element Box {
+        span {
+            // 为 span 添加样式
+            style {
+                color: blue;
+                font-weight: bold;
+            }
+        }
+        
+        div[1] {
+            // 为第二个 div 添加样式
+            style {
+                background: #f0f0f0;
+                margin-top: 10px;
+            }
+        }
+    }
+}
+
+// 使用 delete 删除样式组继承
+section {
+    style {
+        @Style MinimalText {
+            delete @Style BaseStyle;  // 删除继承
+        }
+        // 现在只有 color: blue
+    }
+    text { "最简样式" }
+}
+
+// 变量组特例化
+[Custom] @Var ThemeColor {
+    tableColor: "rgb(255, 192, 203)";
+    textColor: "black";
+    borderColor: "#ddd";
+}
+
+// 使用变量组特例化
+div {
+    style {
+        // 特例化 - 覆盖变量值
+        color: ThemeColor(textColor = "#333");
+        background: ThemeColor(tableColor = rgb(145, 155, 200));
+        border: 1px solid ThemeColor(borderColor);
+    }
+    text { "使用特例化的变量组" }
+}
+
+// 复杂的自定义元素
+[Custom] @Element Card {
+    div {
+        class: "card";
+        style {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            style {
+                background: #007bff;
+                color: white;
+                padding: 15px;
+            }
+        }
+        
+        div {
+            class: "card-body";
+            style {
+                padding: 20px;
+            }
+        }
+        
+        footer {
+            style {
+                background: #f8f9fa;
+                padding: 10px 20px;
+                border-top: 1px solid #dee2e6;
+            }
+        }
+    }
+}
+
+// 使用并特例化复杂元素
+main {
+    @Element Card {
+        header {
+            h2 { text { "卡片标题" } }
+        }
+        
+        div[0] {
+            // 第一个 div（card-body）
+            p { text { "这是卡片的主要内容区域" } }
+            
+            button {
+                style {
+                    @Style ButtonStyle;
+                    background: ThemeColor(primary = "#28a745");
+                }
+                text { "操作按钮" }
+            }
+        }
+        
+        footer {
+            text { "更新时间：2024-01-01" }
+        }
+    }
+}
+
+// 全缀名访问
+[Namespace] custom {
+    [Custom] @Element SpecialBox {
+        div {
+            style {
+                border: 2px dashed red;
+                padding: 15px;
+            }
+            text { "特殊盒子" }
+        }
+    }
+}
+
+// 使用全缀名
+footer {
+    // 使用简写
+    @Element Box;
+    
+    // 使用全缀名访问自定义元素
+    [Custom] @Element Box;
+    
+    // 从命名空间访问
+    @Element SpecialBox from custom;
+}
+
+// 测试模板和自定义的相互继承
+[Template] @Style TemplateStyle {
+    margin: 10px;
+    padding: 10px;
+}
+
+[Custom] @Style CustomStyle {
+    // 自定义可以继承模板
+    inherit @Style TemplateStyle;
+    border: 1px solid #ccc;
+}
+
+[Template] @Style ExtendedTemplate {
+    // 模板也可以继承自定义（只要类型匹配）
+    @Style CustomStyle;
+    background: #f5f5f5;
+}

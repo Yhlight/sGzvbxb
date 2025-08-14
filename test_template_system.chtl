@@ -1,0 +1,203 @@
+// 测试完整的模板系统
+
+// 样式组模板
+[Template] @Style DefaultText {
+    color: black;
+    font-size: 16px;
+    line-height: 1.6;
+    font-family: Arial, sans-serif;
+}
+
+[Template] @Style ButtonStyle {
+    display: inline-block;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #007bff;
+    color: white;
+}
+
+// 变量组模板
+[Template] @Var ThemeColor {
+    primary: "#007bff";
+    secondary: "#6c757d";
+    success: "#28a745";
+    danger: "#dc3545";
+    tableColor: "rgb(255, 192, 203)";
+}
+
+// 元素模板
+[Template] @Element Box {
+    span {
+        text { "这是一个 Box 组件" }
+    }
+    
+    div {
+        style {
+            width: 200px;
+            height: 200px;
+            background-color: red;
+            padding: 20px;
+            margin: 10px;
+        }
+        
+        text { "Box 内的 div" }
+    }
+    
+    div {
+        style {
+            width: 200px;
+            height: 200px;
+            background-color: blue;
+            padding: 20px;
+            margin: 10px;
+        }
+        
+        text { "第二个 div" }
+    }
+}
+
+// 使用变量组的元素模板
+[Template] @Element ColoredBox {
+    div {
+        style {
+            background-color: ThemeColor(primary);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        h3 {
+            style {
+                margin: 0 0 10px 0;
+                color: ThemeColor(tableColor);
+            }
+            text { "彩色盒子" }
+        }
+        
+        p {
+            text { "使用了主题颜色的盒子" }
+        }
+    }
+}
+
+// 测试直接使用模板
+body {
+    // 测试 1: 使用元素模板（简写形式）
+    @Element Box;
+    
+    // 测试 2: 使用元素模板并覆盖内容
+    @Element Box {
+        span {
+            text { "覆盖的 span 内容" }
+        }
+    }
+    
+    // 测试 3: 在元素内使用样式模板
+    div {
+        style {
+            @Style DefaultText;  // 使用样式组模板
+            margin: 20px 0;
+        }
+        
+        text { "这个 div 使用了 DefaultText 样式模板" }
+    }
+    
+    // 测试 4: 使用 use 语句
+    button {
+        use @Style ButtonStyle;
+        text { "按钮文本" }
+    }
+    
+    // 测试 5: 使用变量组中的值
+    div {
+        style {
+            background-color: ThemeColor(tableColor);
+            padding: 15px;
+        }
+        text { "使用了 ThemeColor 的 div" }
+    }
+    
+    // 测试 6: 使用带变量的元素模板
+    @Element ColoredBox;
+    
+    // 测试 7: 嵌套使用模板
+    section {
+        style {
+            @Style DefaultText;
+            background: #f5f5f5;
+            padding: 30px;
+        }
+        
+        h2 {
+            text { "嵌套模板测试" }
+        }
+        
+        @Element Box {
+            // 在模板内再使用样式模板
+            div {
+                style {
+                    inherit @Style ButtonStyle;
+                    background: ThemeColor(success);
+                }
+            }
+        }
+    }
+}
+
+// 测试在自定义元素中使用模板
+[Custom] @Element CustomCard {
+    div {
+        class: "card";
+        
+        // 使用样式模板
+        style {
+            @Style DefaultText;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px;
+        }
+        
+        // 使用元素模板
+        @Element Box;
+    }
+}
+
+// 测试模板的复杂组合
+main {
+    // 使用自定义元素
+    use @Element CustomCard;
+    
+    // 直接使用多个模板
+    article {
+        @Element Box;
+        
+        div {
+            style {
+                @Style ButtonStyle;
+                @Style DefaultText;  // 组合多个样式模板
+                width: auto;  // 覆盖样式
+            }
+            
+            text { "组合模板测试" }
+        }
+    }
+}
+
+// 测试在局部样式块中使用变量组
+footer {
+    style {
+        background: ThemeColor(secondary);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        
+        // 在局部样式块内使用变量特例化
+        border-top: 3px solid ThemeColor(primary = "#0056b3");
+    }
+    
+    text { "页脚内容" }
+}

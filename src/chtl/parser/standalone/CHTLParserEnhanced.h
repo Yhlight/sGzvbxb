@@ -276,6 +276,52 @@ public:
             } else if (match(TokenType::KEYWORD_ORIGIN)) {
                 // [Origin] 块
                 ctx->addChild(originDeclaration());
+            } else if (match(TokenType::AT)) {
+                // @Element templateName; 或 @Style templateName;
+                if (match(TokenType::KEYWORD_ELEMENT)) {
+                    auto name = consume(TokenType::IDENTIFIER, "Expected element template name");
+                    ctx->addChild(std::make_shared<TerminalNode>(name));
+                    
+                    // 可选的 from namespace
+                    if (match(TokenType::KEYWORD_FROM)) {
+                        auto nsName = consume(TokenType::IDENTIFIER, "Expected namespace name");
+                        ctx->addChild(std::make_shared<TerminalNode>(nsName));
+                        
+                        // 嵌套命名空间: space.room.room2
+                        while (match(TokenType::DOT)) {
+                            auto nestedNs = consume(TokenType::IDENTIFIER, "Expected namespace name");
+                            ctx->addChild(std::make_shared<TerminalNode>(nestedNs));
+                        }
+                    }
+                    
+                    // 可选的内容覆盖
+                    if (match(TokenType::LBRACE)) {
+                        while (!match(TokenType::RBRACE)) {
+                            ctx->addChild(htmlElement());
+                        }
+                    } else {
+                        consume(TokenType::SEMICOLON, "Expected ;");
+                    }
+                } else if (match(TokenType::KEYWORD_STYLE_GROUP)) {
+                    auto name = consume(TokenType::IDENTIFIER, "Expected style template name");
+                    ctx->addChild(std::make_shared<TerminalNode>(name));
+                    
+                    // 可选的 from namespace
+                    if (match(TokenType::KEYWORD_FROM)) {
+                        auto nsName = consume(TokenType::IDENTIFIER, "Expected namespace name");
+                        ctx->addChild(std::make_shared<TerminalNode>(nsName));
+                        
+                        // 嵌套命名空间
+                        while (match(TokenType::DOT)) {
+                            auto nestedNs = consume(TokenType::IDENTIFIER, "Expected namespace name");
+                            ctx->addChild(std::make_shared<TerminalNode>(nestedNs));
+                        }
+                    }
+                    
+                    consume(TokenType::SEMICOLON, "Expected ;");
+                } else {
+                    error("Expected @Element or @Style after @", tokens_->LT(1));
+                }
             } else {
                 // 嵌套元素
                 ctx->addChild(htmlElement());

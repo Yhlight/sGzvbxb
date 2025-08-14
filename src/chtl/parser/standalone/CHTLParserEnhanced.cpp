@@ -108,7 +108,7 @@ std::shared_ptr<ParseContext> CHTLParserEnhanced::customStyleGroup() {
     
     consume(TokenType::LBRACE, "Expected {");
     
-    // 自定义内容 - 支持特例化操作
+    // 自定义内容 - 支持特例化操作和无值样式
     while (!match(TokenType::RBRACE) && tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
         if (match(TokenType::AT)) {
             if (match(TokenType::KEYWORD_STYLE_GROUP)) {
@@ -131,7 +131,20 @@ std::shared_ptr<ParseContext> CHTLParserEnhanced::customStyleGroup() {
                 }
             }
         } else {
-            ctx->addChild(styleProperty());
+            // 检查是否是无值属性（逗号分隔）
+            if (tokens_->LT(1)->getType() == TokenType::IDENTIFIER &&
+                (tokens_->LT(2)->getType() == TokenType::COMMA || 
+                 tokens_->LT(2)->getType() == TokenType::SEMICOLON)) {
+                // 无值属性列表: property1, property2;
+                do {
+                    auto prop = consume(TokenType::IDENTIFIER, "Expected property name");
+                    ctx->addChild(std::make_shared<TerminalNode>(prop));
+                } while (match(TokenType::COMMA));
+                consume(TokenType::SEMICOLON, "Expected ;");
+            } else {
+                // 普通样式属性
+                ctx->addChild(styleProperty());
+            }
         }
     }
     
