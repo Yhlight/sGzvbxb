@@ -563,7 +563,33 @@ bool CMODModule::validate() const {
 }
 
 bool CMODModule::checkDependencies() const {
-    // TODO: 实现依赖检查
+    // 实现依赖检查
+    if (dependencies.empty()) {
+        return true;
+    }
+    
+    for (const auto& dep : dependencies) {
+        // 检查依赖是否已安装
+        CMODRegistry registry;
+        auto installed = registry.getInstalledModule(dep.name);
+        
+        if (!installed) {
+            std::cerr << "Missing dependency: " << dep.name << std::endl;
+            return false;
+        }
+        
+        // 检查版本兼容性
+        if (!dep.versionRange.empty()) {
+            // 简单的版本比较（实际应该使用语义化版本比较）
+            if (installed->version < dep.versionRange) {
+                std::cerr << "Incompatible version for " << dep.name 
+                         << ": required " << dep.versionRange 
+                         << ", found " << installed->version << std::endl;
+                return false;
+            }
+        }
+    }
+    
     return true;
 }
 
@@ -816,7 +842,23 @@ bool isCHTLFile(const fs::path& path) {
 }
 
 fs::path getOfficialModulePath() {
-    // TODO: 从配置或环境变量获取
+    // 从配置或环境变量获取
+    // 1. 首先检查环境变量
+    const char* env_path = std::getenv("CHTL_MODULE_PATH");
+    if (env_path) {
+        return fs::path(env_path);
+    }
+    
+    // 2. 检查用户配置目录
+    const char* home = std::getenv("HOME");
+    if (home) {
+        fs::path userPath = fs::path(home) / ".chtl" / "modules";
+        if (fs::exists(userPath)) {
+            return userPath;
+        }
+    }
+    
+    // 3. 默认系统路径
     return fs::path("/usr/local/share/chtl/modules");
 }
 

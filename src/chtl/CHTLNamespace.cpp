@@ -353,12 +353,58 @@ bool NamespaceProcessor::processNamespacedUse(const std::string& useStatement, N
     // 根据类型使用项目
     switch (expectedType) {
         case NamespaceItemType::CUSTOM_ELEMENT:
-            // TODO: 使用自定义元素
+            // 使用自定义元素
+            if (context->getCustomManager()) {
+                auto custom = context->getCustomManager()->findCustomElement(fullName);
+                if (custom && generator) {
+                    custom->expand(*generator);
+                }
+            }
             break;
+            
         case NamespaceItemType::TEMPLATE_STYLE:
-            // TODO: 使用模板样式
+            // 使用模板样式
+            if (context->getTemplateManager()) {
+                auto tmpl = context->getTemplateManager()->findStyleTemplate(fullName);
+                if (tmpl && generator) {
+                    context->getTemplateManager()->useStyleTemplate(fullName, *generator);
+                }
+            }
             break;
-        // ... 其他类型
+            
+        case NamespaceItemType::TEMPLATE_ELEMENT:
+            // 使用模板元素
+            if (context->getTemplateManager()) {
+                auto tmpl = context->getTemplateManager()->findElementTemplate(fullName);
+                if (tmpl && generator) {
+                    context->getTemplateManager()->useElementTemplate(fullName, *generator);
+                }
+            }
+            break;
+            
+        case NamespaceItemType::TEMPLATE_VAR:
+            // 使用模板变量
+            if (context->getTemplateManager()) {
+                // 变量使用通常需要具体的变量名
+                // 这里只是注册到上下文，实际使用在变量引用时
+            }
+            break;
+            
+        case NamespaceItemType::CUSTOM_STYLE:
+            // 使用自定义样式
+            if (context->getCustomManager() && generator) {
+                context->getCustomManager()->useCustomStyle(fullName, *generator);
+            }
+            break;
+            
+        case NamespaceItemType::CUSTOM_VAR:
+            // 使用自定义变量
+            // 变量使用通常需要具体的变量名和值
+            // 这里只是注册到上下文，实际使用在变量引用时
+            break;
+            
+        default:
+            break;
     }
     
     return true;
