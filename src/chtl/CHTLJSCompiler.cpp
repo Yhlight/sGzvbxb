@@ -887,10 +887,10 @@ void CHTLJSProcessor::validateReferences() {
         /*if (symbol.isDuplicate) {
             errors.push_back("重复定义: '" + name + 
                            "' 在第 " + std::to_string(symbol.line) + " 行");
-        }
+        }*/
         
         // 检查const变量的重新赋值
-        if (symbol.isConst && symbol.isReassigned) {
+        /*if (symbol.isConst && symbol.isReassigned) {
             errors.push_back("不能重新赋值const变量: '" + name + "'");
         }
         
@@ -898,7 +898,7 @@ void CHTLJSProcessor::validateReferences() {
         if ((symbol.isLet || symbol.isConst) && symbol.usedBeforeDeclaration) {
             errors.push_back("在声明前使用变量: '" + name + 
                            "' (temporal dead zone)");
-        }
+        }*/
     }
     
     // 报告所有错误
@@ -1014,7 +1014,7 @@ std::string generatePolyfills(const std::vector<std::string>& features) {
             polyfills << "// ... Fetch implementation ...\n\n";
         } else if (feature == "Array.from") {
             polyfills << "// Array.from polyfill\n";
-            polyfills << "if (!Array.from) { Array.from = function() { /* ... */ }; }\n\n";
+            polyfills << "if (!Array.from) { Array.from = function() { }; }\n\n";
         }
         // ... 更多polyfills
     }

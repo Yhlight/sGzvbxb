@@ -11,6 +11,9 @@
 #include "../compiler/CompilerInterface.h"
 
 namespace chtl {
+// 前向声明
+class CHTLContext;
+
 namespace module {
 
 // 模块类型
@@ -214,7 +217,7 @@ private:
 // 模块编译器 - 处理模块的编译
 class ModuleCompiler {
 public:
-    ModuleCompiler(std::shared_ptr<compiler::CompilerDispatcher> dispatcher);
+    ModuleCompiler(std::shared_ptr<CHTLContext> context);
     
     // 编译单个模块
     compiler::CompileResult compileModule(std::shared_ptr<ModuleInfo> module);
@@ -231,7 +234,7 @@ public:
     );
     
 private:
-    std::shared_ptr<compiler::CompilerDispatcher> dispatcher_;
+    std::shared_ptr<CHTLContext> context_;
     std::unordered_map<std::string, std::string> compiledCache_;
     
     // 合并编译结果

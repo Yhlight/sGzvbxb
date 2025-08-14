@@ -1,4 +1,5 @@
 #include "EnhancedError.h"
+#include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <algorithm>
@@ -10,11 +11,30 @@ namespace error {
 // 辅助函数
 std::string toString(ErrorLevel level) {
     switch (level) {
-        case ErrorLevel::WARNING: return "WARNING";
-        case ErrorLevel::ERROR: return "ERROR";
-        case ErrorLevel::FATAL: return "FATAL";
-        case ErrorLevel::INFO: return "INFO";
+        case ErrorLevel::Warning: return "WARNING";
+        case ErrorLevel::Error: return "ERROR";
+        case ErrorLevel::Fatal: return "FATAL";
+        case ErrorLevel::Info: return "INFO";
+        case ErrorLevel::Debug: return "DEBUG";
         default: return "UNKNOWN";
+    }
+}
+
+std::string toString(ErrorCategory category) {
+    switch (category) {
+        case ErrorCategory::Syntax: return "Syntax";
+        case ErrorCategory::Semantic: return "Semantic";
+        case ErrorCategory::Type: return "Type";
+        case ErrorCategory::Reference: return "Reference";
+        case ErrorCategory::Import: return "Import";
+        case ErrorCategory::Runtime: return "Runtime";
+        case ErrorCategory::Internal: return "Internal";
+        case ErrorCategory::IO: return "IO";
+        case ErrorCategory::FileIO: return "FileIO";
+        case ErrorCategory::Config: return "Config";
+        case ErrorCategory::ModuleSystem: return "ModuleSystem";
+        case ErrorCategory::Unknown: return "Unknown";
+        default: return "Unknown";
     }
 }
 
@@ -749,23 +769,33 @@ CodeSnippet EnhancedErrorReporter::extractCodeSnippet(const std::string& filenam
 }
 
 void EnhancedErrorReporter::debug(const std::string& message, const SourceLocation& loc) {
-    report(ErrorInfo(ErrorLevel::Debug, ErrorCategory::Internal, message, loc));
+    ErrorInfo info(ErrorLevel::Debug, ErrorCategory::Internal, message);
+    info.location = loc;
+    report(info);
 }
 
 void EnhancedErrorReporter::info(const std::string& message, const SourceLocation& loc) {
-    report(ErrorInfo(ErrorLevel::Info, ErrorCategory::Internal, message, loc));
+    ErrorInfo info(ErrorLevel::Info, ErrorCategory::Internal, message);
+    info.location = loc;
+    report(info);
 }
 
 void EnhancedErrorReporter::warning(const std::string& message, const SourceLocation& loc) {
-    report(ErrorInfo(ErrorLevel::Warning, ErrorCategory::Internal, message, loc));
+    ErrorInfo info(ErrorLevel::Warning, ErrorCategory::Internal, message);
+    info.location = loc;
+    report(info);
 }
 
 void EnhancedErrorReporter::error(const std::string& message, const SourceLocation& loc) {
-    report(ErrorInfo(ErrorLevel::Error, ErrorCategory::Internal, message, loc));
+    ErrorInfo info(ErrorLevel::Error, ErrorCategory::Internal, message);
+    info.location = loc;
+    report(info);
 }
 
 void EnhancedErrorReporter::fatal(const std::string& message, const SourceLocation& loc) {
-    report(ErrorInfo(ErrorLevel::Fatal, ErrorCategory::Internal, message, loc));
+    ErrorInfo info(ErrorLevel::Fatal, ErrorCategory::Internal, message);
+    info.location = loc;
+    report(info);
 }
 
 // EnhancedErrorManager 实现

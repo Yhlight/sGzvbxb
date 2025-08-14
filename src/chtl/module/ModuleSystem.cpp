@@ -37,8 +37,10 @@ std::shared_ptr<ModuleInfo> ModuleParser::parseModule(const std::string& path) {
     // 读取文件内容
     std::ifstream file(path);
     if (!file.is_open()) {
-        throw error::CHTLException("无法打开模块文件: " + path,
-                                 error::ErrorCategory::FileIO);
+        error::ErrorInfo err(error::ErrorLevel::Error, 
+                            error::ErrorCategory::FileIO,
+                            "无法打开模块文件: " + path);
+        throw error::CHTLException(err);
     }
     
     std::string content((std::istreambuf_iterator<char>(file)),
@@ -249,8 +251,10 @@ std::shared_ptr<ModuleInfo> ModuleLoader::loadModule(const std::string& path) {
     // 查找文件
     std::string fullPath = findModuleFile(path);
     if (fullPath.empty()) {
-        throw error::CHTLException("找不到模块: " + path,
-                                 error::ErrorCategory::FileIO);
+        error::ErrorInfo err(error::ErrorLevel::Error, 
+                            error::ErrorCategory::FileIO,
+                            "找不到模块: " + path);
+        throw error::CHTLException(err);
     }
     
     // 解析模块
@@ -307,8 +311,10 @@ std::string ModuleLoader::findModuleFile(const std::string& path) {
 std::string ModuleLoader::readFile(const std::string& path) {
     std::ifstream file(path);
     if (!file.is_open()) {
-        throw error::CHTLException("无法读取文件: " + path,
-                                 error::ErrorCategory::FileIO);
+        error::ErrorInfo err(error::ErrorLevel::Error, 
+                            error::ErrorCategory::FileIO,
+                            "无法读取文件: " + path);
+        throw error::CHTLException(err);
     }
     
     return std::string((std::istreambuf_iterator<char>(file)),
@@ -400,8 +406,10 @@ std::vector<std::string> ModuleDependencyGraph::topologicalSort() const {
     
     // 如果结果数量不等于节点数量，说明有环
     if (result.size() != modules_.size()) {
-        throw error::CHTLException("模块依赖图中存在循环依赖",
-                                 error::ErrorCategory::ModuleSystem);
+        error::ErrorInfo err(error::ErrorLevel::Error, 
+                            error::ErrorCategory::ModuleSystem,
+                            "模块依赖图中存在循环依赖");
+        throw error::CHTLException(err);
     }
     
     return result;

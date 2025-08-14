@@ -28,7 +28,9 @@ enum class ErrorCategory {
     Runtime,     // 运行时错误
     Internal,    // 内部错误
     IO,          // I/O错误
+    FileIO,      // 文件I/O错误
     Config,      // 配置错误
+    ModuleSystem,// 模块系统错误
     Unknown      // 未知错误
 };
 

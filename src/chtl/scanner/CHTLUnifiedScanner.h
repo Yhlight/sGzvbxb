@@ -163,6 +163,9 @@ private:
     void handleJSFragment(const CodeFragment& fragment);
     void handleTextFragment(const CodeFragment& fragment);
     void handleCommentFragment(const CodeFragment& fragment);
+    
+    // 扫描混合脚本内容
+    void scanMixedScriptContent(std::vector<CodeFragment>& fragments);
 };
 
 } // namespace scanner

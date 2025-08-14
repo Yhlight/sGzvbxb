@@ -119,6 +119,9 @@ public:
     // 生成HTML报告
     std::string generateHTMLReport(const std::vector<EnhancedErrorInfo>& errors);
     
+private:
+    bool useColor_;
+    
 public:
     // ANSI颜色代码
     struct Colors {

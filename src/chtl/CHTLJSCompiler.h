@@ -75,6 +75,16 @@ public:
     std::shared_ptr<JSScope> getParent() const { return parent; }
     const std::string& getName() const { return name; }
     const std::unordered_map<std::string, JSSymbol>& getSymbols() const { return symbols; }
+    
+    // 收集所有符号
+    void collectAllSymbols(std::vector<JSSymbol>& result) const {
+        for (const auto& [name, symbol] : symbols) {
+            result.push_back(symbol);
+        }
+        if (parent) {
+            parent->collectAllSymbols(result);
+        }
+    }
 };
 
 // JavaScript编译器监听器
