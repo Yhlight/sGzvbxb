@@ -27,11 +27,11 @@ void StateMachineScanner::initializeStateMachine() {
 }
 
 std::vector<CodeFragment> StateMachineScanner::scan(const std::string& input) {
-    input_ = input;
-    pos_ = 0;
-    line_ = 1;
-    column_ = 1;
-    errors_.clear();
+    source_ = input;
+    currentPos_ = 0;
+    currentLine_ = 1;
+    currentColumn_ = 1;
+    fragments_.clear();
     
     std::vector<CodeFragment> fragments;
     
@@ -46,7 +46,7 @@ std::vector<CodeFragment> StateMachineScanner::scan(const std::string& input) {
     stateStack_.push(initial);
     
     // 开始扫描
-    while (pos_ < input_.size()) {
+    while (currentPos_ < source_.size()) {
         auto handler = stateHandlers_.find(currentState());
         if (handler != stateHandlers_.end()) {
             handler->second(fragments);
@@ -64,11 +64,11 @@ std::vector<CodeFragment> StateMachineScanner::scan(const std::string& input) {
 
 void StateMachineScanner::handleCHTLTop(std::vector<CodeFragment>& fragments) {
     // 跳过空白
-    while (pos_ < input_.size() && std::isspace(peek())) {
+    while (currentPos_ < source_.size() && std::isspace(peek())) {
         advance();
     }
     
-    if (pos_ >= input_.size()) return;
+    if (currentPos_ >= source_.size()) return;
     
     // 检测特征
     char c = peek();
@@ -92,8 +92,8 @@ void StateMachineScanner::handleCHTLTop(std::vector<CodeFragment>& fragments) {
         flushCurrentFragment(fragments);
         startFragment(FragmentType::CHTL);
         appendToFragment("text");
-        pos_ += 4;
-        column_ += 4;
+        currentPos_ += 4;
+        currentColumn_ += 4;
         
         // 扫描text块的内容
         skipWhitespace();
@@ -115,42 +115,42 @@ void StateMachineScanner::handleCHTLTop(std::vector<CodeFragment>& fragments) {
     
     // 检测 [Template], [Custom] 等
     if (c == '[') {
-        size_t savePos = pos_;
+        size_t savePos = currentPos_;
         advance(); // '['
         
         if (matchKeyword("Template]")) {
-            pos_ = savePos;  // 回退
+            currentPos_ = savePos;  // 回退
             flushCurrentFragment(fragments);
             transitionTo(ScanState::TEMPLATE_BLOCK);
             return;
         } else if (matchKeyword("Custom]")) {
-            pos_ = savePos;  // 回退
+            currentPos_ = savePos;  // 回退
             flushCurrentFragment(fragments);
             transitionTo(ScanState::CUSTOM_BLOCK);
             return;
         } else if (matchKeyword("Import]")) {
-            pos_ = savePos;  // 回退
+            currentPos_ = savePos;  // 回退
             flushCurrentFragment(fragments);
             transitionTo(ScanState::IMPORT_STATEMENT);
             return;
         } else if (matchKeyword("Namespace]")) {
-            pos_ = savePos;  // 回退
+            currentPos_ = savePos;  // 回退
             flushCurrentFragment(fragments);
             transitionTo(ScanState::NAMESPACE_BLOCK);
             return;
         } else if (matchKeyword("Export]")) {
-            pos_ = savePos;  // 回退
+            currentPos_ = savePos;  // 回退
             flushCurrentFragment(fragments);
             transitionTo(ScanState::EXPORT_BLOCK);
             return;
         } else if (matchKeyword("Configuration]")) {
-            pos_ = savePos;  // 回退
+            currentPos_ = savePos;  // 回退
             flushCurrentFragment(fragments);
             handleCHTLFeature(fragments);
             return;
         }
         
-        pos_ = savePos;  // 回退
+        currentPos_ = savePos;  // 回退
     }
     
     // 检测 except 约束
@@ -187,8 +187,8 @@ void StateMachineScanner::handleStyleKeyword(std::vector<CodeFragment>& fragment
     // style 关键字已经被检测到
     startFragment(FragmentType::CHTL);
     appendToFragment("style");
-    pos_ += 5;
-    column_ += 5;
+    currentPos_ += 5;
+    currentColumn_ += 5;
     finishFragment(fragments);
     
     skipWhitespace();
@@ -216,8 +216,8 @@ void StateMachineScanner::handleScriptKeyword(std::vector<CodeFragment>& fragmen
     // script 关键字
     startFragment(FragmentType::CHTL);
     appendToFragment("script");
-    pos_ += 6;
-    column_ += 6;
+    currentPos_ += 6;
+    currentColumn_ += 6;
     finishFragment(fragments);
     
     skipWhitespace();
@@ -234,7 +234,7 @@ void StateMachineScanner::handleScriptBlock(std::vector<CodeFragment>& fragments
     // 在script块内，需要检测各种特征
     
     skipWhitespace();
-    if (pos_ >= input_.size()) return;
+    if (currentPos_ >= source_.size()) return;
     
     // 检查块结束
     if (peek() == '}') {
@@ -259,8 +259,8 @@ void StateMachineScanner::handleScriptBlock(std::vector<CodeFragment>& fragments
     }
     
     // 默认作为JS内容
-    if (currentFragmentType_ != FragmentType::JS) {
-        startFragment(FragmentType::JS);
+    if (currentFragmentType_ != FragmentType::JAVASCRIPT) {
+        startFragment(FragmentType::JAVASCRIPT);
     }
     appendToFragment(advance());
 }
@@ -283,7 +283,7 @@ void StateMachineScanner::handleCHTLFeature(std::vector<CodeFragment>& fragments
     // [Template] 等
     else if (peek() == '[') {
         appendToFragment(advance()); // '['
-        while (pos_ < input_.size() && peek() != ']') {
+        while (currentPos_ < source_.size() && peek() != ']') {
             appendToFragment(advance());
         }
         if (peek() == ']') {
@@ -318,7 +318,7 @@ void StateMachineScanner::handleCHTLJSFeature(std::vector<CodeFragment>& fragmen
         appendToFragment("{{");
         advance(); advance();
         
-        while (pos_ < input_.size()) {
+        while (currentPos_ < source_.size()) {
             if (peek() == '}' && peekNext() == '}') {
                 appendToFragment("}}");
                 advance(); advance();
@@ -338,15 +338,15 @@ void StateMachineScanner::handleCHTLJSFeature(std::vector<CodeFragment>& fragmen
             appendToFragment(advance());
         }
         appendToFragment("listen");
-        pos_ += 6;
-        column_ += 6;
+        currentPos_ += 6;
+        currentColumn_ += 6;
         appendToFragment(scanBalanced('(', ')'));
     }
     // animate(
     else if (matchSequence("animate(")) {
         appendToFragment("animate");
-        pos_ += 7;
-        column_ += 7;
+        currentPos_ += 7;
+        currentColumn_ += 7;
         appendToFragment(scanBalanced('(', ')'));
     }
     
@@ -361,9 +361,9 @@ void StateMachineScanner::transitionTo(ScanState newState) {
 void StateMachineScanner::pushState(ScanState newState) {
     StateContext ctx;
     ctx.state = newState;
-    ctx.startPos = pos_;
-    ctx.startLine = line_;
-    ctx.startColumn = column_;
+    ctx.startPos = currentPos_;
+    ctx.startLine = currentLine_;
+    ctx.startColumn = currentColumn_;
     ctx.braceDepth = 0;
     ctx.isGlobalScope = false;
     stateStack_.push(ctx);
@@ -383,9 +383,9 @@ StateMachineScanner::ScanState StateMachineScanner::currentState() const {
 void StateMachineScanner::startFragment(FragmentType type) {
     currentBuffer_.clear();
     currentFragmentType_ = type;
-    fragmentStartPos_ = pos_;
-    fragmentStartLine_ = line_;
-    fragmentStartColumn_ = column_;
+    fragmentStartPos_ = currentPos_;
+    fragmentStartLine_ = currentLine_;
+    fragmentStartColumn_ = currentColumn_;
 }
 
 void StateMachineScanner::appendToFragment(char c) {
@@ -399,7 +399,7 @@ void StateMachineScanner::appendToFragment(const std::string& str) {
 void StateMachineScanner::finishFragment(std::vector<CodeFragment>& fragments) {
     if (!currentBuffer_.empty()) {
         addFragment(fragments, currentFragmentType_, currentBuffer_,
-                   fragmentStartLine_, fragmentStartColumn_, line_, column_);
+                   fragmentStartLine_, fragmentStartColumn_, currentLine_, currentColumn_);
         currentBuffer_.clear();
     }
 }
@@ -414,8 +414,8 @@ bool StateMachineScanner::detectCHTLFeature() {
     
     // @ 指令
     if (c == '@') {
-        size_t next = pos_ + 1;
-        if (next < input_.size()) {
+        size_t next = currentPos_ + 1;
+        if (next < source_.size()) {
             if (matchAt(next, "Element") || matchAt(next, "Style") || matchAt(next, "Var")) {
                 return true;
             }
@@ -456,14 +456,14 @@ bool StateMachineScanner::detectCHTLJSFeature() {
 
 bool StateMachineScanner::detectVariableReference() {
     // 检测 Name(param) 形式的变量引用
-    size_t savePos = pos_;
-    size_t saveLine = line_;
-    size_t saveCol = column_;
+    size_t savePos = currentPos_;
+    size_t saveLine = currentLine_;
+    size_t saveCol = currentColumn_;
     
     // 扫描标识符
     if (!std::isalpha(peek())) return false;
     
-    while (pos_ < input_.size() && (std::isalnum(peek()) || peek() == '_')) {
+    while (currentPos_ < source_.size() && (std::isalnum(peek()) || peek() == '_')) {
         advance();
     }
     
@@ -471,24 +471,24 @@ bool StateMachineScanner::detectVariableReference() {
     bool hasParenthesis = (peek() == '(');
     
     // 恢复位置
-    pos_ = savePos;
-    line_ = saveLine;
-    column_ = saveCol;
+    currentPos_ = savePos;
+    currentLine_ = saveLine;
+    currentColumn_ = saveCol;
     
     return hasParenthesis;
 }
 
 // 辅助方法
 bool StateMachineScanner::matchKeyword(const std::string& keyword) {
-    if (pos_ + keyword.size() > input_.size()) return false;
+    if (currentPos_ + keyword.size() > source_.size()) return false;
     
     for (size_t i = 0; i < keyword.size(); i++) {
-        if (input_[pos_ + i] != keyword[i]) return false;
+        if (source_[currentPos_ + i] != keyword[i]) return false;
     }
     
     // 检查单词边界
-    if (pos_ + keyword.size() < input_.size()) {
-        char next = input_[pos_ + keyword.size()];
+    if (currentPos_ + keyword.size() < source_.size()) {
+        char next = source_[currentPos_ + keyword.size()];
         if (std::isalnum(next) || next == '_') return false;
     }
     
@@ -496,10 +496,10 @@ bool StateMachineScanner::matchKeyword(const std::string& keyword) {
 }
 
 bool StateMachineScanner::matchSequence(const std::string& sequence) {
-    if (pos_ + sequence.size() > input_.size()) return false;
+    if (currentPos_ + sequence.size() > source_.size()) return false;
     
     for (size_t i = 0; i < sequence.size(); i++) {
-        if (input_[pos_ + i] != sequence[i]) return false;
+        if (source_[currentPos_ + i] != sequence[i]) return false;
     }
     
     return true;
@@ -507,7 +507,7 @@ bool StateMachineScanner::matchSequence(const std::string& sequence) {
 
 std::string StateMachineScanner::scanIdentifier() {
     std::string result;
-    while (pos_ < input_.size() && (std::isalnum(peek()) || peek() == '_')) {
+    while (currentPos_ < source_.size() && (std::isalnum(peek()) || peek() == '_')) {
         result += advance();
     }
     return result;
@@ -522,7 +522,7 @@ std::string StateMachineScanner::scanBalanced(char open, char close) {
         depth = 1;
     }
     
-    while (pos_ < input_.size() && depth > 0) {
+    while (currentPos_ < source_.size() && depth > 0) {
         char c = peek();
         if (c == open) depth++;
         else if (c == close) depth--;
@@ -536,14 +536,14 @@ std::string StateMachineScanner::scanBalanced(char open, char close) {
 }
 
 std::string StateMachineScanner::peekWord() {
-    size_t savePos = pos_;
+    size_t savePos = currentPos_;
     std::string word;
     
-    while (pos_ < input_.size() && std::isalpha(peek())) {
+    while (currentPos_ < source_.size() && std::isalpha(peek())) {
         word += advance();
     }
     
-    pos_ = savePos;  // 恢复位置
+    currentPos_ = savePos;  // 恢复位置
     return word;
 }
 
@@ -561,12 +561,12 @@ bool StateMachineScanner::isHTMLElement(const std::string& word) {
 
 void StateMachineScanner::handleJSContent(std::vector<CodeFragment>& fragments) {
     // JS内容处理 - 作为状态之间的内容块
-    if (currentFragmentType_ != FragmentType::JS) {
-        startFragment(FragmentType::JS);
+    if (currentFragmentType_ != FragmentType::JAVASCRIPT) {
+        startFragment(FragmentType::JAVASCRIPT);
     }
     
     // 收集到下一个特征或状态改变
-    while (pos_ < input_.size()) {
+    while (currentPos_ < source_.size()) {
         // 检查是否需要状态转换
         if (peek() == '}' || detectCHTLFeature() || detectCHTLJSFeature()) {
             break;
@@ -591,7 +591,7 @@ void StateMachineScanner::handleStyleBlock(std::vector<CodeFragment>& fragments,
         
         // 收集整个块内容
         int braceDepth = 1;
-        while (pos_ < input_.size() && braceDepth > 0) {
+        while (currentPos_ < source_.size() && braceDepth > 0) {
             char c = peek();
             if (c == '{') braceDepth++;
             else if (c == '}') {
@@ -604,7 +604,7 @@ void StateMachineScanner::handleStyleBlock(std::vector<CodeFragment>& fragments,
         finishFragment(fragments);
     } else {
         // 局部style - CHTL处理，需要检测特征
-        while (pos_ < input_.size()) {
+        while (currentPos_ < source_.size()) {
             if (peek() == '}') {
                 flushCurrentFragment(fragments);
                 popState();
@@ -625,8 +625,8 @@ void StateMachineScanner::handleStyleBlock(std::vector<CodeFragment>& fragments,
 }
 
 char StateMachineScanner::peekAhead(size_t offset) const {
-    size_t idx = pos_ + offset;
-    return idx < input_.size() ? input_[idx] : '\0';
+    size_t idx = currentPos_ + offset;
+    return idx < source_.size() ? source_[idx] : '\0';
 }
 
 // 处理[Template]块
@@ -635,7 +635,7 @@ void StateMachineScanner::handleTemplateBlock(std::vector<CodeFragment>& fragmen
     
     // [Template]
     appendToFragment(advance()); // '['
-    while (pos_ < input_.size() && peek() != ']') {
+    while (currentPos_ < source_.size() && peek() != ']') {
         appendToFragment(advance());
     }
     if (peek() == ']') {
@@ -674,7 +674,7 @@ void StateMachineScanner::handleCustomBlock(std::vector<CodeFragment>& fragments
     
     // [Custom]
     appendToFragment(advance()); // '['
-    while (pos_ < input_.size() && peek() != ']') {
+    while (currentPos_ < source_.size() && peek() != ']') {
         appendToFragment(advance());
     }
     if (peek() == ']') {
@@ -715,7 +715,7 @@ void StateMachineScanner::handleImportStatement(std::vector<CodeFragment>& fragm
     appendToFragment('[');
     advance();
     
-    while (pos_ < input_.size()) {
+    while (currentPos_ < source_.size()) {
         char c = peek();
         if (c == ';' || c == '\n') {
             if (c == ';') {
@@ -736,7 +736,7 @@ void StateMachineScanner::handleNamespaceBlock(std::vector<CodeFragment>& fragme
     
     // [Namespace]
     appendToFragment(advance()); // '['
-    while (pos_ < input_.size() && peek() != ']') {
+    while (currentPos_ < source_.size() && peek() != ']') {
         appendToFragment(advance());
     }
     if (peek() == ']') {
@@ -758,7 +758,7 @@ void StateMachineScanner::handleNamespaceBlock(std::vector<CodeFragment>& fragme
     } else {
         // 可能是嵌套命名空间的简写形式
         // 继续扫描到下一个有意义的内容
-        while (pos_ < input_.size() && std::isspace(peek())) {
+        while (currentPos_ < source_.size() && std::isspace(peek())) {
             advance();
         }
     }
@@ -773,13 +773,13 @@ void StateMachineScanner::handleExceptConstraint(std::vector<CodeFragment>& frag
     
     // except关键字
     appendToFragment("except");
-    pos_ += 6;
-    column_ += 6;
+    currentPos_ += 6;
+    currentColumn_ += 6;
     
     skipWhitespace();
     
     // 扫描约束内容直到分号或下一个语句
-    while (pos_ < input_.size()) {
+    while (currentPos_ < source_.size()) {
         char c = peek();
         if (c == ';' || c == '\n' || c == '{' || c == '}') {
             if (c == ';') {
@@ -800,7 +800,7 @@ void StateMachineScanner::handleExportBlock(std::vector<CodeFragment>& fragments
     
     // [Export]
     appendToFragment(advance()); // '['
-    while (pos_ < input_.size() && peek() != ']') {
+    while (currentPos_ < source_.size() && peek() != ']') {
         appendToFragment(advance());
     }
     if (peek() == ']') {

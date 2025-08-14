@@ -8,11 +8,11 @@ namespace scanner {
 PrecisionScanner::PrecisionScanner() : CHTLUnifiedScanner() {}
 
 std::vector<CodeFragment> PrecisionScanner::scan(const std::string& input) {
-    input_ = input;
-    pos_ = 0;
-    line_ = 1;
-    column_ = 1;
-    errors_.clear();
+    source_ = input;
+    currentPos_ = 0;
+    currentLine_ = 1;
+    currentColumn_ = 1;
+    fragments_.clear();
     
     std::vector<CodeFragment> fragments;
     
@@ -26,9 +26,9 @@ std::vector<CodeFragment> PrecisionScanner::scan(const std::string& input) {
 }
 
 void PrecisionScanner::scanPrecise(std::vector<CodeFragment>& fragments) {
-    while (pos_ < input_.size()) {
+    while (currentPos_ < source_.size()) {
         skipWhitespace();
-        if (pos_ >= input_.size()) break;
+        if (currentPos_ >= source_.size()) break;
         
         ScanMode mode = currentMode();
         
@@ -37,13 +37,13 @@ void PrecisionScanner::scanPrecise(std::vector<CodeFragment>& fragments) {
                 // 在CHTL模式下，严格扫描每个特征
                 if (!scanCHTLFeature(fragments)) {
                     // 如果不是CHTL特征，作为普通CHTL内容
-                    size_t start = pos_;
-                    size_t startLine = line_;
-                    size_t startCol = column_;
+                    size_t start = currentPos_;
+                    size_t startLine = currentLine_;
+                    size_t startCol = currentColumn_;
                     
                     // 扫描到下一个可能的特征或块边界
                     std::string content;
-                    while (pos_ < input_.size()) {
+                    while (currentPos_ < source_.size()) {
                         if (peek() == '@' || peek() == '[' || 
                             (peek() == 's' && matchExact("style")) ||
                             (peek() == 's' && matchExact("script")) ||
@@ -55,7 +55,7 @@ void PrecisionScanner::scanPrecise(std::vector<CodeFragment>& fragments) {
                     
                     if (!content.empty()) {
                         addFragment(fragments, FragmentType::CHTL, content,
-                                   startLine, startCol, line_, column_);
+                                   startLine, startCol, currentLine_, currentColumn_);
                     }
                 }
                 break;
@@ -111,12 +111,12 @@ bool PrecisionScanner::scanCHTLFeature(std::vector<CodeFragment>& fragments) {
     // 扫描 style { } 或 script { }
     if (peek() == 's') {
         if (matchExact("style")) {
-            size_t start = pos_;
-            size_t startLine = line_;
-            size_t startCol = column_;
+            size_t start = currentPos_;
+            size_t startLine = currentLine_;
+            size_t startCol = currentColumn_;
             
-            pos_ += 5;  // "style"
-            column_ += 5;
+            currentPos_ += 5;  // "style"
+            currentColumn_ += 5;
             skipWhitespace();
             
             if (peek() == '{') {
@@ -125,7 +125,7 @@ bool PrecisionScanner::scanCHTLFeature(std::vector<CodeFragment>& fragments) {
                 
                 std::string styleKeyword = "style";
                 addFragment(fragments, FragmentType::CHTL, styleKeyword,
-                           startLine, startCol, line_, column_);
+                           startLine, startCol, currentLine_, currentColumn_);
                 
                 advance(); // '{'
                 pushContext(ScanMode::STYLE_BLOCK);
@@ -134,18 +134,18 @@ bool PrecisionScanner::scanCHTLFeature(std::vector<CodeFragment>& fragments) {
                 return true;
             }
         } else if (matchExact("script")) {
-            size_t start = pos_;
-            size_t startLine = line_;
-            size_t startCol = column_;
+            size_t start = currentPos_;
+            size_t startLine = currentLine_;
+            size_t startCol = currentColumn_;
             
-            pos_ += 6;  // "script"
-            column_ += 6;
+            currentPos_ += 6;  // "script"
+            currentColumn_ += 6;
             skipWhitespace();
             
             if (peek() == '{') {
                 std::string scriptKeyword = "script";
                 addFragment(fragments, FragmentType::CHTL, scriptKeyword,
-                           startLine, startCol, line_, column_);
+                           startLine, startCol, currentLine_, currentColumn_);
                 
                 advance(); // '{'
                 pushContext(ScanMode::SCRIPT_BLOCK);
@@ -161,9 +161,9 @@ bool PrecisionScanner::scanCHTLFeature(std::vector<CodeFragment>& fragments) {
 bool PrecisionScanner::scanAtDirective(std::vector<CodeFragment>& fragments) {
     if (peek() != '@') return false;
     
-    size_t start = pos_;
-    size_t startLine = line_;
-    size_t startCol = column_;
+    size_t start = currentPos_;
+    size_t startLine = currentLine_;
+    size_t startCol = currentColumn_;
     
     advance(); // '@'
     
@@ -181,7 +181,7 @@ bool PrecisionScanner::scanAtDirective(std::vector<CodeFragment>& fragments) {
             
             // 扫描到匹配的 ')'
             int parenCount = 1;
-            while (pos_ < input_.size() && parenCount > 0) {
+            while (currentPos_ < source_.size() && parenCount > 0) {
                 char c = peek();
                 if (c == '(') parenCount++;
                 else if (c == ')') parenCount--;
@@ -191,14 +191,14 @@ bool PrecisionScanner::scanAtDirective(std::vector<CodeFragment>& fragments) {
         }
         
         addFragment(fragments, FragmentType::CHTL, content,
-                   startLine, startCol, line_, column_);
+                   startLine, startCol, currentLine_, currentColumn_);
         return true;
     }
     
     // 不是CHTL特征，回退
-    pos_ = start;
-    line_ = startLine;
-    column_ = startCol;
+    currentPos_ = start;
+    currentLine_ = startLine;
+    currentColumn_ = startCol;
     return false;
 }
 
@@ -221,15 +221,15 @@ bool PrecisionScanner::scanCHTLJSFeature(std::vector<CodeFragment>& fragments) {
 bool PrecisionScanner::scanInterpolation(std::vector<CodeFragment>& fragments) {
     if (peek() != '{' || peekNext() != '{') return false;
     
-    size_t start = pos_;
-    size_t startLine = line_;
-    size_t startCol = column_;
+    size_t start = currentPos_;
+    size_t startLine = currentLine_;
+    size_t startCol = currentColumn_;
     
     std::string content = "{{";
     advance(); advance(); // '{{'
     
     // 扫描到 }}
-    while (pos_ < input_.size()) {
+    while (currentPos_ < source_.size()) {
         if (peek() == '}' && peekNext() == '}') {
             content += "}}";
             advance(); advance();
@@ -239,28 +239,28 @@ bool PrecisionScanner::scanInterpolation(std::vector<CodeFragment>& fragments) {
     }
     
     addFragment(fragments, FragmentType::CHTL_JS, content,
-               startLine, startCol, line_, column_);
+               startLine, startCol, currentLine_, currentColumn_);
     return true;
 }
 
 bool PrecisionScanner::scanChainOperator(std::vector<CodeFragment>& fragments) {
     if (peek() != '-' || peekNext() != '>') return false;
     
-    size_t start = pos_;
-    size_t startLine = line_;
-    size_t startCol = column_;
+    size_t start = currentPos_;
+    size_t startLine = currentLine_;
+    size_t startCol = currentColumn_;
     
     advance(); advance(); // '->'
     
     addFragment(fragments, FragmentType::CHTL_JS, "->",
-               startLine, startCol, line_, column_);
+               startLine, startCol, currentLine_, currentColumn_);
     return true;
 }
 
 bool PrecisionScanner::scanListenMethod(std::vector<CodeFragment>& fragments) {
-    size_t savePos = pos_;
-    size_t saveLine = line_;
-    size_t saveCol = column_;
+    size_t savePos = currentPos_;
+    size_t saveLine = currentLine_;
+    size_t saveCol = currentColumn_;
     
     // 检查 .listen( 或空格后的 listen(
     bool hasDot = false;
@@ -270,15 +270,15 @@ bool PrecisionScanner::scanListenMethod(std::vector<CodeFragment>& fragments) {
     }
     
     if (matchExact("listen") && peek() == '(') {
-        size_t start = hasDot ? savePos : pos_ - 6;  // "listen"的长度
+        size_t start = hasDot ? savePos : currentPos_ - 6;  // "listen"的长度
         
         std::string content = hasDot ? ".listen(" : "listen(";
-        pos_ += 6; // "listen"
+        currentPos_ += 6; // "listen"
         advance(); // '('
         
         // 扫描整个listen调用
         int parenCount = 1;
-        while (pos_ < input_.size() && parenCount > 0) {
+        while (currentPos_ < source_.size() && parenCount > 0) {
             char c = peek();
             if (c == '(') parenCount++;
             else if (c == ')') parenCount--;
@@ -287,30 +287,30 @@ bool PrecisionScanner::scanListenMethod(std::vector<CodeFragment>& fragments) {
         }
         
         addFragment(fragments, FragmentType::CHTL_JS, content,
-                   saveLine, saveCol, line_, column_);
+                   saveLine, saveCol, currentLine_, currentColumn_);
         return true;
     }
     
     // 回退
-    pos_ = savePos;
-    line_ = saveLine;
-    column_ = saveCol;
+    currentPos_ = savePos;
+    currentLine_ = saveLine;
+    currentColumn_ = saveCol;
     return false;
 }
 
 bool PrecisionScanner::scanAnimateFunction(std::vector<CodeFragment>& fragments) {
     if (!matchExact("animate") || peek() != '(') return false;
     
-    size_t start = pos_ - 7;  // "animate"的长度
-    size_t startLine = line_;
-    size_t startCol = column_ - 7;
+    size_t start = currentPos_ - 7;  // "animate"的长度
+    size_t startLine = currentLine_;
+    size_t startCol = currentColumn_ - 7;
     
     std::string content = "animate(";
     advance(); // '('
     
     // 扫描整个animate调用
     int parenCount = 1;
-    while (pos_ < input_.size() && parenCount > 0) {
+    while (currentPos_ < source_.size() && parenCount > 0) {
         char c = peek();
         if (c == '(') parenCount++;
         else if (c == ')') parenCount--;
@@ -319,53 +319,53 @@ bool PrecisionScanner::scanAnimateFunction(std::vector<CodeFragment>& fragments)
     }
     
     addFragment(fragments, FragmentType::CHTL_JS, content,
-               startLine, startCol, line_, column_);
+               startLine, startCol, currentLine_, currentColumn_);
     return true;
 }
 
 void PrecisionScanner::scanCSSBlock(std::vector<CodeFragment>& fragments) {
     // CSS采用宽松的块级别处理
-    size_t start = pos_;
-    size_t startLine = line_;
-    size_t startCol = column_;
+    size_t start = currentPos_;
+    size_t startLine = currentLine_;
+    size_t startCol = currentColumn_;
     
     std::string content = scanBalancedBraces();
     
     if (!content.empty()) {
         addFragment(fragments, FragmentType::CSS, content,
-                   startLine, startCol, line_, column_);
+                   startLine, startCol, currentLine_, currentColumn_);
     }
 }
 
 void PrecisionScanner::scanJSBlock(std::vector<CodeFragment>& fragments) {
     // JS采用宽松的块级别处理，但要检查@Var等CHTL特征
-    size_t start = pos_;
-    size_t startLine = line_;
-    size_t startCol = column_;
+    size_t start = currentPos_;
+    size_t startLine = currentLine_;
+    size_t startCol = currentColumn_;
     std::string content;
     
-    while (pos_ < input_.size()) {
+    while (currentPos_ < source_.size()) {
         // 检查是否遇到CHTL特征
         if (peek() == '@') {
-            size_t checkPos = pos_ + 1;
-            if (checkPos < input_.size() && 
+            size_t checkPos = currentPos_ + 1;
+            if (checkPos < source_.size() && 
                 (matchAt(checkPos, "Var") || 
                  matchAt(checkPos, "Element") || 
                  matchAt(checkPos, "Style"))) {
                 
                 // 保存当前JS片段
                 if (!content.empty()) {
-                    addFragment(fragments, FragmentType::JS, content,
-                               startLine, startCol, line_, column_);
+                    addFragment(fragments, FragmentType::JAVASCRIPT, content,
+                               startLine, startCol, currentLine_, currentColumn_);
                 }
                 
                 // 扫描CHTL特征
                 scanAtDirective(fragments);
                 
                 // 重新开始JS片段
-                start = pos_;
-                startLine = line_;
-                startCol = column_;
+                start = currentPos_;
+                startLine = currentLine_;
+                startCol = currentColumn_;
                 content.clear();
                 continue;
             }
@@ -375,14 +375,14 @@ void PrecisionScanner::scanJSBlock(std::vector<CodeFragment>& fragments) {
         if (scanCHTLJSFeature(fragments)) {
             // 保存当前JS片段
             if (!content.empty()) {
-                addFragment(fragments, FragmentType::JS, content,
-                           startLine, startCol, line_, column_);
+                addFragment(fragments, FragmentType::JAVASCRIPT, content,
+                           startLine, startCol, currentLine_, currentColumn_);
             }
             
             // 重新开始JS片段
-            start = pos_;
-            startLine = line_;
-            startCol = column_;
+            start = currentPos_;
+            startLine = currentLine_;
+            startCol = currentColumn_;
             content.clear();
             continue;
         }
@@ -398,22 +398,22 @@ void PrecisionScanner::scanJSBlock(std::vector<CodeFragment>& fragments) {
     
     // 保存最后的JS片段
     if (!content.empty()) {
-        addFragment(fragments, FragmentType::JS, content,
-                   startLine, startCol, line_, column_);
+        addFragment(fragments, FragmentType::JAVASCRIPT, content,
+                   startLine, startCol, currentLine_, currentColumn_);
     }
 }
 
 // 辅助方法实现
 bool PrecisionScanner::matchExact(const std::string& pattern) {
-    if (pos_ + pattern.size() > input_.size()) return false;
+    if (currentPos_ + pattern.size() > source_.size()) return false;
     
     for (size_t i = 0; i < pattern.size(); i++) {
-        if (input_[pos_ + i] != pattern[i]) return false;
+        if (source_[currentPos_ + i] != pattern[i]) return false;
     }
     
     // 检查是否在单词边界
-    if (pos_ + pattern.size() < input_.size()) {
-        char nextChar = input_[pos_ + pattern.size()];
+    if (currentPos_ + pattern.size() < source_.size()) {
+        char nextChar = source_[currentPos_ + pattern.size()];
         if (std::isalnum(nextChar) || nextChar == '_') {
             return false;  // 不在单词边界
         }
@@ -423,7 +423,7 @@ bool PrecisionScanner::matchExact(const std::string& pattern) {
 }
 
 void PrecisionScanner::skipWhitespace() {
-    while (pos_ < input_.size() && std::isspace(peek())) {
+    while (currentPos_ < source_.size() && std::isspace(peek())) {
         advance();
     }
 }
@@ -431,7 +431,7 @@ void PrecisionScanner::skipWhitespace() {
 std::string PrecisionScanner::scanIdentifier() {
     std::string result;
     
-    while (pos_ < input_.size() && 
+    while (currentPos_ < source_.size() && 
            (std::isalnum(peek()) || peek() == '_')) {
         result += advance();
     }
@@ -443,7 +443,7 @@ std::string PrecisionScanner::scanBalancedBraces() {
     std::string result;
     int braceCount = 0;
     
-    while (pos_ < input_.size()) {
+    while (currentPos_ < source_.size()) {
         char c = peek();
         
         if (c == '{') {
@@ -481,12 +481,12 @@ PrecisionScanner::ScanMode PrecisionScanner::currentMode() const {
 bool PrecisionScanner::scanTextBlock(std::vector<CodeFragment>& fragments) {
     if (!matchExact("text")) return false;
     
-    size_t start = pos_;
-    size_t startLine = line_;
-    size_t startCol = column_;
+    size_t start = currentPos_;
+    size_t startLine = currentLine_;
+    size_t startCol = currentColumn_;
     
-    pos_ += 4;  // "text"
-    column_ += 4;
+    currentPos_ += 4;  // "text"
+    currentColumn_ += 4;
     skipWhitespace();
     
     if (peek() == '{') {
@@ -495,34 +495,34 @@ bool PrecisionScanner::scanTextBlock(std::vector<CodeFragment>& fragments) {
         content += scanBalancedBraces();
         
         addFragment(fragments, FragmentType::CHTL, content,
-                   startLine, startCol, line_, column_);
+                   startLine, startCol, currentLine_, currentColumn_);
         return true;
     }
     
     // 回退
-    pos_ = start;
-    line_ = startLine;
-    column_ = startCol;
+    currentPos_ = start;
+    currentLine_ = startLine;
+    currentColumn_ = startCol;
     return false;
 }
 
 bool PrecisionScanner::scanTemplateDirective(std::vector<CodeFragment>& fragments) {
     if (peek() != '[') return false;
     
-    size_t savePos = pos_;
-    size_t saveLine = line_;
-    size_t saveCol = column_;
+    size_t savePos = currentPos_;
+    size_t saveLine = currentLine_;
+    size_t saveCol = currentColumn_;
     
     advance(); // '['
     
     if (matchExact("Template]")) {
         // 收集整个[Template]指令
         size_t start = savePos;
-        pos_ -= 1;  // 回到']'之前
+        currentPos_ -= 1;  // 回到']'之前
         
         std::string content = "[Template]";
-        pos_ += 9;  // "[Template]"
-        column_ += 9;
+        currentPos_ += 9;  // "[Template]"
+        currentColumn_ += 9;
         
         // 继续收集后续内容
         skipWhitespace();
@@ -533,34 +533,34 @@ bool PrecisionScanner::scanTemplateDirective(std::vector<CodeFragment>& fragment
         }
         
         addFragment(fragments, FragmentType::CHTL, content,
-                   saveLine, saveCol, line_, column_);
+                   saveLine, saveCol, currentLine_, currentColumn_);
         return true;
     }
     
     // 回退
-    pos_ = savePos;
-    line_ = saveLine;
-    column_ = saveCol;
+    currentPos_ = savePos;
+    currentLine_ = saveLine;
+    currentColumn_ = saveCol;
     return false;
 }
 
 bool PrecisionScanner::scanCustomDirective(std::vector<CodeFragment>& fragments) {
     if (peek() != '[') return false;
     
-    size_t savePos = pos_;
-    size_t saveLine = line_;
-    size_t saveCol = column_;
+    size_t savePos = currentPos_;
+    size_t saveLine = currentLine_;
+    size_t saveCol = currentColumn_;
     
     advance(); // '['
     
     if (matchExact("Custom]")) {
         // 收集整个[Custom]指令
         size_t start = savePos;
-        pos_ -= 1;  // 回到']'之前
+        currentPos_ -= 1;  // 回到']'之前
         
         std::string content = "[Custom]";
-        pos_ += 8;  // "[Custom]"
-        column_ += 8;
+        currentPos_ += 8;  // "[Custom]"
+        currentColumn_ += 8;
         
         // 继续收集后续内容
         skipWhitespace();
@@ -571,14 +571,14 @@ bool PrecisionScanner::scanCustomDirective(std::vector<CodeFragment>& fragments)
         }
         
         addFragment(fragments, FragmentType::CHTL, content,
-                   saveLine, saveCol, line_, column_);
+                   saveLine, saveCol, currentLine_, currentColumn_);
         return true;
     }
     
     // 回退
-    pos_ = savePos;
-    line_ = saveLine;
-    column_ = saveCol;
+    currentPos_ = savePos;
+    currentLine_ = saveLine;
+    currentColumn_ = saveCol;
     return false;
 }
 

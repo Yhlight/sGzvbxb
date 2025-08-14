@@ -15,7 +15,7 @@ CompileResult JSCompilerWrapper::compile(const scanner::CodeFragment& fragment) 
     CompileResult result;
     
     // 只处理原生JS片段
-    if (fragment.type != scanner::FragmentType::JS) {
+    if (fragment.type != scanner::FragmentType::JAVASCRIPT) {
         result.success = false;
         result.errors.push_back("JSCompiler can only compile native JavaScript fragments");
         return result;

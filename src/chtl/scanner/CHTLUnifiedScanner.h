@@ -49,7 +49,7 @@ public:
     // 配置选项
     void setDebugMode(bool debug) { debugMode_ = debug; }
     
-private:
+protected:
     // 状态管理
     ScannerState currentState_;
     std::vector<ScannerState> stateStack_;
@@ -73,6 +73,7 @@ private:
     // 配置
     bool debugMode_;
     
+protected:
     // 状态管理方法
     void pushState(ScannerState state);
     void popState();
@@ -98,6 +99,17 @@ private:
     char peek(int offset = 0) const;
     char advance();
     void skipWhitespace();
+    
+    // 辅助方法供子类使用
+    char peekNext() const { return peek(1); }
+    void addFragment(std::vector<CodeFragment>& fragments, 
+                    FragmentType type, 
+                    const std::string& content,
+                    size_t startLine, size_t startColumn,
+                    size_t endLine, size_t endColumn);
+    bool matchAt(size_t position, const std::string& text) const;
+    
+private:
     
     // 特殊检测方法
     bool isCHTLJSFeature(); // 检测 {{}} 或 ->

@@ -43,7 +43,7 @@ script {
     auto fragments2 = scanner.scan(code2);
     bool hasPlainJS = false;
     for (const auto& frag : fragments2) {
-        if (frag.type == FragmentType::JS) {
+        if (frag.type == FragmentType::JAVASCRIPT) {
             hasPlainJS = true;
             break;
         }
@@ -71,7 +71,7 @@ script {
     int chtlCount = 0;
     
     for (const auto& frag : fragments) {
-        if (frag.type == FragmentType::JS) jsCount++;
+        if (frag.type == FragmentType::JAVASCRIPT) jsCount++;
         if (frag.type == FragmentType::CHTL) chtlCount++;
         
         // 调试输出

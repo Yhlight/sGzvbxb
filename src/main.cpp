@@ -110,34 +110,8 @@ int main(int argc, char* argv[]) {
             std::cout << "Compilation completed successfully!\n";
             
         } else if (useFullCompiler) {
-            std::cout << "Using full compiler with advanced features...\n";
-            
-            // 使用完整的CHTL编译器
-            // chtl::CHTLMainCompiler compiler;
-            
-            // 设置编译选项
-            compiler.setStrictMode(false);
-            compiler.setMinifyCSS(false);
-            compiler.setMinifyJS(false);
-            
-            // 编译文件
-            if (!compiler.compileFile(inputFile, outputFile)) {
-                std::cerr << "Compilation failed:\n";
-                
-                // 输出错误
-                const auto& errors = compiler.getErrors();
-                for (const auto& error : errors) {
-                    std::cerr << "  Error: " << error << std::endl;
-                }
-                
-                // 输出警告
-                const auto& warnings = compiler.getWarnings();
-                for (const auto& warning : warnings) {
-                    std::cerr << "  Warning: " << warning << std::endl;
-                }
-                
-                return 1;
-            }
+            std::cout << "Full compiler is currently disabled. Please use --unified option.\n";
+            return 1;
             
         } else if (useEnhancedParser) {
             std::cout << "Using enhanced parser with complete CHTL syntax support...\n";

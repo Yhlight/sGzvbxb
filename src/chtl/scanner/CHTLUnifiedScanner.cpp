@@ -649,5 +649,27 @@ void CHTLUnifiedScanner::updatePosition(char ch) {
     }
 }
 
+void CHTLUnifiedScanner::addFragment(std::vector<CodeFragment>& fragments,
+                                   FragmentType type,
+                                   const std::string& content,
+                                   size_t startLine, size_t startColumn,
+                                   size_t endLine, size_t endColumn) {
+    fragments.push_back({type, content, startLine, startColumn, endLine, endColumn});
+}
+
+bool CHTLUnifiedScanner::matchAt(size_t position, const std::string& text) const {
+    if (position + text.length() > source_.length()) {
+        return false;
+    }
+    
+    for (size_t i = 0; i < text.length(); i++) {
+        if (source_[position + i] != text[i]) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
 } // namespace scanner
 } // namespace chtl

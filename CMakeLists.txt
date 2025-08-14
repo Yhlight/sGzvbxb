@@ -127,8 +127,8 @@ file(GLOB_RECURSE SCANNER_SOURCES
 # 添加精准扫描器和状态机扫描器
 set(SCANNER_SOURCES 
     ${SCANNER_SOURCES}
-    # src/chtl/scanner/PrecisionScanner.cpp  # 暂时禁用
-    # src/chtl/scanner/StateMachineScanner.cpp  # 暂时禁用
+    src/chtl/scanner/PrecisionScanner.cpp
+    src/chtl/scanner/StateMachineScanner.cpp
 )
 
 # ===== 新增模块 =====
@@ -326,3 +326,54 @@ message(STATUS "Dependencies:")
 message(STATUS "  ANTLR4 Runtime: ${antlr4-runtime_FOUND} (CSS/JS only)")
 message(STATUS "  Threads: ${Threads_FOUND}")
 message(STATUS "")
+
+# ===== Google Test 集成 =====
+option(CHTL_BUILD_UNIT_TESTS "Build unit tests" ON)
+
+if(CHTL_BUILD_UNIT_TESTS)
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG release-1.12.1
+    )
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+    
+    # 统一架构的单元测试
+    add_executable(test_unified_scanner tests/unit/test_unified_scanner.cpp)
+    target_link_libraries(test_unified_scanner 
+        chtl_core 
+        gtest 
+        gtest_main
+        Threads::Threads
+    )
+    
+    add_executable(test_compiler_dispatcher tests/unit/test_compiler_dispatcher.cpp)
+    target_link_libraries(test_compiler_dispatcher 
+        chtl_core 
+        gtest 
+        gtest_main
+        Threads::Threads
+    )
+    
+    # 设置测试输出目录
+    set_target_properties(test_unified_scanner test_compiler_dispatcher
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    )
+    
+    # 添加到CTest
+    enable_testing()
+    add_test(NAME UnifiedScannerTest COMMAND test_unified_scanner)
+    add_test(NAME CompilerDispatcherTest COMMAND test_compiler_dispatcher)
+    
+    # 添加到测试目标
+    add_custom_target(run_unit_tests
+        COMMAND test_unified_scanner
+        COMMAND test_compiler_dispatcher
+        DEPENDS test_unified_scanner test_compiler_dispatcher
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+        COMMENT "Running unit tests..."
+    )
+endif()
