@@ -118,8 +118,12 @@ private:
     std::vector<InsertOperation> insertOperations;
     std::vector<DeleteOperation> deleteOperations;
     
+    // 模板管理器引用（用于解析继承）
+    std::shared_ptr<TemplateManager> templateManager;
+    
 public:
-    CustomElement(const std::string& name) : ElementTemplate(name) {}
+    CustomElement(const std::string& name, std::shared_ptr<TemplateManager> tm = nullptr) 
+        : ElementTemplate(name), templateManager(tm) {}
     
     // 特例化操作
     void addElementSpecialization(const ElementSpecialization& spec);
@@ -176,6 +180,9 @@ private:
     std::unordered_map<std::string, std::shared_ptr<CustomStyleGroup>> customStyles;
     std::unordered_map<std::string, std::shared_ptr<CustomElement>> customElements;
     std::unordered_map<std::string, std::shared_ptr<CustomVarGroup>> customVars;
+    
+    // 名称别名映射
+    std::unordered_map<std::string, std::string> nameAliases;
     
     // 模板管理器引用（用于模板和自定义的相互继承）
     std::shared_ptr<TemplateManager> templateManager;

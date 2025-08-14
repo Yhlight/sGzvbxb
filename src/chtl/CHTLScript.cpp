@@ -51,7 +51,8 @@ void ScriptManager::processAllScripts() {
     for (auto& [path, scripts] : localScripts) {
         for (auto& script : scripts) {
             if (!script->hasBeenProcessed()) {
-                // TODO: 处理脚本内容
+                // 处理脚本内容
+                processLocalScript(script);
                 script->markProcessed();
             }
         }
@@ -63,6 +64,40 @@ void ScriptManager::processAllScripts() {
             script->markProcessed();
         }
     }
+}
+
+void ScriptManager::processLocalScript(std::shared_ptr<ScriptBlock> script) {
+    if (!script) return;
+    
+    // 创建局部作用域包装
+    std::stringstream wrapped;
+    wrapped << "(function() {\n";
+    wrapped << "'use strict';\n";
+    
+    // 添加局部脚本的上下文信息
+    wrapped << "// Local script from element: " << script->getElementPath() << "\n";
+    
+    // 如果脚本包含CHTL JS特性，先进行转换
+    std::string processedContent = script->getContent();
+    if (containsCHTLJSFeatures(processedContent)) {
+        CHTLJSTransformer transformer;
+        processedContent = transformer.transform(processedContent);
+    }
+    
+    wrapped << processedContent << "\n";
+    wrapped << "})();\n";
+    
+    // 将处理后的脚本添加到全局脚本集合
+    addGlobalScript(wrapped.str(), ScriptPriority::HIGH);
+}
+
+bool ScriptManager::containsCHTLJSFeatures(const std::string& script) const {
+    // 检查是否包含CHTL JS特性
+    return script.find("{{") != std::string::npos ||
+           script.find("->") != std::string::npos ||
+           script.find("on ") != std::string::npos ||
+           script.find("listen(") != std::string::npos ||
+           script.find("animate(") != std::string::npos;
 }
 
 std::string ScriptManager::generateJavaScript() const {
@@ -143,6 +178,51 @@ void ScriptManager::clear() {
     globalScripts.clear();
     scopeIdMap.clear();
     scopeIdCounter = 0;
+}
+
+// CHTLJSTransformer 辅助方法实现
+std::string CHTLJSTransformer::transformListen(const std::string& eventMap) {
+    std::stringstream js;
+    js << "(function(element) {\n";
+    
+    // 解析事件映射
+    std::regex eventRegex(R"((\w+)\s*:\s*([^,]+)(?:,|$))");
+    std::sregex_iterator it(eventMap.begin(), eventMap.end(), eventRegex);
+    std::sregex_iterator end;
+    
+    for (; it != end; ++it) {
+        std::string eventName = (*it)[1];
+        std::string handler = (*it)[2];
+        // 去除前后空白
+        handler = std::regex_replace(handler, std::regex("^\\s+|\\s+$"), "");
+        js << "    element.addEventListener('" << eventName << "', " << handler << ");\n";
+    }
+    
+    js << "})(this)";
+    return js.str();
+}
+
+std::string CHTLJSTransformer::transformEventDelegation(const std::string& eventType, 
+                                                      const std::string& selector) {
+    std::stringstream js;
+    js << "document.addEventListener('" << eventType << "', function(e) {\n";
+    js << "    if (e.target.matches('" << selector << "')) ";
+    return js.str();
+}
+
+std::string CHTLJSTransformer::transformAnimate(const std::string& properties, 
+                                               const std::string& options) {
+    std::stringstream js;
+    js << ".animate([{" << properties << "}], {";
+    
+    if (!options.empty()) {
+        js << options;
+    } else {
+        js << "duration: 300, easing: 'ease'";
+    }
+    
+    js << "})";
+    return js.str();
 }
 
 // EnhancedSelectorProcessor 实现
@@ -560,7 +640,31 @@ std::string CHTLJSTransformer::transform(const std::string& chtljs) {
             return transformSelector(match[1]);
         });
     
-    // TODO: 转换其他CHTL JS特性
+    // 转换其他CHTL JS特性
+    
+    // 转换 -> 操作符为标准的 . 操作符
+    transformed = std::regex_replace(transformed, std::regex("->"), ".");
+    
+    // 转换 listen 方法
+    std::regex listenRegex(R"(\.listen\s*\(\s*\{([^}]+)\}\s*\))");
+    transformed = std::regex_replace(transformed, listenRegex, 
+        [this](const std::smatch& match) {
+            return transformListen(match[1]);
+        });
+    
+    // 转换 on 语法（事件委托）
+    std::regex onRegex(R"(on\s+(\w+)\s+from\s+(.+?)\s*\{)");
+    transformed = std::regex_replace(transformed, onRegex,
+        [this](const std::smatch& match) {
+            return transformEventDelegation(match[1], match[2]);
+        });
+    
+    // 转换 animate 方法
+    std::regex animateRegex(R"(\.animate\s*\(\s*\{([^}]+)\}\s*(?:,\s*\{([^}]+)\})?\s*\))");
+    transformed = std::regex_replace(transformed, animateRegex,
+        [this](const std::smatch& match) {
+            return transformAnimate(match[1], match[2]);
+        });
     
     return transformed;
 }
@@ -897,9 +1001,66 @@ AnimationConfig AnimationProcessor::parseAnimationConfig(const std::string& conf
         animConfig.delay = std::stoi(delayMatch[1]);
     }
     
-    // TODO: 解析begin, end, when等复杂配置
+    // 解析begin, end, when等复杂配置
+    
+    // 解析loop配置
+    std::regex loopRegex(R"(loop\s*:\s*(-?\d+))");
+    std::smatch loopMatch;
+    if (std::regex_search(config, loopMatch, loopRegex)) {
+        animConfig.loop = std::stoi(loopMatch[1]);
+    }
+    
+    // 解析direction配置
+    std::regex directionRegex(R"(direction\s*:\s*'([^']+)')");
+    std::smatch directionMatch;
+    if (std::regex_search(config, directionMatch, directionRegex)) {
+        animConfig.direction = directionMatch[1];
+    }
+    
+    // 解析begin配置
+    std::regex beginRegex(R"(begin\s*:\s*\{([^}]+)\})");
+    std::smatch beginMatch;
+    if (std::regex_search(config, beginMatch, beginRegex)) {
+        animConfig.hasBegin = true;
+        animConfig.beginState = beginMatch[1];
+    }
+    
+    // 解析end配置
+    std::regex endRegex(R"(end\s*:\s*\{([^}]+)\})");
+    std::smatch endMatch;
+    if (std::regex_search(config, endMatch, endRegex)) {
+        animConfig.hasEnd = true;
+        animConfig.endState = endMatch[1];
+    }
+    
+    // 解析when配置（关键帧）
+    std::regex whenRegex(R"(when\s*:\s*\[([^\]]+)\])");
+    std::smatch whenMatch;
+    if (std::regex_search(config, whenMatch, whenRegex)) {
+        animConfig.hasKeyframes = true;
+        animConfig.keyframes = parseKeyframes(whenMatch[1]);
+    }
+    
+    // 解析callback配置
+    std::regex callbackRegex(R"(callback\s*:\s*([^,}]+))");
+    std::smatch callbackMatch;
+    if (std::regex_search(config, callbackMatch, callbackRegex)) {
+        animConfig.hasCallback = true;
+        animConfig.callback = callbackMatch[1];
+    }
     
     return animConfig;
+}
+
+std::string AnimationProcessor::parseKeyframes(const std::string& keyframesStr) {
+    // 解析when数组中的关键帧
+    std::stringstream parsed;
+    
+    // 简化处理：返回原始字符串
+    // 实际实现中应该解析at属性和CSS属性
+    parsed << "[" << keyframesStr << "]";
+    
+    return parsed.str();
 }
 
 std::string AnimationProcessor::generateAnimationFunction(const AnimationConfig& config) {

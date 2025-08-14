@@ -113,6 +113,8 @@ public:
     
     // 处理所有脚本
     void processAllScripts();
+    void processLocalScript(std::shared_ptr<ScriptBlock> script);
+    bool containsCHTLJSFeatures(const std::string& script) const;
     
     // 生成最终的JavaScript代码
     std::string generateJavaScript() const;
@@ -217,6 +219,11 @@ public:
     // 转换增强选择器
     std::string transformSelector(const std::string& selectorExpr);
     
+    // 转换其他CHTL JS特性
+    std::string transformListen(const std::string& eventMap);
+    std::string transformEventDelegation(const std::string& eventType, const std::string& selector);
+    std::string transformAnimate(const std::string& properties, const std::string& options);
+    
     // 生成DOM查询代码
     std::string generateQueryCode(const EnhancedSelector& selector);
     
@@ -295,15 +302,26 @@ struct AnimationKeyframe {
 
 // 动画配置
 struct AnimationConfig {
-    int duration;                         // 持续时间(ms)
-    std::string easing;                   // 缓动函数
+    int duration = 300;                   // 持续时间(ms)
+    std::string easing = "ease";          // 缓动函数
     std::map<std::string, std::string> begin;    // 起始状态
     std::vector<AnimationKeyframe> when;          // 关键帧
     std::map<std::string, std::string> end;      // 结束状态
-    int loop;                             // 循环次数（-1为无限）
-    std::string direction;                // 播放方向
-    int delay;                            // 延迟(ms)
+    int loop = 1;                         // 循环次数（-1为无限）
+    std::string direction = "normal";     // 播放方向
+    int delay = 0;                        // 延迟(ms)
     std::string callback;                 // 回调函数
+    
+    // 辅助标志
+    bool hasBegin = false;
+    bool hasEnd = false;
+    bool hasKeyframes = false;
+    bool hasCallback = false;
+    
+    // 字符串形式的状态（用于解析）
+    std::string beginState;
+    std::string endState;
+    std::string keyframes;
 };
 
 // 增强方法调用处理器
@@ -337,6 +355,9 @@ public:
     
     // 解析动画配置
     static AnimationConfig parseAnimationConfig(const std::string& config);
+    
+    // 解析关键帧
+    static std::string parseKeyframes(const std::string& keyframesStr);
     
     // 生成动画函数代码
     static std::string generateAnimationFunction(const AnimationConfig& config);

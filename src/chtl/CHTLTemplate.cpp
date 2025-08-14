@@ -196,7 +196,9 @@ void ElementTemplate::expand(CHTLGenerator& generator) const {
         }
         
         // 递归处理子元素
-        // TODO: 实现子元素处理
+        for (const auto& child : element->children) {
+            generateElementNode(child, generator);
+        }
         
         generator.closeElement();
     }

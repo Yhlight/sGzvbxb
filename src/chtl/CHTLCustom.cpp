@@ -119,7 +119,10 @@ void CustomElement::addDeleteOperation(const DeleteOperation& op) {
 std::shared_ptr<ElementTemplate::ElementNode> CustomElement::getElementByIndex(
     const std::string& elementName, int index) const {
     
-    auto allElements = getAllElements({});  // TODO: 需要传入模板映射
+    // 获取模板映射
+    auto templateMap = templateManager ? templateManager->getAllElementTemplates() 
+                                      : std::unordered_map<std::string, std::shared_ptr<ElementTemplate>>{};
+    auto allElements = getAllElements(templateMap);
     int currentIndex = 0;
     
     for (const auto& elem : allElements) {
@@ -138,7 +141,10 @@ std::vector<std::shared_ptr<ElementTemplate::ElementNode>> CustomElement::getEle
     const ElementSelector& selector) const {
     
     std::vector<std::shared_ptr<ElementNode>> result;
-    auto allElements = getAllElements({});  // TODO: 需要传入模板映射
+    // 获取模板映射
+    auto templateMap = templateManager ? templateManager->getAllElementTemplates() 
+                                      : std::unordered_map<std::string, std::shared_ptr<ElementTemplate>>{};
+    auto allElements = getAllElements(templateMap);
     int currentIndex = 0;
     std::unordered_map<std::string, int> indexMap;
     
@@ -156,7 +162,9 @@ void CustomElement::expandWithSpecialization(CHTLGenerator& generator,
     const std::vector<SpecializationOperation>& userSpecializations) const {
     
     // 获取所有元素
-    auto elements = getAllElements({});  // TODO: 需要传入模板映射
+    auto templateMap = templateManager ? templateManager->getAllElementTemplates() 
+                                      : std::unordered_map<std::string, std::shared_ptr<ElementTemplate>>{};
+    auto elements = getAllElements(templateMap);
     
     // 应用删除操作
     elements = applyDeletions(elements);
@@ -174,7 +182,26 @@ void CustomElement::expandWithSpecialization(CHTLGenerator& generator,
                 if (!elem->inlineStyles) {
                     elem->inlineStyles = spec.additionalStyles;
                 } else {
-                    // TODO: 合并样式
+                    // 合并样式
+                    auto mergedStyles = std::make_shared<StyleTemplate>("merged");
+                    
+                    // 先添加原有样式
+                    if (elem->inlineStyles) {
+                        auto existingStyles = elem->inlineStyles->getAllStyles({});
+                        for (const auto& [prop, value] : existingStyles) {
+                            mergedStyles->addProperty(prop, value);
+                        }
+                    }
+                    
+                    // 再添加额外样式（覆盖同名属性）
+                    if (spec.additionalStyles) {
+                        auto newStyles = spec.additionalStyles->getAllStyles({});
+                        for (const auto& [prop, value] : newStyles) {
+                            mergedStyles->addProperty(prop, value);
+                        }
+                    }
+                    
+                    elem->inlineStyles = mergedStyles;
                 }
             }
             
@@ -351,7 +378,15 @@ bool CustomManager::registerCustomStyle(const std::string& name, std::shared_ptr
     QualifiedNameResolver resolver;
     resolver.parse(name);
     
-    // TODO: 注册别名到管理器
+    // 注册别名到管理器
+    if (resolver.hasQualifier()) {
+        std::string fullName = resolver.getFullName();
+        std::string simpleName = resolver.getName();
+        
+        // 注册别名映射
+        nameAliases[simpleName] = fullName;
+        nameAliases[fullName] = fullName;  // 全名也映射到自己
+    }
     
     return true;
 }
@@ -372,7 +407,14 @@ std::shared_ptr<CustomStyleGroup> CustomManager::findCustomStyle(const std::stri
         return it->second;
     }
     
-    // TODO: 处理全缀名查找
+    // 处理全缀名查找
+    auto aliasIt = nameAliases.find(name);
+    if (aliasIt != nameAliases.end()) {
+        it = customStyles.find(aliasIt->second);
+        if (it != customStyles.end()) {
+            return it->second;
+        }
+    }
     
     return nullptr;
 }
@@ -383,7 +425,14 @@ std::shared_ptr<CustomElement> CustomManager::findCustomElement(const std::strin
         return it->second;
     }
     
-    // TODO: 处理全缀名查找
+    // 处理全缀名查找
+    auto aliasIt = nameAliases.find(name);
+    if (aliasIt != nameAliases.end()) {
+        it = customElements.find(aliasIt->second);
+        if (it != customElements.end()) {
+            return it->second;
+        }
+    }
     
     return nullptr;
 }
@@ -394,7 +443,14 @@ std::shared_ptr<CustomVarGroup> CustomManager::findCustomVar(const std::string& 
         return it->second;
     }
     
-    // TODO: 处理全缀名查找
+    // 处理全缀名查找
+    auto aliasIt = nameAliases.find(name);
+    if (aliasIt != nameAliases.end()) {
+        it = customVars.find(aliasIt->second);
+        if (it != customVars.end()) {
+            return it->second;
+        }
+    }
     
     return nullptr;
 }
@@ -409,7 +465,9 @@ bool CustomManager::useCustomStyle(const std::string& name, CHTLGenerator& gener
     }
     
     // 获取有效样式（考虑特例化和提供的值）
-    auto effectiveStyles = custom->getEffectiveStyles({}, providedValues);  // TODO: 传入模板映射
+    auto templateMap = templateManager ? templateManager->getAllStyleTemplates() 
+                                      : std::unordered_map<std::string, std::shared_ptr<StyleTemplate>>{};
+    auto effectiveStyles = custom->getEffectiveStyles(templateMap, providedValues);
     
     // 应用样式
     for (const auto& [property, value] : effectiveStyles) {
@@ -574,11 +632,39 @@ std::vector<SpecializationOperation> mergeSpecializations(
     const std::vector<SpecializationOperation>& base,
     const std::vector<SpecializationOperation>& overrides) {
     
-    // 简单合并策略：后面的覆盖前面的
-    std::vector<SpecializationOperation> merged = base;
-    merged.insert(merged.end(), overrides.begin(), overrides.end());
+    // 实现智能的合并策略
+    std::vector<SpecializationOperation> merged;
+    std::unordered_map<std::string, size_t> operationIndex;
     
-    // TODO: 实现更智能的合并策略
+    // 先添加基础操作
+    for (const auto& op : base) {
+        merged.push_back(op);
+        
+        // 记录操作的索引（用于后续覆盖）
+        if (op.type == SpecializationType::STYLE && !op.styleName.empty()) {
+            operationIndex[op.styleName] = merged.size() - 1;
+        } else if (op.type == SpecializationType::VAR && !op.varGroup.empty()) {
+            operationIndex[op.varGroup] = merged.size() - 1;
+        }
+    }
+    
+    // 添加或覆盖覆盖操作
+    for (const auto& op : overrides) {
+        std::string key;
+        if (op.type == SpecializationType::STYLE && !op.styleName.empty()) {
+            key = op.styleName;
+        } else if (op.type == SpecializationType::VAR && !op.varGroup.empty()) {
+            key = op.varGroup;
+        }
+        
+        if (!key.empty() && operationIndex.find(key) != operationIndex.end()) {
+            // 覆盖已存在的操作
+            merged[operationIndex[key]] = op;
+        } else {
+            // 添加新操作
+            merged.push_back(op);
+        }
+    }
     
     return merged;
 }
@@ -589,7 +675,31 @@ std::vector<T> applyDeletionFilter(const std::vector<T>& items,
     
     std::vector<T> result;
     
-    // TODO: 实现基于删除列表的过滤
+    // 实现基于删除列表的过滤
+    std::unordered_set<std::string> deletionSet(deletions.begin(), deletions.end());
+    
+    for (const auto& item : items) {
+        std::string itemName;
+        
+        // 根据类型获取名称
+        if constexpr (std::is_same_v<T, std::string>) {
+            itemName = item;
+        } else if constexpr (std::is_same_v<T, std::pair<std::string, std::string>>) {
+            itemName = item.first;  // 对于属性对，使用属性名
+        } else {
+            // 对于其他类型，假设有getName()方法
+            if constexpr (requires { item->getName(); }) {
+                itemName = item->getName();
+            } else if constexpr (requires { item->name; }) {
+                itemName = item->name;
+            }
+        }
+        
+        // 如果不在删除列表中，保留该项
+        if (deletionSet.find(itemName) == deletionSet.end()) {
+            result.push_back(item);
+        }
+    }
     
     return result;
 }

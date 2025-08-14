@@ -215,6 +215,11 @@ public:
     std::unordered_map<std::string, std::shared_ptr<StyleTemplate>> getAllStyleTemplates() const {
         return styleTemplates;
     }
+    
+    // 获取所有元素模板（用于自定义系统）
+    std::unordered_map<std::string, std::shared_ptr<ElementTemplate>> getAllElementTemplates() const {
+        return elementTemplates;
+    }
 };
 
 // 模板使用处理器
