@@ -2,6 +2,8 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <set>
+#include <cctype>
 
 namespace chtl {
 namespace scanner {
@@ -104,32 +106,77 @@ void CHTLUnifiedScanner::scanCHTL() {
         
         // 检查 style 块
         if (matchKeyword("style") && peek() == '{') {
-            // 结束当前 CHTL 片段
-            endFragment();
+            // 判断是局部样式块还是全局样式块
+            // 局部样式块：在元素内部（状态栈中有元素状态）
+            // 全局样式块：在顶层
+            bool isLocalStyle = !stateStack_.empty();
             
-            // 跳过 style 和 {
-            for (int i = 0; i < 5; i++) advance(); // "style"
-            skipWhitespace();
-            advance(); // '{'
-            
-            // 开始 CSS 片段
-            startFragment(FragmentType::CSS);
-            pushState(ScannerState::IN_STYLE);
+            if (isLocalStyle) {
+                // 局部样式块整体归属于 CHTL
+                // 继续在 CHTL 片段中
+                // 扫描整个局部样式块
+                appendToFragment('s');
+                appendToFragment('t');
+                appendToFragment('y');
+                appendToFragment('l');
+                appendToFragment('e');
+                for (int i = 0; i < 5; i++) advance(); // 移动位置
+                
+                skipWhitespace();
+                appendToFragment(' ');
+                appendToFragment(advance()); // '{'
+                
+                int braceCount = 1;
+                while (!isAtEnd() && braceCount > 0) {
+                    char ch = peek();
+                    appendToFragment(advance());
+                    if (ch == '{') braceCount++;
+                    else if (ch == '}') braceCount--;
+                }
+            } else {
+                // 全局样式块
+                // style { 归属于 CHTL
+                appendToFragment('s');
+                appendToFragment('t');
+                appendToFragment('y');
+                appendToFragment('l');
+                appendToFragment('e');
+                for (int i = 0; i < 5; i++) advance(); // 移动位置
+                
+                skipWhitespace();
+                
+                appendToFragment(advance()); // '{'
+                
+                // 结束 CHTL 片段
+                endFragment();
+                
+                // 开始 CSS 片段
+                startFragment(FragmentType::CSS);
+                pushState(ScannerState::IN_STYLE);
+            }
             return;
         }
         
         // 检查 script 块
         if (matchKeyword("script") && peek() == '{') {
-            // 结束当前 CHTL 片段
+            // script { 归属于 CHTL
+            appendToFragment('s');
+            appendToFragment('c');
+            appendToFragment('r');
+            appendToFragment('i');
+            appendToFragment('p');
+            appendToFragment('t');
+            for (int i = 0; i < 6; i++) advance(); // 移动位置
+            
+            skipWhitespace();
+            
+            appendToFragment(advance()); // '{'
+            
+            // 结束 CHTL 片段
             endFragment();
             
-            // 跳过 script 和 {
-            for (int i = 0; i < 6; i++) advance(); // "script"
-            skipWhitespace();
-            advance(); // '{'
-            
-            // 开始脚本片段
-            startFragment(FragmentType::CHTL_JS);
+            // 开始 JavaScript 片段（默认）
+            startFragment(FragmentType::JAVASCRIPT);
             pushState(ScannerState::IN_SCRIPT);
             return;
         }
@@ -149,6 +196,29 @@ void CHTLUnifiedScanner::scanStyle() {
     int braceCount = 1;
     
     while (!isAtEnd() && braceCount > 0) {
+        // 检查 CHTL 特性（如 @Var 等）
+        if (peek() == '@' && std::isalpha(peek(1))) {
+            // 结束当前 CSS 片段
+            endFragment();
+            // 开始 CHTL 片段
+            startFragment(FragmentType::CHTL);
+            
+            // 扫描 CHTL 特性
+            appendToFragment(advance()); // @
+            scanIdentifier(); // Var, Element等
+            
+            // 如果有参数
+            if (peek() == '(') {
+                scanBalancedParentheses();
+            }
+            
+            // 结束 CHTL 片段
+            endFragment();
+            // 继续 CSS 片段
+            startFragment(FragmentType::CSS);
+            continue;
+        }
+        
         // 检查注释
         if (matchSequence("/*")) {
             appendToFragment(advance());
@@ -180,8 +250,9 @@ void CHTLUnifiedScanner::scanStyle() {
         } else if (ch == '}') {
             braceCount--;
             if (braceCount == 0) {
-                // 结束 CSS 片段，返回 CHTL 状态
+                // 结束 CSS 片段
                 endFragment();
+                // style 的结束 } 归属于 CHTL
                 startFragment(FragmentType::CHTL);
                 popState();
                 return;
@@ -192,11 +263,23 @@ void CHTLUnifiedScanner::scanStyle() {
 
 void CHTLUnifiedScanner::scanScript() {
     int braceCount = 1;
+    bool inJavaScript = true; // 默认为 JavaScript
     
     while (!isAtEnd() && braceCount > 0) {
-        // 检查 CHTL JS 特性
-        if (isCHTLJSFeature()) {
-            // 保持在 CHTL_JS 片段中
+        // 检查是否需要切换到 CHTL JS
+        if (inJavaScript && matchSequence("{{")) {
+            // 结束当前 JavaScript 片段
+            endFragment();
+            // 开始 CHTL JS 片段
+            startFragment(FragmentType::CHTL_JS);
+            inJavaScript = false;
+            scanCHTLJS();
+            // 结束 CHTL JS 片段
+            endFragment();
+            // 开始新的 JavaScript 片段
+            startFragment(FragmentType::JAVASCRIPT);
+            inJavaScript = true;
+            continue;
         }
         
         // 检查注释
@@ -239,8 +322,9 @@ void CHTLUnifiedScanner::scanScript() {
         } else if (ch == '}') {
             braceCount--;
             if (braceCount == 0) {
-                // 结束脚本片段，返回 CHTL 状态
+                // 结束脚本片段
                 endFragment();
+                // script 的结束 } 归属于 CHTL
                 startFragment(FragmentType::CHTL);
                 popState();
                 return;
@@ -327,6 +411,123 @@ bool CHTLUnifiedScanner::isCHTLJSFeature() {
     }
     
     return false;
+}
+
+bool CHTLUnifiedScanner::isCHTLJSContinuation() {
+    // 跳过空白
+    size_t pos = currentPos_;
+    while (pos < source_.length() && std::isspace(source_[pos])) {
+        pos++;
+    }
+    
+    if (pos >= source_.length()) {
+        return false;
+    }
+    
+    // 检查 -> 操作符
+    if (pos + 1 < source_.length() && source_[pos] == '-' && source_[pos + 1] == '>') {
+        return true;
+    }
+    
+    // 检查 . 后跟 CHTL JS 方法
+    if (source_[pos] == '.') {
+        pos++;
+        std::string method = peekIdentifierAt(pos);
+        return isCHTLJSMethod(method);
+    }
+    
+    return false;
+}
+
+bool CHTLUnifiedScanner::isCHTLJSMethod(const std::string& method) {
+    // 根据语法文档，CHTL JS 的专有方法
+    static const std::set<std::string> chtlJSMethods = {
+        "listen",     // 事件监听
+        "delegate",   // 事件委托
+        "animate"     // 动画
+    };
+    
+    return chtlJSMethods.count(method) > 0;
+}
+
+std::string CHTLUnifiedScanner::peekIdentifier() {
+    size_t pos = currentPos_;
+    return peekIdentifierAt(pos);
+}
+
+std::string CHTLUnifiedScanner::peekIdentifierAt(size_t pos) {
+    std::string identifier;
+    
+    if (pos < source_.length() && (std::isalpha(source_[pos]) || source_[pos] == '_')) {
+        identifier += source_[pos++];
+        
+        while (pos < source_.length() && 
+               (std::isalnum(source_[pos]) || source_[pos] == '_')) {
+            identifier += source_[pos++];
+        }
+    }
+    
+    return identifier;
+}
+
+void CHTLUnifiedScanner::scanIdentifier() {
+    while (!isAtEnd() && (std::isalnum(peek()) || peek() == '_')) {
+        appendToFragment(advance());
+    }
+}
+
+void CHTLUnifiedScanner::scanBalancedParentheses() {
+    if (peek() != '(') return;
+    
+    appendToFragment(advance()); // '('
+    int count = 1;
+    
+    while (!isAtEnd() && count > 0) {
+        if (peek() == '(') {
+            count++;
+        } else if (peek() == ')') {
+            count--;
+        } else if (peek() == '"' || peek() == '\'') {
+            char quote = peek();
+            appendToFragment(advance());
+            scanString(quote);
+            continue;
+        }
+        appendToFragment(advance());
+    }
+}
+
+void CHTLUnifiedScanner::scanCHTLJS() {
+    // 扫描 {{selector}}
+    appendToFragment(advance()); // {
+    appendToFragment(advance()); // {
+    
+    while (!isAtEnd() && !(peek() == '}' && peek(1) == '}')) {
+        appendToFragment(advance());
+    }
+    
+    if (!isAtEnd()) {
+        appendToFragment(advance()); // }
+        appendToFragment(advance()); // }
+    }
+    
+    // 继续扫描 CHTL JS 的延续部分
+    while (isCHTLJSContinuation()) {
+        skipWhitespace();
+        
+        if (peek() == '-' && peek(1) == '>') {
+            appendToFragment(advance()); // -
+            appendToFragment(advance()); // >
+        } else if (peek() == '.') {
+            appendToFragment(advance()); // .
+            // 扫描方法名
+            scanIdentifier();
+            // 扫描方法参数
+            if (peek() == '(') {
+                scanBalancedParentheses();
+            }
+        }
+    }
 }
 
 bool CHTLUnifiedScanner::isInCHTLJSContext() {

@@ -102,6 +102,15 @@ private:
     // 特殊检测方法
     bool isCHTLJSFeature(); // 检测 {{}} 或 ->
     bool isInCHTLJSContext(); // 判断是否在 CHTL JS 上下文中
+    bool isCHTLJSContinuation(); // 判断是否是 CHTL JS 的延续
+    
+    // CHTL JS 专有方法
+    bool isCHTLJSMethod(const std::string& method);
+    std::string peekIdentifier();
+    std::string peekIdentifierAt(size_t pos);
+    void scanIdentifier();
+    void scanBalancedParentheses();
+    void scanCHTLJS();
     
     // 位置更新
     void updatePosition(char ch);
