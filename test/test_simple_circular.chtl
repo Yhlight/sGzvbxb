@@ -1,0 +1,13 @@
+// 简单的循环继承测试
+
+// 自引用测试
+[Template] @Style SelfReference {
+    inherit @Style SelfReference;
+    color: red;
+}
+
+body {
+    div {
+        text "Testing circular inheritance detection"
+    }
+}

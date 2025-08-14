@@ -176,6 +176,27 @@ void ElementTemplate::inheritFrom(const std::string& templateName) {
     inheritedTemplates.push_back(templateName);
 }
 
+bool ElementTemplate::hasCircularInheritance(const std::string& checkName,
+    const std::unordered_map<std::string, std::shared_ptr<ElementTemplate>>& templateMap) const {
+    
+    // 如果当前模板名与检查名相同，说明存在循环
+    if (name == checkName) {
+        return true;
+    }
+    
+    // 递归检查所有继承的模板
+    for (const auto& inheritedName : inheritedTemplates) {
+        auto it = templateMap.find(inheritedName);
+        if (it != templateMap.end()) {
+            if (it->second->hasCircularInheritance(checkName, templateMap)) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
 // 辅助函数：递归应用元素节点
 void applyElementNode(const std::shared_ptr<ElementTemplate::ElementNode>& element, CHTLGenerator& generator) {
     generator.generateElement(element->name, element->attributes);
@@ -243,6 +264,27 @@ void VarTemplate::addVariable(const std::string& varName, const std::string& val
 
 void VarTemplate::inheritFrom(const std::string& templateName) {
     inheritedTemplates.push_back(templateName);
+}
+
+bool VarTemplate::hasCircularInheritance(const std::string& checkName,
+    const std::unordered_map<std::string, std::shared_ptr<VarTemplate>>& templateMap) const {
+    
+    // 如果当前模板名与检查名相同，说明存在循环
+    if (name == checkName) {
+        return true;
+    }
+    
+    // 递归检查所有继承的模板
+    for (const auto& inheritedName : inheritedTemplates) {
+        auto it = templateMap.find(inheritedName);
+        if (it != templateMap.end()) {
+            if (it->second->hasCircularInheritance(checkName, templateMap)) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
 }
 
 std::unordered_map<std::string, std::string> VarTemplate::getAllVariables(
@@ -639,14 +681,22 @@ void TemplateManager::processInheritance() {
     }
     
     // 检查元素模板的循环继承
-    // TODO: 实现 ElementTemplate 的循环继承检查
-    // for (const auto& [name, elementTemplate] : elementTemplates) {
-    //     if (elementTemplate->hasCircularInheritance(...)) {
-    //         if (context) {
-    //             context->reportError("Circular inheritance detected in element template: " + name);
-    //         }
-    //     }
-    // }
+    for (const auto& [name, elementTemplate] : elementTemplates) {
+        if (elementTemplate->hasCircularInheritance(name, elementTemplates)) {
+            if (context) {
+                context->reportError("Circular inheritance detected in element template: " + name);
+            }
+        }
+    }
+    
+    // 检查变量模板的循环继承
+    for (const auto& [name, varTemplate] : varTemplates) {
+        if (varTemplate->hasCircularInheritance(name, varTemplates)) {
+            if (context) {
+                context->reportError("Circular inheritance detected in var template: " + name);
+            }
+        }
+    }
     
     // 注意：实际的继承处理在模板使用时进行，通过 getAllStyles() 等方法实现
     // 这里只进行验证和循环检查

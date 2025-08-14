@@ -154,6 +154,10 @@ public:
     
     // 访问器方法
     const std::vector<std::shared_ptr<ElementNode>>& getElements() const { return elements; }
+    
+    // 检查是否有循环继承
+    bool hasCircularInheritance(const std::string& checkName,
+        const std::unordered_map<std::string, std::shared_ptr<ElementTemplate>>& templateMap) const;
 };
 
 // 变量组模板
@@ -185,6 +189,10 @@ public:
     
     // 变量替换
     std::string replaceVariables(const std::string& text) const;
+    
+    // 检查是否有循环继承
+    bool hasCircularInheritance(const std::string& checkName,
+        const std::unordered_map<std::string, std::shared_ptr<VarTemplate>>& templateMap) const;
 };
 
 // 模板管理器

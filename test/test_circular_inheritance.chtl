@@ -1,0 +1,114 @@
+// 测试循环继承检查
+
+// 正常的继承链
+[Template] @Style BaseStyle {
+    color: black;
+    font-size: 14px;
+}
+
+[Template] @Style ExtendedStyle {
+    inherit @Style BaseStyle;
+    background-color: white;
+}
+
+[Template] @Style FinalStyle {
+    inherit @Style ExtendedStyle;
+    border: 1px solid gray;
+}
+
+// 循环继承 - 应该报错
+[Template] @Style CircularStyle1 {
+    inherit @Style CircularStyle2;
+    color: red;
+}
+
+[Template] @Style CircularStyle2 {
+    inherit @Style CircularStyle3;
+    color: green;
+}
+
+[Template] @Style CircularStyle3 {
+    inherit @Style CircularStyle1;  // 形成循环
+    color: blue;
+}
+
+// 自引用 - 应该报错
+[Template] @Style SelfReferenceStyle {
+    inherit @Style SelfReferenceStyle;  // 自己继承自己
+    color: purple;
+}
+
+// 元素模板的循环继承测试
+[Template] @Element BaseButton {
+    button class="base-btn" {
+        text "Base Button"
+    }
+}
+
+[Template] @Element ExtendedButton {
+    inherit @Element BaseButton;
+    style {
+        padding: 10px;
+    }
+}
+
+// 元素模板的循环继承 - 应该报错
+[Template] @Element CircularElement1 {
+    inherit @Element CircularElement2;
+    div {
+        text "Circular 1"
+    }
+}
+
+[Template] @Element CircularElement2 {
+    inherit @Element CircularElement1;  // 形成循环
+    div {
+        text "Circular 2"
+    }
+}
+
+// 变量模板的循环继承测试
+[Template] @Var BaseColors {
+    primary: #007bff;
+    secondary: #6c757d;
+}
+
+[Template] @Var ExtendedColors {
+    inherit @Var BaseColors;
+    success: #28a745;
+    danger: #dc3545;
+}
+
+// 变量模板的循环继承 - 应该报错
+[Template] @Var CircularVar1 {
+    inherit @Var CircularVar2;
+    color1: red;
+}
+
+[Template] @Var CircularVar2 {
+    inherit @Var CircularVar3;
+    color2: green;
+}
+
+[Template] @Var CircularVar3 {
+    inherit @Var CircularVar1;  // 形成循环
+    color3: blue;
+}
+
+// 使用模板
+body {
+    // 使用正常的模板
+    div {
+        style @Style FinalStyle;
+        @Element ExtendedButton;
+        
+        text "Colors: " + @Var ExtendedColors.primary;
+    }
+    
+    // 尝试使用有循环继承的模板（应该失败）
+    div {
+        style @Style CircularStyle1;  // 应该报错
+        @Element CircularElement1;     // 应该报错
+        text "Color: " + @Var CircularVar1.color1;  // 应该报错
+    }
+}
