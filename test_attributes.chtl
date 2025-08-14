@@ -77,3 +77,62 @@ html {
         }
     }
 }
+
+// 测试属性语法 - 冒号和等号
+div {
+    // 冒号语法
+    id: "main-container";
+    class: "container wrapper";
+    
+    // 等号语法（CE对等式）
+    title = "这是一个提示";
+    data-value = "123";
+    
+    // 无引号字面量
+    width: 100%;
+    height: auto;
+    role: navigation;
+    
+    // 混合使用
+    style: "color: red;";
+    onclick = "handleClick()";
+    
+    text { "测试属性语法" }
+}
+
+// 测试各种HTML属性
+form {
+    action: "/submit";
+    method = "POST";
+    
+    input {
+        type: "text";
+        name = "username";
+        placeholder: "请输入用户名";
+        required: true;
+    }
+    
+    button {
+        type = "submit";
+        class: "btn btn-primary";
+        
+        text { "提交" }
+    }
+}
+
+// 测试链接属性
+a {
+    href: "https://example.com";
+    target = "_blank";
+    rel: "noopener noreferrer";
+    
+    text { "访问示例网站" }
+}
+
+// 测试图片属性
+img {
+    src = "/images/logo.png";
+    alt: "公司logo";
+    width: 200;
+    height = 60;
+}

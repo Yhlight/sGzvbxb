@@ -86,6 +86,7 @@ file(GLOB_RECURSE CHTL_CORE_SOURCES
     src/chtl/CHTLCMOD.cpp  # CMOD管理器实现 - 已修复
     src/chtl/CHTLOrigin.cpp  # Origin管理器实现 - 已修复
     src/chtl/CHTLImportVisitorStandalone.cpp  # 独立导入访问器实现
+    src/chtl/AutoClassIdProcessor.cpp  # 自动化类/ID处理器
     src/chtl/stubs/ManagerStubs.cpp  # 临时管理器实现桩
 )
 
@@ -107,6 +108,7 @@ file(GLOB_RECURSE CHTL_PARSER_SOURCES
     src/chtl/parser/standalone/ParserRuntime.cpp
     src/chtl/parser/standalone/CHTLLexer.cpp
     src/chtl/parser/standalone/CHTLParser.cpp
+    src/chtl/parser/standalone/CHTLParserEnhanced.cpp
     src/chtl/parser/standalone/CHTLJSLexer.cpp
     src/chtl/parser/standalone/CHTLJSParser.cpp
     src/chtl/parser/standalone/CHTLJSCodeGenerator.cpp

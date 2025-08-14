@@ -1,0 +1,110 @@
+// 测试 [Origin] 原始嵌入块
+
+// 顶级原始 HTML
+[Origin] @Html {
+    <!-- 这是原始的 HTML 注释 -->
+    <div class="raw-html">
+        <p>这段 HTML 不会被 CHTL 处理</p>
+        <script>console.log("内嵌脚本");</script>
+    </div>
+}
+
+// 顶级原始 CSS
+[Origin] @Style {
+    /* 原始 CSS 规则 */
+    .special-class {
+        color: red;
+        /* 支持所有 CSS 特性 */
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+}
+
+// 顶级原始 JavaScript
+[Origin] @JavaScript {
+    // 原始 JavaScript 代码
+    (function() {
+        'use strict';
+        
+        const config = {
+            debug: true,
+            version: '1.0.0'
+        };
+        
+        console.log('原始 JS 块', config);
+    })();
+}
+
+// 在元素内使用 [Origin]
+div {
+    text { "包含原始嵌入的元素" }
+    
+    // 元素内的原始 HTML
+    [Origin] @Html {
+        <svg width="100" height="100">
+            <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
+        </svg>
+    }
+    
+    // 元素内的原始样式
+    [Origin] @Style {
+        /* 仅应用于这个 div 的样式 */
+        :host {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+    }
+    
+    // 元素内的原始脚本
+    [Origin] @JavaScript {
+        // 局部作用域脚本
+        {
+            let localVar = "局部变量";
+            console.log(localVar);
+        }
+    }
+}
+
+// 复杂的原始嵌入示例
+article {
+    [Origin] @Html {
+        <details>
+            <summary>点击展开更多信息</summary>
+            <p>这是使用原生 HTML5 的 details 元素</p>
+            <ul>
+                <li>支持所有 HTML 特性</li>
+                <li>不受 CHTL 语法限制</li>
+                <li>可以使用任何 HTML5 标签</li>
+            </ul>
+        </details>
+    }
+    
+    [Origin] @Style {
+        details {
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            padding: .5em .5em 0;
+        }
+        
+        summary {
+            font-weight: bold;
+            margin: -.5em -.5em 0;
+            padding: .5em;
+            cursor: pointer;
+        }
+        
+        details[open] {
+            padding: .5em;
+        }
+        
+        details[open] summary {
+            border-bottom: 1px solid #aaa;
+            margin-bottom: .5em;
+        }
+    }
+}

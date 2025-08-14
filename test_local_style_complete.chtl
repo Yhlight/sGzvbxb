@@ -1,0 +1,201 @@
+// 测试局部样式块的完整功能
+
+// 1. 内联样式测试
+div {
+    text { "内联样式测试" }
+    
+    style {
+        // 这些会成为内联样式
+        width: 300px;
+        height: 200px;
+        padding: 20px;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        margin: 20px auto;
+    }
+}
+
+// 2. 自动化类名测试
+section {
+    text { "自动化类名测试" }
+    
+    style {
+        // 内联样式
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        
+        // 类选择器 - 自动添加 class="card"
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        // 多个类选择器 - 自动添加 class="card primary"
+        .primary {
+            border-left: 4px solid #007bff;
+        }
+    }
+}
+
+// 3. 自动化ID测试
+header {
+    text { "自动化ID测试" }
+    
+    style {
+        // ID选择器 - 自动添加 id="main-header"
+        #main-header {
+            background: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+    }
+}
+
+// 4. 伪类和伪元素测试
+button {
+    text { "悬停按钮" }
+    
+    style {
+        // 自动化类名
+        .hover-button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        // 使用 & 符号表示当前元素
+        &:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        &:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        &:focus {
+            outline: 3px solid #0056b3;
+            outline-offset: 2px;
+        }
+        
+        // 伪元素
+        &::before {
+            content: "➤ ";
+            margin-right: 5px;
+        }
+        
+        &::after {
+            content: "";
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #0056b3;
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+        
+        &:hover::after {
+            transform: scaleX(1);
+        }
+    }
+}
+
+// 5. 复杂组合测试
+nav {
+    style {
+        // 内联样式
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        
+        // 自动化类名
+        .navbar {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+    }
+    
+    ul {
+        style {
+            // 内联样式
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 20px;
+            
+            // 自动化类名
+            .nav-menu {
+                align-items: center;
+            }
+        }
+        
+        li {
+            a {
+                text { "链接" }
+                
+                style {
+                    // 内联样式
+                    text-decoration: none;
+                    color: #333;
+                    padding: 8px 16px;
+                    border-radius: 4px;
+                    transition: all 0.3s;
+                    
+                    // 自动化类名
+                    .nav-link {
+                        display: inline-block;
+                    }
+                    
+                    // 伪类
+                    &:hover {
+                        background: #e9ecef;
+                        color: #007bff;
+                    }
+                    
+                    &.active {
+                        background: #007bff;
+                        color: white;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 6. 媒体查询测试（通过 [Origin] 实现）
+div {
+    style {
+        .responsive-box {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+    }
+    
+    [Origin] @Style {
+        @media (max-width: 768px) {
+            .responsive-box {
+                padding: 10px;
+            }
+        }
+    }
+    
+    text { "响应式容器" }
+}
