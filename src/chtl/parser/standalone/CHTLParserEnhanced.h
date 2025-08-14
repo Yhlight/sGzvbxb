@@ -267,9 +267,7 @@ public:
             } else if (match(TokenType::KEYWORD_EXCEPT)) {
                 // except 约束
                 ctx->addChild(exceptConstraint());
-            } else if (match(TokenType::KEYWORD_USE)) {
-                // use 语句
-                ctx->addChild(useStatement());
+
             } else if (match(TokenType::KEYWORD_INSERT)) {
                 // insert 操作
                 ctx->addChild(insertOperation());
@@ -348,7 +346,7 @@ private:
     std::shared_ptr<ParseContext> textBlock();
     std::shared_ptr<ParseContext> localStyleBlock();
     std::shared_ptr<ParseContext> localScriptBlock();
-    std::shared_ptr<ParseContext> useStatement();
+
     std::shared_ptr<ParseContext> insertOperation();
     
     // 额外的辅助方法

@@ -105,9 +105,11 @@ body {
         text { "这个 div 使用了 DefaultText 样式模板" }
     }
     
-    // 测试 4: 使用 use 语句
+    // 测试 4: 在按钮中使用样式模板
     button {
-        use @Style ButtonStyle;
+        style {
+            @Style ButtonStyle;
+        }
         text { "按钮文本" }
     }
     
@@ -169,7 +171,7 @@ body {
 // 测试模板的复杂组合
 main {
     // 使用自定义元素
-    use @Element CustomCard;
+    @Element CustomCard;
     
     // 直接使用多个模板
     article {

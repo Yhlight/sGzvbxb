@@ -1,0 +1,117 @@
+// 测试完整的导入系统
+
+// 导入 HTML 文件
+[Import] @Html from "components/header.html"
+[Import] @Html from "components/footer.html" as footerHtml
+
+// 导入 CSS 文件  
+[Import] @Style from "styles/theme.css"
+[Import] @Style from "styles/layout.css" as layoutStyles
+
+// 导入 JavaScript 文件
+[Import] @JavaScript from "scripts/utils.js"
+[Import] @JavaScript from "scripts/animations.js" as animationLib
+
+// 导入整个 CHTL 文件
+[Import] @Chtl from "components/ui-library.chtl"
+
+// 导入 CJmod 文件
+[Import] @CJmod from "modules/enhanced-dom.cjmod"
+
+// 特定导入 - 从其他 CHTL 文件导入自定义元素
+[Import] [Custom] @Element Button from "components/button.chtl"
+[Import] [Custom] @Element Card from "components/card.chtl" as UICard
+
+// 特定导入 - 导入自定义样式组
+[Import] [Custom] @Style ButtonStyle from "styles/button.chtl"
+[Import] [Custom] @Style CardStyle from "styles/card.chtl" as UICardStyle
+
+// 特定导入 - 导入自定义变量组
+[Import] [Custom] @Var ThemeColors from "config/theme.chtl"
+[Import] [Custom] @Var Spacing from "config/layout.chtl" as LayoutSpacing
+
+// 特定导入 - 导入模板
+[Import] [Template] @Element PageHeader from "templates/header.chtl"
+[Import] [Template] @Element PageFooter from "templates/footer.chtl" as Footer
+
+[Import] [Template] @Style DefaultText from "templates/typography.chtl"
+[Import] [Template] @Style HeadingStyle from "templates/typography.chtl" as Heading
+
+[Import] [Template] @Var BaseColors from "templates/colors.chtl"
+[Import] [Template] @Var FontSizes from "templates/typography.chtl" as Sizes
+
+// 使用导入的内容
+body {
+    // 使用导入的模板元素
+    @Element PageHeader;
+    
+    main {
+        // 使用导入的自定义元素
+        @Element Button {
+            text { "点击我" }
+        }
+        
+        // 使用带别名的导入
+        @Element UICard {
+            h2 { 
+                style {
+                    @Style Heading;  // 使用别名
+                }
+                text { "卡片标题" } 
+            }
+            p { 
+                style {
+                    @Style DefaultText;
+                    color: ThemeColor(primary);
+                }
+                text { "卡片内容" } 
+            }
+        }
+    }
+    
+    // 使用别名导入的模板
+    @Element Footer;
+}
+
+// 测试路径中使用点号代替斜杠
+[Import] @Chtl from "components.shared.utils"
+[Import] [Custom] @Element Dialog from "components.dialogs.modal" as Modal
+
+// 复杂的导入场景
+[Namespace] app {
+    // 在命名空间内也可以导入
+    [Import] [Template] @Style AppStyle from "app/styles.chtl"
+    [Import] [Custom] @Element AppHeader from "app/header.chtl"
+    
+    div {
+        style {
+            @Style AppStyle;
+        }
+        
+        @Element AppHeader;
+    }
+}
+
+// 组合使用导入的样式
+div {
+    class: "themed-container";
+    
+    style {
+        // 使用导入的样式
+        @Style ButtonStyle;
+        @Style UICardStyle;  // 使用别名
+        
+        // 使用导入的变量
+        padding: ThemeColor(spacing = "20px");
+        margin: LayoutSpacing(medium);
+    }
+    
+    text { "组合样式的容器" }
+}
+
+// 测试导入后的命名空间访问
+section {
+    // 假设 ui-library.chtl 有 [Namespace] ui
+    @Element Button from ui;
+    @Style DefaultButton from ui;
+}

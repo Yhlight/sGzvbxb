@@ -531,42 +531,7 @@ std::shared_ptr<ParseContext> CHTLParserEnhanced::localScriptBlock() {
     return ctx;
 }
 
-// use 语句
-std::shared_ptr<ParseContext> CHTLParserEnhanced::useStatement() {
-    auto ctx = std::make_shared<ParseContext>("useStatement");
-    
-    // use 已被消费
-    consume(TokenType::AT, "Expected @");
-    
-    if (match(TokenType::KEYWORD_STYLE_GROUP)) {
-        // use @Style templateName
-        auto name = consume(TokenType::IDENTIFIER, "Expected style template name");
-        ctx->addChild(std::make_shared<TerminalNode>(name));
-        consume(TokenType::SEMICOLON, "Expected ;");
-    } else if (match(TokenType::KEYWORD_ELEMENT)) {
-        // use @Element templateName { ... }
-        auto name = consume(TokenType::IDENTIFIER, "Expected element template name");
-        ctx->addChild(std::make_shared<TerminalNode>(name));
-        
-        if (match(TokenType::LBRACE)) {
-            // 内容覆盖
-            while (!match(TokenType::RBRACE)) {
-                ctx->addChild(htmlElement());
-            }
-        }
-    } else if (match(TokenType::KEYWORD_VAR_GROUP)) {
-        // use @Var varGroup.varName
-        auto groupName = consume(TokenType::IDENTIFIER, "Expected var group name");
-        ctx->addChild(std::make_shared<TerminalNode>(groupName));
-        
-        if (match(TokenType::DOT)) {
-            auto varName = consume(TokenType::IDENTIFIER, "Expected variable name");
-            ctx->addChild(std::make_shared<TerminalNode>(varName));
-        }
-    }
-    
-    return ctx;
-}
+
 
 // insert 操作
 std::shared_ptr<ParseContext> CHTLParserEnhanced::insertOperation() {
@@ -629,8 +594,19 @@ std::shared_ptr<ParseContext> CHTLParserEnhanced::insertOperation() {
     // 插入的元素或语句
     while (!match(TokenType::RBRACE) && tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
         if (match(TokenType::AT)) {
-            // @Element 等使用语句
-            ctx->addChild(useStatement());
+            // @Element 或其他元素
+            if (match(TokenType::KEYWORD_ELEMENT)) {
+                auto name = consume(TokenType::IDENTIFIER, "Expected element name");
+                ctx->addChild(std::make_shared<TerminalNode>(name));
+                
+                if (match(TokenType::LBRACE)) {
+                    while (!match(TokenType::RBRACE)) {
+                        ctx->addChild(htmlElement());
+                    }
+                } else {
+                    consume(TokenType::SEMICOLON, "Expected ;");
+                }
+            }
         } else {
             // HTML 元素
             ctx->addChild(htmlElement());

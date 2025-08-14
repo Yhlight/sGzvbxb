@@ -1,0 +1,172 @@
+// 测试模块系统
+
+// 导入 CMOD 模块
+[Import] @Chtl from "chtholly"  // 导入整个模块
+[Import] @Chtl from "chtholly.space"  // 导入子模块
+[Import] @Chtl from "ui-components.buttons"  // 使用点号代替斜杠
+
+// 导入 CJMOD 模块（扩展 CHTL JS 语法）
+[Import] @CJmod from "enhanced-dom"
+[Import] @CJmod from "animation-lib"
+
+// 模块信息示例（通常在 info/moduleName.chtl 中）
+[Info] {
+    name: "my-module";
+    version: "1.0.0";
+    description: "我的 CHTL 模块";
+    author: "开发者";
+    license: "MIT";
+    dependencies: "chtholly@1.0.0, ui-components@2.0.0";
+    category: "components";
+    minCHTLVersion: "1.0.0";
+    maxCHTLVersion: "2.0.0";
+}
+
+// 使用导入的模块内容
+body {
+    // 假设 chtholly 模块提供了主题组件
+    @Element ThemeHeader from chtholly;
+    
+    main {
+        // 使用子模块的组件
+        @Element SpaceContainer from chtholly.space;
+        
+        // 使用 ui-components 模块的按钮
+        @Element PrimaryButton from ui-components.buttons {
+            text { "主按钮" }
+        }
+        
+        @Element SecondaryButton from ui-components.buttons {
+            text { "次要按钮" }
+        }
+    }
+    
+    // 使用模块提供的样式
+    div {
+        style {
+            @Style ThemeColors from chtholly;
+            @Style ButtonStyles from ui-components.buttons;
+        }
+        
+        text { "使用模块样式的内容" }
+    }
+}
+
+// 使用 CJMOD 扩展的 JS 语法
+section {
+    id: "enhanced-section";
+    
+    script {
+        // enhanced-dom 模块可能提供的增强语法
+        {{#enhanced-section}}->enhance({
+            animations: true,
+            gestures: true
+        });
+        
+        // animation-lib 模块可能提供的高级动画
+        {{.animated}}->advancedAnimate({
+            timeline: [
+                { at: 0, props: { opacity: 0, scale: 0.5 } },
+                { at: 0.5, props: { opacity: 1, scale: 1.2 } },
+                { at: 1, props: { opacity: 1, scale: 1 } }
+            ],
+            duration: 1000,
+            easing: "spring"
+        });
+    }
+}
+
+// 创建一个模块化的组件（可以打包成 CMOD）
+[Namespace] myModule {
+    // 模块内的模板
+    [Template] @Style ModuleStyle {
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 8px;
+    }
+    
+    [Template] @Element ModuleCard {
+        div {
+            class: "module-card";
+            style {
+                @Style ModuleStyle;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            h3 {
+                style {
+                    margin: 0 0 10px 0;
+                    color: #333;
+                }
+            }
+            
+            p {
+                style {
+                    margin: 0;
+                    color: #666;
+                }
+            }
+        }
+    }
+    
+    // 模块内的自定义元素
+    [Custom] @Element InteractiveCard {
+        @Element ModuleCard {
+            h3 { text { "交互式卡片" } }
+            p { text { "点击查看效果" } }
+            
+            script {
+                {{.module-card}}->listen({
+                    click: function() {
+                        this->classList->toggle("active");
+                    }
+                });
+            }
+        }
+    }
+}
+
+// 使用本地模块
+article {
+    @Element InteractiveCard from myModule;
+    
+    // 从不同模块组合组件
+    div {
+        class: "module-composition";
+        
+        // 混合使用多个模块
+        @Element ThemeHeader from chtholly;
+        @Element ModuleCard from myModule {
+            h3 { text { "组合模块" } }
+            p { text { "来自不同模块的组件组合" } }
+        }
+        @Element PrimaryButton from ui-components.buttons;
+    }
+}
+
+// 模块的外部查询表（通常由系统生成）
+[ExternalQueryTable] {
+    // 元素列表
+    elements: [
+        "ThemeHeader",
+        "SpaceContainer", 
+        "ModuleCard",
+        "InteractiveCard"
+    ];
+    
+    // 样式列表
+    styles: [
+        "ThemeColors",
+        "ModuleStyle"
+    ];
+    
+    // 变量组列表
+    vars: [
+        "ThemeVariables"
+    ];
+    
+    // 命名空间
+    namespaces: [
+        "myModule"
+    ];
+}
