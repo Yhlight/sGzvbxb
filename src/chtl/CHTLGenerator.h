@@ -255,6 +255,7 @@ public:
     // 原始嵌入处理
     void processOriginBlock(const std::string& declaration, const std::string& content);
     void useOriginBlock(const std::string& name);
+    void addAvailableOrigin(const std::string& name, const std::string& type);
     
     // 导入处理
     void processImportStatement(const std::string& statement);

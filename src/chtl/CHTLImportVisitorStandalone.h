@@ -58,6 +58,20 @@ private:
     
     // 辅助方法
     std::string getMappedName(const std::string& originalName) const;
+    void parseStyleProperties(std::shared_ptr<parser::ParseContext> ctx, 
+                            std::shared_ptr<StyleTemplate> styleTemplate);
+    void parseElementContent(std::shared_ptr<parser::ParseContext> ctx,
+                           std::shared_ptr<ElementTemplate> elementTemplate);
+    void parseVarContent(std::shared_ptr<parser::ParseContext> ctx,
+                        std::shared_ptr<VarTemplate> varTemplate);
+    
+    // 解析自定义内容
+    void parseCustomStyleContent(std::shared_ptr<parser::ParseContext> ctx,
+                                std::shared_ptr<CustomStyleGroup> customStyle);
+    void parseCustomElementContent(std::shared_ptr<parser::ParseContext> ctx,
+                                  std::shared_ptr<CustomElement> customElement);
+    void parseCustomVarContent(std::shared_ptr<parser::ParseContext> ctx,
+                              std::shared_ptr<CustomVarGroup> customVar);
 };
 
 /**

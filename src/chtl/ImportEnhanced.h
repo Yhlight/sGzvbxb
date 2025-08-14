@@ -149,6 +149,22 @@ public:
     bool processCMODFile(const std::filesystem::path& cmodPath,
                         std::shared_ptr<CHTLGenerator> generator);
     
+    // 处理CJMOD目录结构
+    bool processCJMODDirectory(const std::filesystem::path& cjmodDir,
+                              const ImportDeclaration& decl,
+                              std::shared_ptr<CHTLGenerator> generator);
+    
+    // 处理CJMOD ZIP文件
+    bool processCJMODZip(const std::filesystem::path& cjmodZip,
+                        const ImportDeclaration& decl,
+                        std::shared_ptr<CHTLGenerator> generator);
+    
+    // 处理CJMOD内容
+    bool processCJMODContent(const std::string& content,
+                            const std::filesystem::path& basePath,
+                            const ImportDeclaration& decl,
+                            std::shared_ptr<CHTLGenerator> generator);
+    
     // 处理通配符导入
     bool processWildcardImport(const ImportDeclaration& decl,
                               std::shared_ptr<CHTLGenerator> generator);

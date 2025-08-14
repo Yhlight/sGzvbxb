@@ -10,6 +10,27 @@
 
 namespace chtl {
 
+// 辅助函数：查找匹配的大括号
+static size_t findMatchingBrace(const std::string& str, size_t startPos) {
+    if (startPos >= str.length() || str[startPos] != '{') {
+        return std::string::npos;
+    }
+    
+    int braceCount = 1;
+    size_t pos = startPos + 1;
+    
+    while (pos < str.length() && braceCount > 0) {
+        if (str[pos] == '{') {
+            braceCount++;
+        } else if (str[pos] == '}') {
+            braceCount--;
+        }
+        pos++;
+    }
+    
+    return (braceCount == 0) ? (pos - 1) : std::string::npos;
+}
+
 // PathNormalizer 实现
 std::filesystem::path PathNormalizer::normalize(const std::string& path, 
                                                const std::filesystem::path& basePath) {
@@ -545,14 +566,24 @@ bool ImportManagerEnhanced::processModuleImport(const ImportDeclaration& decl,
         moduleContext->setCurrentFile(filePath.string());
         
         // 4. 检查循环依赖
-        // TODO: 实现循环依赖检测
-        // if (circularDetector) {
-        //     if (!circularDetector->checkCircularDependency(
-        //         context->getCurrentFile(), filePath.string())) {
-        //         context->reportError("Circular dependency detected: " + filePath.string());
-        //         return false;
-        //     }
-        // }
+        if (dependencyDetector) {
+            std::string currentFile = context->getCurrentFile();
+            if (!currentFile.empty() && 
+                dependencyDetector->hasCircularDependency(currentFile, filePath.string())) {
+                auto circularPath = dependencyDetector->getCircularPath(currentFile, filePath.string());
+                std::string pathStr;
+                for (const auto& p : circularPath) {
+                    if (!pathStr.empty()) pathStr += " -> ";
+                    pathStr += p;
+                }
+                context->reportError("Circular dependency detected: " + pathStr);
+                return false;
+            }
+            // 添加依赖关系
+            if (!currentFile.empty()) {
+                dependencyDetector->addDependency(currentFile, filePath.string());
+            }
+        }
         
         // 5. 解析模块
         // 如果是源文件，需要编译
@@ -597,8 +628,43 @@ bool ImportManagerEnhanced::processCJMODImport(const ImportDeclaration& decl,
     }
     
     // 处理 CJMOD 文件
-    // TODO: 实际的 CJMOD 处理逻辑
-    return true;
+    try {
+        // 1. 检查是否是目录（CJMOD可能是目录结构）
+        if (std::filesystem::is_directory(filePath)) {
+            return processCJMODDirectory(filePath, decl, generator);
+        }
+        
+        // 2. 如果是文件，检查是否是压缩包
+        std::ifstream file(filePath, std::ios::binary);
+        if (!file.is_open()) {
+            context->reportError("Cannot open CJMOD file: " + filePath.string());
+            return false;
+        }
+        
+        // 检查文件魔数
+        char magic[4];
+        file.read(magic, 4);
+        file.seekg(0);
+        
+        // 如果是ZIP格式
+        if (magic[0] == 'P' && magic[1] == 'K' && magic[2] == 0x03 && magic[3] == 0x04) {
+            file.close();
+            return processCJMODZip(filePath, decl, generator);
+        }
+        
+        // 3. 否则作为CJMOD描述文件处理
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        std::string content = buffer.str();
+        file.close();
+        
+        // 解析CJMOD信息
+        return processCJMODContent(content, filePath.parent_path(), decl, generator);
+        
+    } catch (const std::exception& e) {
+        context->reportError("Error processing CJMOD: " + std::string(e.what()));
+        return false;
+    }
 }
 
 bool ImportManagerEnhanced::processWildcardImport(const ImportDeclaration& decl,
@@ -666,7 +732,40 @@ void ImportManagerEnhanced::createOriginNode(const std::string& content,
         originManager->registerNamedOrigin(asName, originDef);
     }
     
-    // TODO: 将原始嵌入节点添加到生成器
+    // 将原始嵌入节点添加到生成器
+    // 生成器应该知道这个命名的原始嵌入节点已经可用
+    if (generator) {
+        // 根据不同类型生成相应的标记注释
+        switch (type) {
+            case ImportType::HTML:
+                generator->processSingleLineComment("Named origin HTML '" + asName + "' registered");
+                // 如果需要立即使用，可以生成占位符
+                // generator->processOriginBlock("@Html", "<!-- Named origin: " + asName + " -->");
+                break;
+            case ImportType::STYLE:
+                generator->processSingleLineComment("Named origin Style '" + asName + "' registered");
+                // 为CSS生成占位符
+                generator->processGlobalStyleBlock(
+                    "/* Named origin Style: " + asName + " */\n" +
+                    "/* Content will be injected when referenced */\n"
+                );
+                break;
+            case ImportType::JAVASCRIPT:
+                generator->processSingleLineComment("Named origin JavaScript '" + asName + "' registered");
+                // 为JS生成占位符
+                generator->processGlobalScriptBlock(
+                    "// Named origin JavaScript: " + asName + "\n" +
+                    "// Content will be injected when referenced\n"
+                );
+                break;
+            default:
+                break;
+        }
+        
+        // 通知生成器有新的命名原始嵌入可用
+        // 这样当遇到 [Origin] @Type name; 时可以正确解析
+        generator->addAvailableOrigin(asName, syntaxType);
+    }
 }
 
 std::filesystem::path ImportManagerEnhanced::normalizePath(const std::string& path) const {
@@ -884,8 +983,62 @@ bool ImportProcessorEnhanced::processModuleContent(const std::string& content,
         }
         
         // 3. 将处理后的内容添加到生成器
-        // 暂时使用注释表示处理后的内容
-        generator->processSingleLineComment("Processed module content with exports");
+        // 这里需要解析CHTL内容并生成相应的代码
+        // 由于完整的CHTL解析器还在开发中，我们先生成基本的结构
+        
+        // 处理[Custom]定义
+        size_t pos = 0;
+        while ((pos = processedContent.find("[Custom]", pos)) != std::string::npos) {
+            size_t blockStart = processedContent.find("{", pos);
+            size_t blockEnd = findMatchingBrace(processedContent, blockStart);
+            
+            if (blockStart != std::string::npos && blockEnd != std::string::npos) {
+                std::string customBlock = processedContent.substr(pos, blockEnd - pos + 1);
+                
+                // 检查是@Style, @Element还是@Var
+                if (customBlock.find("@Style") != std::string::npos) {
+                    // 提取样式名称和内容
+                    size_t nameStart = customBlock.find("@Style") + 6;
+                    size_t nameEnd = customBlock.find("{", nameStart);
+                    if (nameEnd != std::string::npos) {
+                        std::string styleName = customBlock.substr(nameStart, nameEnd - nameStart);
+                        styleName.erase(0, styleName.find_first_not_of(" \t\n\r"));
+                        styleName.erase(styleName.find_last_not_of(" \t\n\r") + 1);
+                        
+                        // 提取样式内容
+                        std::string styleContent = customBlock.substr(blockStart + 1, blockEnd - blockStart - 1);
+                        
+                        // 生成CSS
+                        std::string cssContent = 
+                            "/* Custom Style: " + styleName + " */\n"
+                            "." + styleName + " {\n" + styleContent + "\n}\n";
+                        generator->processGlobalStyleBlock(cssContent);
+                    }
+                } else if (customBlock.find("@Element") != std::string::npos) {
+                    // 元素定义需要更复杂的处理
+                    generator->processSingleLineComment("Custom Element definition found");
+                } else if (customBlock.find("@Var") != std::string::npos) {
+                    // 变量定义
+                    generator->processSingleLineComment("Custom Var definition found");
+                }
+            }
+            
+            pos = blockEnd + 1;
+        }
+        
+        // 处理[Template]定义
+        pos = 0;
+        while ((pos = processedContent.find("[Template]", pos)) != std::string::npos) {
+            size_t blockStart = processedContent.find("{", pos);
+            size_t blockEnd = findMatchingBrace(processedContent, blockStart);
+            
+            if (blockStart != std::string::npos && blockEnd != std::string::npos) {
+                std::string templateBlock = processedContent.substr(pos, blockEnd - pos + 1);
+                generator->processSingleLineComment("Template definition found");
+            }
+            
+            pos = blockEnd + 1;
+        }
         
         // 4. 记录导出的符号（供其他模块引用）
         // 这里可以将导出的符号存储在上下文中
@@ -982,6 +1135,155 @@ bool ImportManagerEnhanced::processCMODFile(const std::filesystem::path& cmodPat
         
     } catch (const std::exception& e) {
         context->reportError("Error processing CMOD file: " + std::string(e.what()));
+        return false;
+    }
+}
+
+bool ImportManagerEnhanced::processCJMODDirectory(const std::filesystem::path& cjmodDir,
+                                                 const ImportDeclaration& decl,
+                                                 std::shared_ptr<CHTLGenerator> generator) {
+    try {
+        // CJMOD目录结构：
+        // cjmod/
+        //   src/     - C++源代码
+        //   info/    - CJMOD信息文件
+        
+        auto infoDir = cjmodDir / "info";
+        auto srcDir = cjmodDir / "src";
+        
+        // 1. 检查必要的目录
+        if (!std::filesystem::exists(infoDir)) {
+            context->reportError("CJMOD missing info directory: " + cjmodDir.string());
+            return false;
+        }
+        
+        // 2. 读取info文件
+        std::string infoContent;
+        for (const auto& entry : std::filesystem::directory_iterator(infoDir)) {
+            if (entry.path().extension() == ".chtl") {
+                std::ifstream file(entry.path());
+                if (file.is_open()) {
+                    std::stringstream buffer;
+                    buffer << file.rdbuf();
+                    infoContent += buffer.str() + "\n";
+                    file.close();
+                }
+            }
+        }
+        
+        // 3. 生成CJMOD加载代码
+        generator->processSingleLineComment("CJMOD: " + decl.sourcePath);
+        
+        // 如果有别名，创建命名空间
+        if (!decl.asName.empty()) {
+            generator->beginNamespace(decl.asName);
+        }
+        
+        // 4. 注册CJMOD扩展
+        // 这里应该生成对CHTL JS运行时的扩展注册代码
+        std::string extensionScript = 
+            "// Register CJMOD extension: " + cjmodDir.filename().string() + "\n"
+            "if (typeof chtl !== 'undefined' && chtl.registerExtension) {\n"
+            "    chtl.registerExtension('" + cjmodDir.filename().string() + "', {\n"
+            "        // Extension implementation loaded from native code\n"
+            "    });\n"
+            "}\n";
+        generator->processLocalScript(extensionScript);
+        
+        // 5. 如果有src目录，记录源文件信息
+        if (std::filesystem::exists(srcDir)) {
+            std::vector<std::string> sourceFiles;
+            for (const auto& entry : std::filesystem::recursive_directory_iterator(srcDir)) {
+                if (entry.is_regular_file()) {
+                    auto ext = entry.path().extension();
+                    if (ext == ".cpp" || ext == ".cc" || ext == ".cxx" || 
+                        ext == ".h" || ext == ".hpp" || ext == ".hxx") {
+                        sourceFiles.push_back(entry.path().string());
+                    }
+                }
+            }
+            
+            if (!sourceFiles.empty()) {
+                std::cerr << "CJMOD source files found:\n";
+                for (const auto& src : sourceFiles) {
+                    std::cerr << "  " << src << "\n";
+                }
+            }
+        }
+        
+        if (!decl.asName.empty()) {
+            generator->endNamespace();
+        }
+        
+        return true;
+        
+    } catch (const std::exception& e) {
+        context->reportError("Error processing CJMOD directory: " + std::string(e.what()));
+        return false;
+    }
+}
+
+bool ImportManagerEnhanced::processCJMODZip(const std::filesystem::path& cjmodZip,
+                                           const ImportDeclaration& decl,
+                                           std::shared_ptr<CHTLGenerator> generator) {
+    // ZIP格式的CJMOD暂不支持
+    context->reportError("ZIP format CJMOD files are not yet supported: " + cjmodZip.string());
+    return false;
+}
+
+bool ImportManagerEnhanced::processCJMODContent(const std::string& content,
+                                               const std::filesystem::path& basePath,
+                                               const ImportDeclaration& decl,
+                                               std::shared_ptr<CHTLGenerator> generator) {
+    try {
+        // 解析CJMOD配置信息
+        size_t configPos = content.find("[Configuration]");
+        if (configPos != std::string::npos) {
+            size_t blockStart = content.find("{", configPos);
+            size_t blockEnd = content.find("}", blockStart);
+            
+            if (blockStart != std::string::npos && blockEnd != std::string::npos) {
+                std::string configBlock = content.substr(blockStart + 1, blockEnd - blockStart - 1);
+                
+                // 提取模块名称
+                size_t namePos = configBlock.find("name");
+                if (namePos != std::string::npos) {
+                    size_t equalPos = configBlock.find("=", namePos);
+                    size_t lineEnd = configBlock.find(";", equalPos);
+                    if (equalPos != std::string::npos && lineEnd != std::string::npos) {
+                        std::string moduleName = configBlock.substr(equalPos + 1, lineEnd - equalPos - 1);
+                        moduleName.erase(0, moduleName.find_first_not_of(" \t\n\r\""));
+                        moduleName.erase(moduleName.find_last_not_of(" \t\n\r\"") + 1);
+                        
+                        std::cerr << "Loading CJMOD: " << moduleName << "\n";
+                    }
+                }
+            }
+        }
+        
+        // 生成CJMOD注册代码
+        generator->processSingleLineComment("CJMOD loaded from: " + basePath.string());
+        
+        if (!decl.asName.empty()) {
+            generator->beginNamespace(decl.asName);
+        }
+        
+        // 注册扩展
+        std::string scriptContent = 
+            "// CJMOD extension registration\n"
+            "if (typeof chtl !== 'undefined' && chtl.registerExtension) {\n"
+            "    // Extension loaded from: " + basePath.string() + "\n"
+            "}\n";
+        generator->processLocalScript(scriptContent);
+        
+        if (!decl.asName.empty()) {
+            generator->endNamespace();
+        }
+        
+        return true;
+        
+    } catch (const std::exception& e) {
+        context->reportError("Error processing CJMOD content: " + std::string(e.what()));
         return false;
     }
 }

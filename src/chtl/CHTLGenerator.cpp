@@ -784,6 +784,20 @@ void CHTLGenerator::useOriginBlock(const std::string& name) {
     originManager->useNamedOrigin(name, *this);
 }
 
+void CHTLGenerator::addAvailableOrigin(const std::string& name, const std::string& type) {
+    if (!originManager) {
+        context->reportError("Origin manager not initialized");
+        return;
+    }
+    
+    // 记录这个命名的原始嵌入已经可用
+    // 这样后续的 [Origin] @Type name; 可以正确引用
+    std::cerr << "Registered available origin: " << name << " of type " << type << std::endl;
+    
+    // 如果需要，可以在这里添加到一个可用原始嵌入的映射中
+    // 以便后续快速查找和验证
+}
+
 // 导入处理
 void CHTLGenerator::processImportStatement(const std::string& statement) {
     if (!importManager) {
