@@ -1,0 +1,9 @@
+[Template] @Style MyStyle {
+    color: red;
+}
+
+body {
+    div {
+        text "Hello"
+    }
+}

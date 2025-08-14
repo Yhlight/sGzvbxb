@@ -25,25 +25,72 @@ public:
     std::shared_ptr<ParseContext> compilationUnit() {
         auto ctx = std::make_shared<ParseContext>("compilationUnit");
         
-        while (tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
+        while (tokens_->LT(1) && tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
+            // 跳过注释
+            if (skipComments()) {
+                continue;
+            }
+            
             // 根据 CHTL 语法文档，顶级可以有以下元素
-            if (match(TokenType::KEYWORD_TEMPLATE)) {
-                ctx->addChild(templateDefinition());
-            } else if (match(TokenType::KEYWORD_CUSTOM)) {
-                ctx->addChild(customDefinition());
-            } else if (match(TokenType::KEYWORD_IMPORT)) {
-                ctx->addChild(importStatement());
-            } else if (match(TokenType::KEYWORD_NAMESPACE)) {
-                ctx->addChild(namespaceDeclaration());
-            } else if (match(TokenType::KEYWORD_ORIGIN)) {
-                ctx->addChild(originDeclaration());
+            if (tokens_->LT(1)->getType() == TokenType::LBRACKET) {
+                // 处理方括号语法
+                tokens_->consume(); // consume '['
+                if (match(TokenType::KEYWORD_TEMPLATE)) {
+                    consume(TokenType::RBRACKET, "Expected ]");
+                    ctx->addChild(templateDefinition());
+                } else if (match(TokenType::KEYWORD_CUSTOM)) {
+                    consume(TokenType::RBRACKET, "Expected ]");
+                    ctx->addChild(customDefinition());
+                } else if (match(TokenType::KEYWORD_IMPORT)) {
+                    consume(TokenType::RBRACKET, "Expected ]");
+                    ctx->addChild(importStatement());
+                } else if (match(TokenType::KEYWORD_NAMESPACE)) {
+                    consume(TokenType::RBRACKET, "Expected ]");
+                    ctx->addChild(namespaceDeclaration());
+                } else if (match(TokenType::KEYWORD_ORIGIN)) {
+                    consume(TokenType::RBRACKET, "Expected ]");
+                    ctx->addChild(originDeclaration());
+                } else {
+                    error("Expected Template, Custom, Import, Namespace, or Origin after [", tokens_->LT(1));
+                    // 尝试恢复
+                    while (tokens_->LT(1) && tokens_->LT(1)->getType() != TokenType::RBRACKET && 
+                           tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
+                        tokens_->consume();
+                    }
+                    if (tokens_->LT(1) && tokens_->LT(1)->getType() == TokenType::RBRACKET) {
+                        tokens_->consume();
+                    }
+                }
             } else {
                 // HTML 元素
-                ctx->addChild(htmlElement());
+                auto element = htmlElement();
+                if (element) {
+                    ctx->addChild(element);
+                } else {
+                    // 如果解析失败，跳过当前 token
+                    tokens_->consume();
+                }
             }
         }
         
         return ctx;
+    }
+    
+    // 跳过注释
+    bool skipComments() {
+        bool skipped = false;
+        while (tokens_->LT(1)) {
+            TokenType type = tokens_->LT(1)->getType();
+            if (type == TokenType::COMMENT || 
+                type == TokenType::MULTILINE_COMMENT || 
+                type == TokenType::HTML_COMMENT) {
+                tokens_->consume();
+                skipped = true;
+            } else {
+                break;
+            }
+        }
+        return skipped;
     }
     
     // [Template] 定义
@@ -54,7 +101,12 @@ public:
         ctx->addChild(std::make_shared<TerminalNode>(
             std::make_shared<Token>(TokenType::KEYWORD_TEMPLATE, "[Template]", 0, 0)));
         
+        // 跳过注释
+        skipComments();
+        
         // @Style, @Element, @Var
+        consume(TokenType::AT, "Expected @");
+        
         if (match(TokenType::KEYWORD_STYLE_GROUP)) {
             ctx->addChild(templateStyleGroup());
         } else if (match(TokenType::KEYWORD_ELEMENT)) {
@@ -62,7 +114,7 @@ public:
         } else if (match(TokenType::KEYWORD_VAR_GROUP)) {
             ctx->addChild(templateVarGroup());
         } else {
-            error("Expected @Style, @Element, or @Var after [Template]", tokens_->LT(1));
+            error("Expected Style, Element, or Var after @", tokens_->LT(1));
         }
         
         return ctx;
@@ -89,8 +141,16 @@ public:
         consume(TokenType::LBRACE, "Expected {");
         
         // 样式内容
-        while (!match(TokenType::RBRACE) && tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
-            ctx->addChild(styleProperty());
+        while (tokens_->LT(1) && tokens_->LT(1)->getType() != TokenType::RBRACE && 
+               tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
+            skipComments();
+            if (tokens_->LT(1) && tokens_->LT(1)->getType() != TokenType::RBRACE) {
+                ctx->addChild(styleProperty());
+            }
+        }
+        
+        if (tokens_->LT(1) && tokens_->LT(1)->getType() == TokenType::RBRACE) {
+            tokens_->consume(); // consume '}'
         }
         
         return ctx;
@@ -111,8 +171,19 @@ public:
         consume(TokenType::LBRACE, "Expected {");
         
         // 元素内容
-        while (!match(TokenType::RBRACE) && tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
-            ctx->addChild(htmlElement());
+        while (tokens_->LT(1) && tokens_->LT(1)->getType() != TokenType::RBRACE && 
+               tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
+            skipComments();
+            if (tokens_->LT(1) && tokens_->LT(1)->getType() != TokenType::RBRACE) {
+                auto element = htmlElement();
+                if (element) {
+                    ctx->addChild(element);
+                }
+            }
+        }
+        
+        if (tokens_->LT(1) && tokens_->LT(1)->getType() == TokenType::RBRACE) {
+            tokens_->consume(); // consume '}'
         }
         
         return ctx;
@@ -170,10 +241,19 @@ public:
         ctx->addChild(std::make_shared<TerminalNode>(
             std::make_shared<Token>(TokenType::KEYWORD_IMPORT, "[Import]", 0, 0)));
         
+        // 跳过注释
+        skipComments();
+        
         // 判断导入类型
-        if (match(TokenType::KEYWORD_TEMPLATE) || match(TokenType::KEYWORD_CUSTOM)) {
+        if (tokens_->LT(1) && tokens_->LT(1)->getType() == TokenType::LBRACKET) {
             // 特定导入：[Import] [Template/Custom] @Type name from "path"
-            ctx->addChild(specificImport());
+            tokens_->consume(); // consume '['
+            if (match(TokenType::KEYWORD_TEMPLATE) || match(TokenType::KEYWORD_CUSTOM)) {
+                consume(TokenType::RBRACKET, "Expected ]");
+                ctx->addChild(specificImport());
+            } else {
+                error("Expected Template or Custom after [", tokens_->LT(1));
+            }
         } else if (match(TokenType::AT)) {
             // 文件导入：[Import] @Html/Style/JavaScript/Chtl/CJmod from "path"
             ctx->addChild(fileImport());

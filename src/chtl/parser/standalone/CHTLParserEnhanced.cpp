@@ -33,9 +33,9 @@ std::shared_ptr<ParseContext> CHTLParserEnhanced::styleProperty() {
     consume(TokenType::COLON, "Expected :");
     
     // 属性值 - 支持无引号字面量和 ThemeColor 函数
-    if (tokens_->LT(1)->getType() == TokenType::IDENTIFIER && 
+    if (tokens_->LT(1) && tokens_->LT(1)->getType() == TokenType::IDENTIFIER && 
         tokens_->LT(1)->getText() == "ThemeColor" && 
-        tokens_->LT(2)->getType() == TokenType::LPAREN) {
+        tokens_->LT(2) && tokens_->LT(2)->getType() == TokenType::LPAREN) {
         // ThemeColor(varName) 语法
         auto themeColorToken = tokens_->consume(); // ThemeColor
         ctx->addChild(std::make_shared<TerminalNode>(themeColorToken));
@@ -59,9 +59,10 @@ std::shared_ptr<ParseContext> CHTLParserEnhanced::styleProperty() {
         }
         
         consume(TokenType::RPAREN, "Expected )");
-    } else if (tokens_->LT(1)->getType() == TokenType::STRING_LITERAL ||
-               tokens_->LT(1)->getType() == TokenType::NUMBER_LITERAL ||
-               tokens_->LT(1)->getType() == TokenType::IDENTIFIER) {
+    } else if (tokens_->LT(1) && 
+               (tokens_->LT(1)->getType() == TokenType::STRING_LITERAL ||
+                tokens_->LT(1)->getType() == TokenType::NUMBER_LITERAL ||
+                tokens_->LT(1)->getType() == TokenType::IDENTIFIER)) {
         ctx->addChild(std::make_shared<TerminalNode>(tokens_->consume()));
     } else {
         error("Expected property value", tokens_->LT(1));

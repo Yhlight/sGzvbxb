@@ -9,6 +9,7 @@
 #include "chtl/parser/CHTLSimpleParser.h"
 #include "chtl/parser/standalone/CHTLParserEnhanced.h"
 #include "chtl/parser/standalone/CHTLLexer.h"
+#include "chtl/parser/standalone/CHTLCodeGenVisitor.h"
 #include "chtl/CHTLGenerator.h"
 
 using namespace chtl;
@@ -112,43 +113,34 @@ int main(int argc, char* argv[]) {
                 std::cout << "Creating enhanced parser...\n";
                 parser::CHTLParserEnhanced parser(tokenStream);
                 std::cout << "Parsing compilation unit...\n";
-                auto parseTree = parser.compilationUnit();
-                std::cout << "Parsing complete.\n";
+                std::shared_ptr<parser::ParseContext> parseTree;
+                try {
+                    parseTree = parser.compilationUnit();
+                    std::cout << "Parsing complete.\n";
+                } catch (const std::exception& e) {
+                    std::cerr << "Parse exception: " << e.what() << std::endl;
+                    return 1;
+                }
                 
                 if (!parseTree) {
                     std::cerr << "Parse error: Failed to parse CHTL source\n";
                     return 1;
                 }
                 
-                // 创建上下文和生成器
-                auto generatorContext = std::make_shared<CHTLContext>();
-                CHTLGenerator generator(generatorContext);
-                generatorContext->setCurrentFile(inputFile);
+                // 创建代码生成访问器
+                parser::CHTLCodeGenVisitor visitor;
+                std::string generatedCode = visitor.visit(parseTree);
                 
-                // TODO: 遍历解析树并生成代码
-                // 这里暂时输出一个简单的成功消息
-                std::cout << "Parsing successful!\n";
-                std::cout << "Parse tree generated successfully.\n";
+                std::cout << "Code generation complete.\n";
                 
-                // 生成基本输出
+                // 写入输出文件
                 std::ofstream output(outputFile);
                 if (!output.is_open()) {
                     std::cerr << "Error: Cannot open output file: " << outputFile << std::endl;
                     return 1;
                 }
                 
-                output << "<!DOCTYPE html>\n";
-                output << "<html>\n";
-                output << "<head>\n";
-                output << "    <meta charset=\"UTF-8\">\n";
-                output << "    <title>CHTL Enhanced Parser Output</title>\n";
-                output << "</head>\n";
-                output << "<body>\n";
-                output << "    <h1>Enhanced Parser Test</h1>\n";
-                output << "    <p>Successfully parsed CHTL source with enhanced parser.</p>\n";
-                output << "</body>\n";
-                output << "</html>\n";
-                
+                output << generatedCode;
                 output.close();
                 
             } catch (const std::exception& e) {

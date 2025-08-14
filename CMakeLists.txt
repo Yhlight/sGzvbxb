@@ -110,6 +110,7 @@ file(GLOB_RECURSE CHTL_PARSER_SOURCES
     src/chtl/parser/standalone/CHTLLexer.cpp
     src/chtl/parser/standalone/CHTLParser.cpp
     src/chtl/parser/standalone/CHTLParserEnhanced.cpp
+    src/chtl/parser/standalone/CHTLCodeGenVisitor.cpp
     src/chtl/parser/standalone/CHTLJSLexer.cpp
     src/chtl/parser/standalone/CHTLJSParser.cpp
     src/chtl/parser/standalone/CHTLJSCodeGenerator.cpp
