@@ -10,37 +10,7 @@
 
 namespace chtl {
 
-// ========== ConstraintManager ==========
-ConstraintManager::ConstraintManager(std::shared_ptr<CHTLContext> ctx) : context(ctx) {}
-
-void ConstraintManager::enterScope(const std::string&) {}
-void ConstraintManager::exitScope() {}
-void ConstraintManager::addElementConstraint(const std::string&, std::shared_ptr<ConstraintRule>) {}
-void ConstraintManager::addNamespaceConstraint(const std::string&, std::shared_ptr<ConstraintRule>) {}
-
-// ========== ConstraintHelper ==========
-std::string ConstraintHelper::buildElementPath(const std::vector<std::string>& stack) {
-    std::string path;
-    for (size_t i = 0; i < stack.size(); ++i) {
-        if (i > 0) path += " > ";
-        path += stack[i];
-    }
-    return path;
-}
-
-// ========== ConstraintProcessor ==========
-bool ConstraintProcessor::validateUsage(const std::string&, const std::string&) {
-    return true;
-}
-
-void ConstraintProcessor::processExceptStatement(const std::string&, const std::string&) {}
-
-ConstraintProcessor::ExceptDeclaration ConstraintProcessor::parseExceptDeclaration(const std::string&) {
-    return ExceptDeclaration();
-}
-
-// ========== ConstraintRule ==========
-void ConstraintRule::addTarget(const ConstraintTarget&) {}
+// ConstraintManager、ConstraintHelper、ConstraintProcessor 和 ConstraintRule 已移至 CHTLConstraint.cpp
 
 // ========== ImportManager ==========
 ImportManager::ImportManager(std::shared_ptr<CHTLContext> ctx) : context(ctx) {}
@@ -60,23 +30,7 @@ ImportDeclaration ImportProcessor::parseImportStatement(const std::string&) {
     return ImportDeclaration();
 }
 
-// ========== NamespaceManager ==========
-NamespaceManager::NamespaceManager(std::shared_ptr<CHTLContext> ctx) : context(ctx) {}
-
-void NamespaceManager::beginNamespace(const std::string&) {}
-void NamespaceManager::endNamespace() {}
-
-std::shared_ptr<NamespaceDefinition> NamespaceManager::getCurrentNamespace() const {
-    return nullptr;
-}
-
-// ========== NamespaceProcessor ==========
-void NamespaceProcessor::processNamespaceDeclaration(const std::string&) {}
-
-// ========== NamespaceResolver ==========
-std::shared_ptr<void> NamespaceResolver::resolveItem(const std::string&, NamespaceItemType, const std::string&) {
-    return nullptr;
-}
+// NamespaceManager、NamespaceProcessor 和 NamespaceResolver 已移至 CHTLNamespace.cpp
 
 // ========== ScriptManager ==========
 // ScriptManager uses Impl pattern, so we need to define the Impl class

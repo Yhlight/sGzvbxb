@@ -1,7 +1,7 @@
 #include "CHTLScript.h"
 #include "CHTLGenerator.h"
 #include "CHTLCJMOD.h"
-#include "CHTLJSContext.h"
+// #include "CHTLJSContext.h" // TODO: Fix include path or create this file
 #include <regex>
 #include <sstream>
 #include <algorithm>
@@ -9,38 +9,70 @@
 
 namespace chtl {
 
+// ScriptManager::Impl 定义
+class ScriptManager::Impl {
+public:
+    std::shared_ptr<CHTLContext> context;
+    
+    // 脚本存储
+    std::vector<std::shared_ptr<ScriptBlock>> globalScripts;
+    std::unordered_map<std::string, std::vector<std::shared_ptr<ScriptBlock>>> localScripts;
+    
+    // 作用域ID映射
+    std::unordered_map<std::string, std::string> scopeIdMap;
+    int scopeIdCounter = 0;
+    
+    // CJMOD管理器
+    std::shared_ptr<CJMODManager> cjmodManager;
+    
+    // 关联的JS上下文
+    // std::shared_ptr<JSContext> jsContext; // TODO: Enable when JSContext is available
+    
+    Impl(std::shared_ptr<CHTLContext> ctx) : context(ctx) {}
+};
+
+// ScriptManager 构造函数和析构函数
+ScriptManager::ScriptManager(std::shared_ptr<CHTLContext> ctx) 
+    : pImpl(std::make_unique<Impl>(ctx)) {}
+
+ScriptManager::~ScriptManager() = default;
+
+std::shared_ptr<CHTLContext> ScriptManager::getContext() const {
+    return pImpl->context;
+}
+
 // ScriptManager 实现
 void ScriptManager::addLocalScript(const std::string& elementPath, std::shared_ptr<ScriptBlock> script) {
     script->setScope(elementPath);
-    localScripts[elementPath].push_back(script);
+    pImpl->localScripts[elementPath].push_back(script);
 }
 
 void ScriptManager::addGlobalScript(std::shared_ptr<ScriptBlock> script) {
-    globalScripts.push_back(script);
+    pImpl->globalScripts.push_back(script);
 }
 
 std::vector<std::shared_ptr<ScriptBlock>> ScriptManager::getScriptsForElement(const std::string& elementPath) const {
-    auto it = localScripts.find(elementPath);
-    if (it != localScripts.end()) {
+    auto it = pImpl->localScripts.find(elementPath);
+    if (it != pImpl->localScripts.end()) {
         return it->second;
     }
     return {};
 }
 
 std::string ScriptManager::generateScopeId(const std::string& elementPath) {
-    auto it = scopeIdMap.find(elementPath);
-    if (it != scopeIdMap.end()) {
+    auto it = pImpl->scopeIdMap.find(elementPath);
+    if (it != pImpl->scopeIdMap.end()) {
         return it->second;
     }
     
-    std::string scopeId = "chtl_scope_" + std::to_string(++scopeIdCounter);
-    scopeIdMap[elementPath] = scopeId;
+    std::string scopeId = "chtl_scope_" + std::to_string(++pImpl->scopeIdCounter);
+    pImpl->scopeIdMap[elementPath] = scopeId;
     return scopeId;
 }
 
 std::string ScriptManager::getScopeId(const std::string& elementPath) const {
-    auto it = scopeIdMap.find(elementPath);
-    if (it != scopeIdMap.end()) {
+    auto it = pImpl->scopeIdMap.find(elementPath);
+    if (it != pImpl->scopeIdMap.end()) {
         return it->second;
     }
     return "";
@@ -48,7 +80,7 @@ std::string ScriptManager::getScopeId(const std::string& elementPath) const {
 
 void ScriptManager::processAllScripts() {
     // 处理所有局部脚本
-    for (auto& [path, scripts] : localScripts) {
+    for (auto& [path, scripts] : pImpl->localScripts) {
         for (auto& script : scripts) {
             if (!script->hasBeenProcessed()) {
                 // 处理脚本内容
@@ -59,7 +91,7 @@ void ScriptManager::processAllScripts() {
     }
     
     // 处理全局脚本
-    for (auto& script : globalScripts) {
+    for (auto& script : pImpl->globalScripts) {
         if (!script->hasBeenProcessed()) {
             script->markProcessed();
         }
@@ -75,12 +107,12 @@ void ScriptManager::processLocalScript(std::shared_ptr<ScriptBlock> script) {
     wrapped << "'use strict';\n";
     
     // 添加局部脚本的上下文信息
-    wrapped << "// Local script from element: " << script->getElementPath() << "\n";
+    wrapped << "// Local script from element: " << script->getScope() << "\n";
     
     // 如果脚本包含CHTL JS特性，先进行转换
     std::string processedContent = script->getContent();
     if (containsCHTLJSFeatures(processedContent)) {
-        CHTLJSTransformer transformer;
+        CHTLJSTransformer transformer(script->getScope(), *this);
         processedContent = transformer.transform(processedContent);
     }
     
@@ -88,7 +120,8 @@ void ScriptManager::processLocalScript(std::shared_ptr<ScriptBlock> script) {
     wrapped << "})();\n";
     
     // 将处理后的脚本添加到全局脚本集合
-    addGlobalScript(wrapped.str(), ScriptPriority::HIGH);
+    auto wrappedScript = std::make_shared<ScriptBlock>(wrapped.str(), ScriptType::JAVASCRIPT);
+    addGlobalScript(wrappedScript);
 }
 
 bool ScriptManager::containsCHTLJSFeatures(const std::string& script) const {
@@ -111,7 +144,7 @@ std::string ScriptManager::generateJavaScript() const {
     // 生成作用域映射
     js << "  // Scope mappings\n";
     js << "  const CHTL_SCOPES = {\n";
-    for (const auto& [path, scopeId] : scopeIdMap) {
+    for (const auto& [path, scopeId] : pImpl->scopeIdMap) {
         js << "    '" << ScriptHelper::escapeJavaScript(scopeId) << "': '" 
            << ScriptHelper::escapeJavaScript(path) << "',\n";
     }
@@ -145,7 +178,7 @@ std::string ScriptManager::generateJavaScript() const {
     
     // 生成局部脚本
     js << "  // Local scripts\n";
-    for (const auto& [path, scripts] : localScripts) {
+    for (const auto& [path, scripts] : pImpl->localScripts) {
         std::string scopeId = getScopeId(path);
         if (!scopeId.empty()) {
             js << "  // Scripts for: " << path << "\n";
@@ -161,9 +194,9 @@ std::string ScriptManager::generateJavaScript() const {
     }
     
     // 生成全局脚本
-    if (!globalScripts.empty()) {
+    if (!pImpl->globalScripts.empty()) {
         js << "  // Global scripts\n";
-        for (const auto& script : globalScripts) {
+        for (const auto& script : pImpl->globalScripts) {
             js << script->getContent() << "\n";
         }
     }
@@ -174,10 +207,10 @@ std::string ScriptManager::generateJavaScript() const {
 }
 
 void ScriptManager::clear() {
-    localScripts.clear();
-    globalScripts.clear();
-    scopeIdMap.clear();
-    scopeIdCounter = 0;
+    pImpl->localScripts.clear();
+    pImpl->globalScripts.clear();
+    pImpl->scopeIdMap.clear();
+    pImpl->scopeIdCounter = 0;
 }
 
 // CHTLJSTransformer 辅助方法实现

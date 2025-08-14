@@ -79,10 +79,10 @@ file(GLOB_RECURSE CHTL_CORE_SOURCES
     src/chtl/CHTLCSSPreprocessor.cpp  # CSS预处理器（需要Template和Custom）
     src/chtl/CHTLGenerator.cpp  # 代码生成器实现
     # Temporarily commented out due to compilation errors
-    # src/chtl/CHTLConstraint.cpp  # 约束管理器实现
+    src/chtl/CHTLConstraint.cpp  # 约束管理器实现 - 已修复
     # src/chtl/CHTLImport.cpp  # 导入管理器实现
-    # src/chtl/CHTLNamespace.cpp  # 命名空间管理器实现
-    # src/chtl/CHTLScript.cpp  # 脚本管理器实现
+    # src/chtl/CHTLNamespace.cpp  # 命名空间管理器实现 - 需要更多工作
+    # src/chtl/CHTLScript.cpp  # 脚本管理器实现 - 需要更多工作
     # src/chtl/CHTLCMOD.cpp  # CMOD管理器实现
     # src/chtl/CHTLOrigin.cpp  # Origin管理器实现
     src/chtl/stubs/ManagerStubs.cpp  # 临时管理器实现桩
