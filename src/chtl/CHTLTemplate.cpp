@@ -629,15 +629,27 @@ VarReference parseVarReference(const std::string& reference) {
 } // namespace TemplateHelper
 
 void TemplateManager::processInheritance() {
-    // TODO: 实现模板继承处理
-    // 这个功能会处理模板之间的继承关系
-    // 例如：[Template @Style myBase] 和 [Template @Style myDerived : myBase]
-    
-    // 暂时只记录日志
-    if (context) {
-        // 使用 reportWarning 作为信息日志的替代
-        // context->reportWarning("Template inheritance processing completed");
+    // 检查样式模板的循环继承
+    for (const auto& [name, styleTemplate] : styleTemplates) {
+        if (styleTemplate->hasCircularInheritance(name, styleTemplates)) {
+            if (context) {
+                context->reportError("Circular inheritance detected in style template: " + name);
+            }
+        }
     }
+    
+    // 检查元素模板的循环继承
+    // TODO: 实现 ElementTemplate 的循环继承检查
+    // for (const auto& [name, elementTemplate] : elementTemplates) {
+    //     if (elementTemplate->hasCircularInheritance(...)) {
+    //         if (context) {
+    //             context->reportError("Circular inheritance detected in element template: " + name);
+    //         }
+    //     }
+    // }
+    
+    // 注意：实际的继承处理在模板使用时进行，通过 getAllStyles() 等方法实现
+    // 这里只进行验证和循环检查
 }
 
 } // namespace chtl

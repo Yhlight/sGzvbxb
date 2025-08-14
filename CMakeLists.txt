@@ -85,6 +85,7 @@ file(GLOB_RECURSE CHTL_CORE_SOURCES
     src/chtl/CHTLScript.cpp  # 脚本管理器实现 - 已修复
     src/chtl/CHTLCMOD.cpp  # CMOD管理器实现 - 已修复
     src/chtl/CHTLOrigin.cpp  # Origin管理器实现 - 已修复
+    src/chtl/CHTLImportVisitorStandalone.cpp  # 独立导入访问器实现
     src/chtl/stubs/ManagerStubs.cpp  # 临时管理器实现桩
 )
 

@@ -1,0 +1,49 @@
+// 测试 CHTL JS 功能
+div #app {
+    h1 { text { "CHTL JS 测试" } }
+    
+    // 测试增强选择器
+    button #myBtn {
+        text { "点击计数" }
+        onclick: "handleClick()";
+    }
+    
+    p #counter {
+        text { "点击次数: 0" }
+    }
+    
+    // 测试事件委托
+    ul #list {
+        li { text { "项目 1" } }
+        li { text { "项目 2" } }
+        li { text { "项目 3" } }
+    }
+    
+    script {
+        // 使用 CHTL JS 特性
+        let count = 0;
+        
+        function handleClick() {
+            count++;
+            {{#counter}}->textContent = `点击次数: ${count}`;
+        }
+        
+        // 事件委托
+        {{#list}}.listen({
+            click: (e) => {
+                if (e.target.tagName === 'LI') {
+                    e.target->style.color = 'red';
+                }
+            }
+        });
+        
+        // 动画
+        {{#myBtn}}.animate({
+            props: {
+                transform: "scale(1.1)"
+            },
+            duration: 200,
+            easing: "ease-out"
+        });
+    }
+}

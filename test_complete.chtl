@@ -1,0 +1,56 @@
+html {
+    head {
+        title { text { "CHTL 完整测试" } }
+        style {
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+            }
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            h1 {
+                color: #333;
+            }
+            .button {
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+        }
+    }
+    
+    body {
+        div .container {
+            h1 { text { "欢迎使用 CHTL" } }
+            
+            p {
+                text { "这是一个使用 CHTL 编写的示例页面。" }
+            }
+            
+            button .button {
+                text { "点击我" }
+                onclick: "alert('你好，CHTL！')";
+            }
+            
+            script {
+                console.log("CHTL 页面已加载");
+                
+                // 添加一些交互
+                document.addEventListener('DOMContentLoaded', function() {
+                    const button = document.querySelector('.button');
+                    button.addEventListener('mouseover', function() {
+                        this.style.backgroundColor = '#0056b3';
+                    });
+                    button.addEventListener('mouseout', function() {
+                        this.style.backgroundColor = '#007bff';
+                    });
+                });
+            }
+        }
+    }
+}

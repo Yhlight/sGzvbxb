@@ -1,0 +1,41 @@
+// 测试模板定义和继承
+[Template] @Style baseStyle {
+    color: blue;
+    font-size: 16px;
+}
+
+[Template] @Style derivedStyle : baseStyle {
+    font-weight: bold;
+    // 继承 baseStyle 的 color 和 font-size
+}
+
+[Template] @Element card {
+    div {
+        class: "card";
+        style {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+    }
+}
+
+[Template] @Var theme {
+    primaryColor: "#007bff";
+    secondaryColor: "#6c757d";
+}
+
+// 使用模板
+div {
+    use @Style derivedStyle;
+    
+    use @Element card {
+        text { "这是一个卡片" }
+    }
+    
+    p {
+        style {
+            color: use @Var theme.primaryColor;
+        }
+        text { "使用主题颜色" }
+    }
+}

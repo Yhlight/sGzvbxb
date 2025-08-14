@@ -23,7 +23,7 @@ ImportManager::ImportManager(std::shared_ptr<CHTLContext> ctx) : context(ctx) {
     pathConfig.searchOfficialFirst = true;
 }
 
-bool ImportManager::processImport(const ImportDeclaration& decl, CHTLGenerator& generator) {
+bool ImportManager::processImport(const ImportDeclaration& decl, CHTLGenerator& /*generator*/) {
     // 简化实现：只记录导入但不实际处理
     context->reportWarning("Import '" + decl.sourcePath + "' noted but not processed (simplified implementation)");
     importedFiles.insert(decl.sourcePath);

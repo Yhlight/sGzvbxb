@@ -23,6 +23,11 @@ class Template {
 public:
     virtual ~Template() = default;
     virtual std::string getName() const = 0;
+    virtual std::string getBaseTemplateName() const { return baseTemplateName_; }
+    virtual void setBaseTemplateName(const std::string& baseName) { baseTemplateName_ = baseName; }
+    
+protected:
+    std::string baseTemplateName_;
 };
 
 // 模板使用状态

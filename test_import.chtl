@@ -1,0 +1,21 @@
+// 测试导入功能
+[Import "components/button.chtl"]
+[Import "styles/theme.chtl" as theme]
+
+// 使用导入的组件
+div {
+    h1 { text { "导入测试" } }
+    
+    // 使用导入的按钮组件
+    use @Element button {
+        text { "导入的按钮" }
+    }
+    
+    // 使用主题变量
+    p {
+        style {
+            color: use @Var theme.primaryColor;
+        }
+        text { "使用导入的主题颜色" }
+    }
+}

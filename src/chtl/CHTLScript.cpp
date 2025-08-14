@@ -418,8 +418,8 @@ std::shared_ptr<ScriptBlock> ScriptProcessor::processScriptBlock(const std::stri
     }
     
     // 进入脚本状态
-    // TODO: Enable when CHTLJSContext is available
-    // jsContext->getStateMachine().handleEvent(CHTLJSEvent::EnterScript);
+    // 使用现有的状态机 API
+    // jsContext->getStateMachine().processEvent(CHTLEvent::SCRIPT_START);
     
     // 检测脚本类型
     ScriptType type = detectScriptType(content);
@@ -457,8 +457,8 @@ std::shared_ptr<ScriptBlock> ScriptProcessor::processScriptBlock(const std::stri
     }
     
     // 退出脚本状态
-    // TODO: Enable when CHTLJSContext is available  
-    // jsContext->getStateMachine().handleEvent(CHTLJSEvent::ExitScript);
+    // 使用现有的状态机 API
+    // jsContext->getStateMachine().processEvent(CHTLEvent::SCRIPT_END);
     
     block->setContent(processedContent);
     block->markProcessed();
