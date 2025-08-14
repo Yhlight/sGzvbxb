@@ -1,0 +1,139 @@
+// 测试插入操作
+
+// 定义一个自定义元素用于测试
+[Custom] @Element TestBox {
+    div {
+        class: "box";
+        style {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px;
+        }
+        
+        div {
+            text { "第一个子 div" }
+        }
+        
+        div {
+            text { "第二个子 div" }
+        }
+        
+        span {
+            text { "一个 span 元素" }
+        }
+    }
+}
+
+// 测试各种插入操作
+body {
+    h1 { text { "插入操作测试" } }
+    
+    // 使用自定义元素并测试插入
+    use @Element TestBox {
+        // 在第一个 div 后面插入内容
+        insert after div[0] {
+            div {
+                style {
+                    background: #f0f0f0;
+                }
+                text { "在第一个 div 后插入的内容" }
+            }
+        }
+        
+        // 在第二个 div 前面插入内容
+        insert before div[1] {
+            div {
+                style {
+                    background: #e0e0e0;
+                }
+                text { "在第二个 div 前插入的内容" }
+            }
+        }
+        
+        // 替换 span 元素
+        insert replace span {
+            p {
+                style {
+                    color: red;
+                }
+                text { "替换掉的 span 元素" }
+            }
+        }
+        
+        // 在顶部插入
+        insert at top {
+            header {
+                style {
+                    font-weight: bold;
+                    background: #333;
+                    color: white;
+                    padding: 10px;
+                }
+                text { "在顶部插入的标题" }
+            }
+        }
+        
+        // 在底部插入
+        insert at bottom {
+            footer {
+                style {
+                    margin-top: 20px;
+                    border-top: 1px solid #ccc;
+                    padding-top: 10px;
+                }
+                text { "在底部插入的页脚" }
+            }
+        }
+    }
+}
+
+// 测试在普通元素中的插入操作
+div {
+    id: "container";
+    
+    p { text { "段落 1" } }
+    p { text { "段落 2" } }
+    p { text { "段落 3" } }
+    
+    // 在特定位置插入
+    insert after p[1] {
+        hr {
+            style {
+                margin: 20px 0;
+            }
+        }
+        
+        blockquote {
+            style {
+                border-left: 3px solid #007bff;
+                padding-left: 15px;
+                margin: 10px 0;
+                font-style: italic;
+            }
+            text { "这是在第二个段落后插入的引用块" }
+        }
+    }
+}
+
+// 复杂的插入场景
+ul {
+    li { text { "项目 1" } }
+    li { text { "项目 2" } }
+    
+    // 在列表中插入新项目
+    insert after li[0] {
+        li {
+            style {
+                font-weight: bold;
+                color: green;
+            }
+            text { "新插入的项目 1.5" }
+        }
+    }
+    
+    // 在末尾添加
+    insert at bottom {
+        li { text { "项目 3" } }
+        li { text { "项目 4" } }
+    }
+}

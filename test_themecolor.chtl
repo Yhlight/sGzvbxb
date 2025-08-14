@@ -1,0 +1,199 @@
+// 测试 ThemeColor 变量引用语法
+
+// 定义变量组模板
+[Template] @Var ThemeColors {
+    // 基础颜色
+    primary: "#007bff";
+    secondary: "#6c757d";
+    success: "#28a745";
+    danger: "#dc3545";
+    warning: "#ffc107";
+    info: "#17a2b8";
+    
+    // 文本颜色
+    textPrimary: "#212529";
+    textSecondary: "#6c757d";
+    textLight: "#f8f9fa";
+    
+    // 背景颜色
+    bgLight: "#f8f9fa";
+    bgDark: "#343a40";
+    
+    // 边框颜色
+    borderColor: "#dee2e6";
+    
+    // 特殊颜色
+    tableColor: "rgb(255, 192, 203)";
+}
+
+// 定义自定义变量组
+[Custom] @Var CustomColors {
+    brandColor: "#ff6b6b";
+    accentColor: "#4ecdc4";
+    neutralColor: "#95a5a6";
+}
+
+// 测试在样式中使用 ThemeColor
+div {
+    id: "theme-test";
+    
+    style {
+        // 使用变量组中的颜色
+        color: ThemeColor(textPrimary);
+        background-color: ThemeColor(bgLight);
+        border: 1px solid ThemeColor(borderColor);
+        
+        // 内联样式
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    h1 {
+        style {
+            color: ThemeColor(primary);
+            border-bottom: 2px solid ThemeColor(primary);
+        }
+        text { "主标题" }
+    }
+    
+    p {
+        style {
+            color: ThemeColor(textSecondary);
+            line-height: 1.6;
+        }
+        text { "这是使用了 ThemeColor 的段落文本" }
+    }
+}
+
+// 测试在元素模板中使用 ThemeColor
+[Template] @Element Card {
+    div {
+        style {
+            background: white;
+            border: 1px solid ThemeColor(borderColor);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h3 {
+            style {
+                color: ThemeColor(primary);
+                margin: 0 0 10px 0;
+            }
+        }
+        
+        p {
+            style {
+                color: ThemeColor(textSecondary);
+                margin: 0;
+            }
+        }
+    }
+}
+
+// 使用带有 ThemeColor 的模板
+body {
+    use @Element Card {
+        h3 { text { "卡片标题" } }
+        p { text { "卡片内容使用了主题颜色" } }
+    }
+}
+
+// 测试变量组特例化（使用自定义变量组）
+section {
+    style {
+        // 正常使用
+        background: ThemeColor(brandColor);
+        
+        // 特例化 - 覆盖变量值
+        color: ThemeColor(textPrimary = "#ffffff");
+        border: 2px solid ThemeColor(accentColor = rgb(78, 205, 196));
+    }
+    
+    text { "测试变量组特例化" }
+}
+
+// 复杂场景 - 按钮组件
+[Custom] @Element Button {
+    button {
+        style {
+            // 使用主题颜色
+            background: ThemeColor(primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        // 伪类也可以使用 ThemeColor
+        style {
+            &:hover {
+                background: ThemeColor(primary = "#0056b3");
+            }
+            
+            &:active {
+                background: ThemeColor(primary = "#004085");
+            }
+        }
+    }
+}
+
+// 测试表格颜色
+table {
+    style {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    tr {
+        style {
+            &:nth-child(even) {
+                background: ThemeColor(tableColor);
+            }
+        }
+    }
+    
+    td {
+        style {
+            padding: 10px;
+            border: 1px solid ThemeColor(borderColor);
+            color: ThemeColor(textPrimary);
+        }
+        
+        text { "表格单元格" }
+    }
+}
+
+// 测试警告框
+div {
+    class: "alert";
+    
+    style {
+        .alert-success {
+            background: ThemeColor(success);
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .alert-danger {
+            background: ThemeColor(danger);
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .alert-warning {
+            background: ThemeColor(warning);
+            color: ThemeColor(textPrimary);
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    }
+}

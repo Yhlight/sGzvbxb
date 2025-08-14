@@ -32,10 +32,36 @@ std::shared_ptr<ParseContext> CHTLParserEnhanced::styleProperty() {
     
     consume(TokenType::COLON, "Expected :");
     
-    // 属性值 - 支持无引号字面量
-    if (tokens_->LT(1)->getType() == TokenType::STRING_LITERAL ||
-        tokens_->LT(1)->getType() == TokenType::NUMBER_LITERAL ||
-        tokens_->LT(1)->getType() == TokenType::IDENTIFIER) {
+    // 属性值 - 支持无引号字面量和 ThemeColor 函数
+    if (tokens_->LT(1)->getType() == TokenType::IDENTIFIER && 
+        tokens_->LT(1)->getText() == "ThemeColor" && 
+        tokens_->LT(2)->getType() == TokenType::LPAREN) {
+        // ThemeColor(varName) 语法
+        auto themeColorToken = tokens_->consume(); // ThemeColor
+        ctx->addChild(std::make_shared<TerminalNode>(themeColorToken));
+        
+        consume(TokenType::LPAREN, "Expected (");
+        
+        // 变量名
+        auto varName = consume(TokenType::IDENTIFIER, "Expected variable name");
+        ctx->addChild(std::make_shared<TerminalNode>(varName));
+        
+        // 可选的特例化: varName = value
+        if (match(TokenType::EQUALS)) {
+            // 特例化值
+            if (tokens_->LT(1)->getType() == TokenType::STRING_LITERAL ||
+                tokens_->LT(1)->getType() == TokenType::NUMBER_LITERAL ||
+                tokens_->LT(1)->getType() == TokenType::IDENTIFIER) {
+                ctx->addChild(std::make_shared<TerminalNode>(tokens_->consume()));
+            } else {
+                error("Expected value after =", tokens_->LT(1));
+            }
+        }
+        
+        consume(TokenType::RPAREN, "Expected )");
+    } else if (tokens_->LT(1)->getType() == TokenType::STRING_LITERAL ||
+               tokens_->LT(1)->getType() == TokenType::NUMBER_LITERAL ||
+               tokens_->LT(1)->getType() == TokenType::IDENTIFIER) {
         ctx->addChild(std::make_shared<TerminalNode>(tokens_->consume()));
     } else {
         error("Expected property value", tokens_->LT(1));
@@ -535,28 +561,69 @@ std::shared_ptr<ParseContext> CHTLParserEnhanced::insertOperation() {
     
     // insert 已被消费
     
-    // content, style, script
-    if (match(TokenType::IDENTIFIER)) {
-        auto insertType = tokens_->LT(0)->getText();
-        ctx->addChild(std::make_shared<TerminalNode>(tokens_->LT(0)));
-        
-        // 可选的位置
-        if (match(TokenType::KEYWORD_AT)) {
-            // at position
-            auto position = consume(TokenType::IDENTIFIER, "Expected position");
-            ctx->addChild(std::make_shared<TerminalNode>(position));
-        } else if (match(TokenType::KEYWORD_BEFORE)) {
-            // before
+    // 位置关键字: after, before, replace, at top, at bottom
+    std::string position;
+    if (match(TokenType::KEYWORD_AFTER)) {
+        position = "after";
+        ctx->addChild(std::make_shared<TerminalNode>(
+            std::make_shared<Token>(TokenType::KEYWORD_AFTER, "after", 0, 0)));
+    } else if (match(TokenType::KEYWORD_BEFORE)) {
+        position = "before";
+        ctx->addChild(std::make_shared<TerminalNode>(
+            std::make_shared<Token>(TokenType::KEYWORD_BEFORE, "before", 0, 0)));
+    } else if (match(TokenType::KEYWORD_REPLACE)) {
+        position = "replace";
+        ctx->addChild(std::make_shared<TerminalNode>(
+            std::make_shared<Token>(TokenType::KEYWORD_REPLACE, "replace", 0, 0)));
+    } else if (match(TokenType::KEYWORD_AT)) {
+        // at top 或 at bottom
+        if (tokens_->LT(1)->getText() == "top") {
+            consume(TokenType::IDENTIFIER, "Expected 'top'");
+            position = "at top";
             ctx->addChild(std::make_shared<TerminalNode>(
-                std::make_shared<Token>(TokenType::KEYWORD_BEFORE, "before", 0, 0)));
-        } else if (match(TokenType::KEYWORD_AFTER)) {
-            // after
+                std::make_shared<Token>(TokenType::KEYWORD_AT, "at", 0, 0)));
             ctx->addChild(std::make_shared<TerminalNode>(
-                std::make_shared<Token>(TokenType::KEYWORD_AFTER, "after", 0, 0)));
+                std::make_shared<Token>(TokenType::KEYWORD_TOP, "top", 0, 0)));
+        } else if (tokens_->LT(1)->getText() == "bottom") {
+            consume(TokenType::IDENTIFIER, "Expected 'bottom'");
+            position = "at bottom";
+            ctx->addChild(std::make_shared<TerminalNode>(
+                std::make_shared<Token>(TokenType::KEYWORD_AT, "at", 0, 0)));
+            ctx->addChild(std::make_shared<TerminalNode>(
+                std::make_shared<Token>(TokenType::KEYWORD_BOTTOM, "bottom", 0, 0)));
+        } else {
+            error("Expected 'top' or 'bottom' after 'at'", tokens_->LT(1));
         }
     }
     
-    consume(TokenType::SEMICOLON, "Expected ;");
+    // 选择器（可选，对于 at top/bottom 不需要）
+    if (position != "at top" && position != "at bottom") {
+        // 元素选择器，如 div[0]
+        auto selector = consume(TokenType::IDENTIFIER, "Expected element selector");
+        ctx->addChild(std::make_shared<TerminalNode>(selector));
+        
+        // 可选的索引 [n]
+        if (match(TokenType::LBRACKET)) {
+            auto index = consume(TokenType::NUMBER_LITERAL, "Expected index");
+            ctx->addChild(std::make_shared<TerminalNode>(index));
+            consume(TokenType::RBRACKET, "Expected ]");
+        }
+    }
+    
+    // 插入的内容块
+    consume(TokenType::LBRACE, "Expected {");
+    
+    // 插入的元素或语句
+    while (!match(TokenType::RBRACE) && tokens_->LT(1)->getType() != TokenType::EOF_TOKEN) {
+        if (match(TokenType::AT)) {
+            // @Element 等使用语句
+            ctx->addChild(useStatement());
+        } else {
+            // HTML 元素
+            ctx->addChild(htmlElement());
+        }
+    }
+    
     return ctx;
 }
 
